@@ -1,5 +1,6 @@
 #TextoPrincipal {
     /* Cor é azul */
+    font-family: monocraft;
     color: rgb(107, 107, 245);
     font-size: 40px;
 }
@@ -8,6 +9,7 @@ body {
     background-color: black;
 }
 .Palavra {
+    font-family: monocraft;
     color: white;
     font-size: 20px;
 }
