@@ -1,3 +1,13 @@
-h1 {
-    color: red;
+.TextoPrincipal {
+    /* Cor é azul */
+    color: rgb(107, 107, 245);
+    font-size: 100px:
+}
+
+body {
+    background-color: black;
+}
+.Palavra {
+    color: white;
+    font-size: 20px;
 }
