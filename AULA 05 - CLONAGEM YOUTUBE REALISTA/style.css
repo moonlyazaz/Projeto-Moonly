@@ -8,26 +8,35 @@
 .cabecalho {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
 }
 
-.logotipo-icons {
-    color: red;
+.logotipo-svg {
+    display: block;
 }
 
 .cabecalho-inicio {
     display: flex;
-    gap: 3px;
+    gap: 24px;
+    align-items: center;
+}
+
+.fa-bars {
+    font-size: 20px;
 }
 
 .logotipo {
     display: flex;
     gap: 2px;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .logotipo-pais {
-    font-size: 7px;
-    color: gray;
+    font-size: 9px;
+    color: #606060;
+    margin-top: 2px;
+    font-weight: 500;
 }
 
 
