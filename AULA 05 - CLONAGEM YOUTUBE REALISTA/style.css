@@ -5,15 +5,27 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background-color: #0f0f0f;
+}
+
 .cabecalho {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
+    background-color: #0f0f0f;
+    color: #fff;
 }
 
 .logotipo-svg {
     display: block;
+    color: #fff;
 }
 
 .cabecalho-inicio {
@@ -34,36 +46,208 @@
 
 .logotipo-pais {
     font-size: 9px;
-    color: #050505;
+    color: #fff;
     margin-top: 2px;
     font-weight: 500;
 }
 
 
+.cabecalho-centro {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .search {
     display: flex;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
 }
 
 #search-input {
-    border: 1px solid gray;
+    background-color: #121212;
+    border: 1px solid #303030;
     outline: none;
-    height: 26px;
-    width: 350px;
-    border-radius: 16px 0 0 16px;
+    color: #fff;
+    height: 40px;
+    width: 400px;
+    padding: 0 44px 0 16px;
+    border-radius: 20px 0 0 20px;
+    font-size: 16px;
+}
+
+#search-input::placeholder {
+    color: #909090;
+}
+
+.search-keyboard-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #909090;
+    font-size: 16px;
+    pointer-events: none;
 }
 
 .search-button {
-    width: 50px;
-    height: 26px;
-    border-radius: 0 16px 16px 0;
+    width: 64px;
+    height: 40px;
+    background-color: #222222;
+    border: 1px solid #303030;
+    border-left: none;
+    border-radius: 0 20px 20px 0;
+    color: #fff;
+    font-size: 18px;
     outline: none;
-    border: 1px solid gray;
+    cursor: pointer;
 }
 
 .microphone {
-    border: 1px solid gray;
-    height: 25px;
-    width: 25px;
-    border-radius: 16px;
+    background-color: #181818;
+    border: 1px solid #303030;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 15px;
     outline: none;
+    cursor: pointer;
+}
+
+.cabecalho-final {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.icon-button:hover {
+    background-color: #383838;
+}
+
+.icon-button svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+}
+
+.login-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #565656;
+    border-radius: 18px;
+    color: #3ea6ff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.login-button:hover {
+    background-color: #263850;
+}
+
+.login-button svg {
+    width: 18px;
+    height: 18px;
+    fill: #3ea6ff;
+}
+
+.sidebar {
+    width: 240px;
+    background-color: #0f0f0f;
+    color: #fff;
+    padding: 12px 0;
+    font-size: 14px;
+}
+
+.sidebar-secao {
+    display: flex;
+    flex-direction: column;
+    padding: 0 8px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 0 12px;
+    height: 40px;
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sidebar-item:hover {
+    background-color: #272727;
+}
+
+.sidebar-item.ativo {
+    background-color: #383838;
+    font-weight: 500;
+}
+
+.sidebar-item i {
+    width: 24px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.icone-vermelho {
+    color: #ff0033;
+}
+
+.sidebar-divisor {
+    border: none;
+    border-top: 1px solid #303030;
+    margin: 12px 0;
+}
+
+.sidebar-login {
+    padding: 0 24px;
+}
+
+.sidebar-login p {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.sidebar-login .login-button {
+    width: fit-content;
+}
+
+.sidebar-titulo {
+    padding: 8px 20px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.sidebar-rodape {
+    padding: 0 24px;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.sidebar-rodape p {
+    margin-bottom: 12px;
 }
