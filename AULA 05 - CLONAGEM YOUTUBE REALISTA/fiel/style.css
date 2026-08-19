@@ -1,0 +1,70 @@
+· CSS
+* {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+}
+
+.logotipo-svg {
+    display: block;
+}
+
+.cabecalho-inicio {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.fa-bars {
+    font-size: 20px;
+}
+
+.logotipo {
+    display: flex;
+    gap: 2px;
+    align-items: flex-start;
+}
+
+.logotipo-pais {
+    font-size: 9px;
+    color: #606060;
+    margin-top: 2px;
+    font-weight: 500;
+}
+
+
+.search {
+    display: flex;
+}
+
+#search-input {
+    border: 1px solid gray;
+    outline: none;
+    height: 26px;
+    width: 350px;
+    border-radius: 16px 0 0 16px;
+}
+
+.search-button {
+    width: 50px;
+    height: 26px;
+    border-radius: 0 16px 16px 0;
+    outline: none;
+    border: 1px solid gray;
+}
+
+.microphone {
+    border: 1px solid gray;
+    height: 25px;
+    width: 25px;
+    border-radius: 16px;
+    outline: none;
+}
