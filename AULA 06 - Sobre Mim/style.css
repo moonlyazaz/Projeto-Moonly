@@ -16,7 +16,7 @@ body {
 }
 
 .divpaedobanner {
-    background-color: #a0a0a0;
+    background-color: #797979;
     height: 45px;
     display: flex;
     align-items: center;
@@ -45,6 +45,7 @@ body {
     font-family: "Caacupe One", sans-serif;
     text-align: center;
     margin-bottom: 20px;       /* Cria espaço abaixo do título principal */
+    background-color: rgb(185, 211, 211);
 }
 
 /* NOVA CLASSE: Alinha os itens (imagem + textos) lado a lado */
@@ -82,7 +83,7 @@ body {
     justify-content: center; 
     align-items: center;
     padding: 30px 0;
-    background-color: #f9f9f9;
+    background-color: #ececec;
 }
 
 .sobremim {
@@ -98,8 +99,8 @@ body {
 /* Rodapé fixado na parte inferior */
 .footer {
     display: flex;
-    justify-content: flex-start; 
-    background-color: #a0a0a0; 
+    justify-content: center; 
+    background-color: #797979; 
     padding: 20px;          
     color: white;
     width: 100%;
