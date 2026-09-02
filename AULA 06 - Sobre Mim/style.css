@@ -1,0 +1,106 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Impede que paddings quebrem o tamanho das caixas */
+}
+
+/* Garante que a página ocupe a altura total da tela */
+html, body {
+    height: 100%;
+}
+  
+/* Transforma o body em um container flexível vertical para o rodapé funcionar */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.divpaedobanner {
+    background-color: #a0a0a0;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+}
+
+.meunomeusuario {
+    font-size: 30px;
+    font-family: Monocraft, sans-serif;
+    color: white;
+}
+
+/* O container principal que afasta a seção de filmes da seção de jogos */
+.container-favoritos {
+    display: flex;            
+    gap: 60px;                
+    justify-content: center;  
+    padding: 40px 20px;
+    flex-wrap: wrap;          /* Permite quebrar linha em telas pequenas (responsivo) */
+    flex: 1;                  /* Faz essa área crescer e empurrar o footer para o final */
+}
+
+.titulofavorito, 
+.titulojogos {
+    font-size: 20px;
+    font-family: "Caacupe One", sans-serif;
+    text-align: center;
+    margin-bottom: 20px;       /* Cria espaço abaixo do título principal */
+}
+
+/* NOVA CLASSE: Alinha os itens (imagem + textos) lado a lado */
+.conteudo-linha {
+    display: flex;
+    gap: 20px;                 /* Espaço horizontal entre um item e outro */
+}
+
+/* NOVA CLASSE: Organiza o conteúdo de cada mídia verticalmente */
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;       /* Centraliza as imagens e textos internamente */
+    width: 160px;              /* Define uma largura máxima base para cada coluna */
+    text-align: center;
+}
+
+/* Customização dos textos das mídias */
+.nome-midia {
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.detalhes-midia {
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
+}
+
+/* Seção Sobre Mim */
+.divsobre {
+    display: flex;
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    padding: 30px 0;
+    background-color: #f9f9f9;
+}
+
+.sobremim {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.restante {
+    font-size: 12px;
+    color: #333;
+}
+
+/* Rodapé fixado na parte inferior */
+.footer {
+    display: flex;
+    justify-content: flex-start; 
+    background-color: #a0a0a0; 
+    padding: 20px;          
+    color: white;
+    width: 100%;
+}
