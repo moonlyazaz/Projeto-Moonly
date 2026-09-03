@@ -64,6 +64,63 @@ function formatarNumeroResumido(numero) {
 }
 
 /**
+ * Converte a lista bruta de itens de videos.list (contentDetails +
+ * statistics + snippet) no formato simplificado usado pelo front-end.
+ *
+ * @param {Array} itens - Array "items" retornado por videos.list.
+ * @returns {Array} Lista de vídeos no formato do front-end.
+ */
+function formatarListaDeVideos(itens) {
+    return itens.map((item) => ({
+        id: item.id,
+        titulo: item.snippet.title,
+        canal: item.snippet.channelTitle,
+        miniatura: item.snippet.thumbnails.high.url,
+        duracao: formatarDuracao(item.contentDetails.duration),
+        visualizacoes: `${formatarNumeroResumido(item.statistics.viewCount)} visualizações`,
+        tempoPublicacao: new Date(item.snippet.publishedAt).toLocaleDateString("pt-BR")
+    }));
+}
+
+/**
+ * Rota da página inicial. Devolve vídeos em alta no Brasil, exatamente
+ * como a Home real do YouTube (que não é uma busca, e sim uma lista de
+ * vídeos populares). Aceita um parâmetro opcional "categoria" com o ID
+ * numérico de categoria da YouTube Data API (ex: 10 = Música,
+ * 20 = Jogos, 17 = Esportes, 25 = Notícias, 24 = Entretenimento,
+ * 23 = Comédia, 28 = Ciência e Tecnologia).
+ *
+ * Exemplos:
+ *   GET /api/populares
+ *   GET /api/populares?categoria=20
+ */
+app.get("/api/populares", async (req, res) => {
+    const idDaCategoria = req.query.categoria;
+    const parametroDeCategoria = idDaCategoria ? `&videoCategoryId=${idDaCategoria}` : "";
+
+    try {
+        const urlDePopulares =
+            `${URL_BASE_DA_API}/videos?part=snippet,contentDetails,statistics` +
+            `&chart=mostPopular&regionCode=BR&maxResults=24` +
+            parametroDeCategoria +
+            `&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+
+        const resposta = await fetch(urlDePopulares);
+        const dados = await resposta.json();
+
+        if (dados.error) {
+            console.error("[Erro da API do YouTube]", JSON.stringify(dados.error, null, 2));
+            return res.status(502).json({ erro: dados.error.message });
+        }
+
+        res.json(formatarListaDeVideos(dados.items || []));
+    } catch (erro) {
+        console.error("Erro ao buscar vídeos populares:", erro);
+        res.status(500).json({ erro: "Falha ao buscar vídeos populares." });
+    }
+});
+
+/**
  * Rota de busca de vídeos. Recebe um termo de pesquisa e devolve uma
  * lista simplificada de vídeos encontrados, no formato já esperado
  * pelo front-end (mesmos nomes de campo usados em videosRecomendados).
@@ -88,7 +145,7 @@ app.get("/api/buscar", async (req, res) => {
         const parametroDeDuracao = filtroDeDuracao ? `&videoDuration=${filtroDeDuracao}` : "";
 
         const urlDeBusca =
-            `${URL_BASE_DA_API}/search?part=snippet&type=video&maxResults=12` +
+            `${URL_BASE_DA_API}/search?part=snippet&type=video&maxResults=24` +
             parametroDeDuracao +
             `&q=${encodeURIComponent(termoDeBusca)}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
 
@@ -96,6 +153,7 @@ app.get("/api/buscar", async (req, res) => {
         const dadosDaBusca = await respostaDaBusca.json();
 
         if (dadosDaBusca.error) {
+            console.error("[Erro da API do YouTube]", JSON.stringify(dadosDaBusca.error, null, 2));
             return res.status(502).json({ erro: dadosDaBusca.error.message });
         }
 
@@ -114,17 +172,7 @@ app.get("/api/buscar", async (req, res) => {
         const respostaDosDetalhes = await fetch(urlDeDetalhes);
         const dadosDosDetalhes = await respostaDosDetalhes.json();
 
-        const videosFormatados = dadosDosDetalhes.items.map((item) => ({
-            id: item.id,
-            titulo: item.snippet.title,
-            canal: item.snippet.channelTitle,
-            miniatura: item.snippet.thumbnails.high.url,
-            duracao: formatarDuracao(item.contentDetails.duration),
-            visualizacoes: `${formatarNumeroResumido(item.statistics.viewCount)} visualizações`,
-            tempoPublicacao: new Date(item.snippet.publishedAt).toLocaleDateString("pt-BR")
-        }));
-
-        res.json(videosFormatados);
+        res.json(formatarListaDeVideos(dadosDosDetalhes.items || []));
     } catch (erro) {
         console.error("Erro ao buscar vídeos:", erro);
         res.status(500).json({ erro: "Falha ao buscar vídeos no YouTube." });

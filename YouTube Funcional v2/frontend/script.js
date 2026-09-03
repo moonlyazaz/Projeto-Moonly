@@ -1,184 +1,3 @@
-const secoesDoMenuLateral = [
-    {
-        titulo: "",
-        itens: [
-            {
-                nome: "Início",
-                icone: "fa-solid fa-house",
-                ativo: true
-            },
-            {
-                nome: "Shorts",
-                icone: "fa-solid fa-clapperboard",
-                ativo: false
-            },
-            {
-                nome: "Inscrições",
-                icone: "fa-solid fa-square-rss",
-                ativo: false
-            }
-        ]
-    },
-    {
-        titulo: "Você",
-        itens: [
-            {
-                nome: "Seu canal",
-                icone: "fa-solid fa-user",
-                ativo: false
-            },
-            {
-                nome: "Histórico",
-                icone: "fa-solid fa-clock-rotate-left",
-                ativo: false
-            },
-            {
-                nome: "Playlists",
-                icone: "fa-solid fa-list",
-                ativo: false
-            },
-            {
-                nome: "Seus vídeos",
-                icone: "fa-solid fa-video",
-                ativo: false
-            },
-            {
-                nome: "Assistir mais tarde",
-                icone: "fa-solid fa-clock",
-                ativo: false
-            },
-            {
-                nome: "Vídeos curtidos",
-                icone: "fa-solid fa-thumbs-up",
-                ativo: false
-            }
-        ]
-    },
-    {
-        titulo: "Explorar",
-        itens: [
-            {
-                nome: "Em alta",
-                icone: "fa-solid fa-fire",
-                ativo: false
-            },
-            {
-                nome: "Música",
-                icone: "fa-solid fa-music",
-                ativo: false
-            },
-            {
-                nome: "Filmes",
-                icone: "fa-solid fa-film",
-                ativo: false
-            },
-            {
-                nome: "Ao vivo",
-                icone: "fa-solid fa-tower-broadcast",
-                ativo: false
-            },
-            {
-                nome: "Jogos",
-                icone: "fa-solid fa-gamepad",
-                ativo: false
-            },
-            {
-                nome: "Notícias",
-                icone: "fa-solid fa-newspaper",
-                ativo: false
-            },
-            {
-                nome: "Esportes",
-                icone: "fa-solid fa-trophy",
-                ativo: false
-            }
-        ]
-    }
-];
-
-/**
- * Monta o HTML de um único item do menu lateral esquerdo.
- *
- * Dados esperados (exemplo):
- * {
- *     "nome": "Início",
- *     "icone": "fa-solid fa-house",
- *     "ativo": true
- * }
- *
- * @param {Object} itemDoMenu - Item com nome, classe do ícone e se está selecionado.
- * @returns {string} HTML do item pronto para ser inserido na página.
- */
-function montarItemDoMenuLateral(itemDoMenu) {
-    const classeDeItemAtivo = itemDoMenu.ativo ? "menu-item menu-item--ativo" : "menu-item";
-
-    return `
-        <a href="#" class="${classeDeItemAtivo}">
-            <span class="menu-item__icone">
-                <i class="${itemDoMenu.icone}"></i>
-            </span>
-            <span class="menu-item__nome">${itemDoMenu.nome}</span>
-        </a>
-    `;
-}
-
-/**
- * Monta o HTML de uma seção do menu lateral, com seu título e seus itens.
- *
- * Dados esperados (exemplo):
- * {
- *     "titulo": "Explorar",
- *     "itens": [
- *         {
- *             "nome": "Em alta",
- *             "icone": "fa-solid fa-fire",
- *             "ativo": false
- *         }
- *     ]
- * }
- *
- * @param {Object} secaoDoMenu - Seção contendo o título e a lista de itens.
- * @returns {string} HTML da seção completa.
- */
-function montarSecaoDoMenuLateral(secaoDoMenu) {
-    let htmlDosItens = "";
-
-    for (const itemDoMenu of secaoDoMenu.itens) {
-        htmlDosItens = htmlDosItens + montarItemDoMenuLateral(itemDoMenu);
-    }
-
-    const htmlDoTitulo = secaoDoMenu.titulo === ""
-        ? ""
-        : `<span class="menu-secao__titulo">${secaoDoMenu.titulo}</span>`;
-
-    return `
-        <div class="menu-secao">
-            ${htmlDoTitulo}
-            ${htmlDosItens}
-        </div>
-    `;
-}
-
-/**
- * Percorre todas as seções do menu lateral e escreve o resultado dentro do elemento
- * de id "menuLateral" do index.html.
- */
-function renderizarMenuLateral() {
-    const elementoDoMenuLateral = document.getElementById("menuLateral");
-
-    if (!elementoDoMenuLateral) {
-        return;
-    }
-
-    let htmlDoMenuLateral = "";
-
-    for (const secaoDoMenu of secoesDoMenuLateral) {
-        htmlDoMenuLateral = htmlDoMenuLateral + montarSecaoDoMenuLateral(secaoDoMenu);
-    }
-
-    elementoDoMenuLateral.innerHTML = htmlDoMenuLateral;
-}
-
 /**
  * Monta e insere na página todo o bloco do vídeo que está sendo assistido:
  * player, título, dados do canal, botões de ação e descrição.
@@ -322,8 +141,119 @@ function renderizarVideosRecomendados(listaDeVideosRecomendados) {
 }
 
 /**
- * Busca no backend os detalhes de um vídeo específico e o exibe como
- * vídeo principal da página.
+ * Alterna qual área principal fica visível: grade de resultados (Início
+ * e pesquisa), tela de assistir (player + recomendados) ou Shorts.
+ * Apenas uma fica visível por vez.
+ *
+ * @param {"resultados"|"assistir"|"shorts"} nomeDaView - View a ser exibida.
+ */
+function mostrarView(nomeDaView) {
+    document.getElementById("areaInicio").style.display = nomeDaView === "inicio" ? "flex" : "none";
+    document.getElementById("areaAssistir").style.display = nomeDaView === "assistir" ? "flex" : "none";
+    document.getElementById("areaShorts").style.display = nomeDaView === "shorts" ? "flex" : "none";
+}
+
+/**
+ * Monta o HTML de um card de resultado (usado na grade de Início e de
+ * pesquisa), no formato de grade parecido com a home real do YouTube.
+ *
+ * @param {Object} video - Objeto de vídeo retornado por /api/buscar.
+ */
+function montarCardDeResultado(video) {
+    const inicialDoCanal = video.canal ? video.canal.charAt(0).toUpperCase() : "?";
+
+    return `
+        <div class="card-resultado" data-id-do-video="${video.id}">
+            <div class="card-resultado__miniatura-wrapper">
+                <img class="card-resultado__miniatura" src="${video.miniatura}" alt="${video.titulo}" loading="lazy">
+                <span class="card-resultado__duracao">${video.duracao}</span>
+            </div>
+            <div class="card-resultado__corpo">
+                <div class="card-resultado__avatar">${inicialDoCanal}</div>
+                <div class="card-resultado__informacoes">
+                    <span class="card-resultado__titulo">${video.titulo}</span>
+                    <span class="card-resultado__canal">${video.canal}</span>
+                    <span class="card-resultado__dados">${video.visualizacoes} • ${video.tempoPublicacao}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza a grade (ou lista) de vídeos e muda para a view "Início".
+ *
+ * @param {Array} videos - Lista de vídeos a exibir.
+ * @param {boolean} [mostrarChips=true] - Se falso, esconde a barra de
+ *   categorias (usado durante uma busca por texto, que no YouTube real
+ *   não mostra as mesmas chips de categoria da Home).
+ * @param {"grid"|"lista"} [modo="grid"] - "grid" para a grade de cards da
+ *   Home; "lista" para os resultados de pesquisa (vídeos empilhados
+ *   verticalmente, um embaixo do outro, igual ao YouTube real).
+ */
+function renderizarResultados(videos, mostrarChips = true, modo = "grid") {
+    const areaDeResultados = document.getElementById("areaResultados");
+    const areaDeChips = document.getElementById("chipsCategorias");
+
+    areaDeChips.style.display = mostrarChips ? "flex" : "none";
+    areaDeResultados.classList.toggle("lista", modo === "lista");
+
+    if (!videos.length) {
+        areaDeResultados.innerHTML = `<p class="mensagem-vazia">Nenhum vídeo encontrado para essa busca.</p>`;
+    } else {
+        areaDeResultados.innerHTML = videos.map(montarCardDeResultado).join("");
+    }
+
+    mostrarView("inicio");
+}
+
+/**
+ * Monta o HTML de um item de Shorts: player em formato vertical (9:16)
+ * com autoplay e loop, usando o mesmo iframe embed do YouTube.
+ *
+ * @param {Object} video - Objeto de vídeo retornado por /api/buscar.
+ */
+function montarShort(video) {
+    return `
+        <div class="short-item">
+            <div class="short-item__player-wrapper">
+                <iframe
+                    class="short-item__iframe"
+                    src="https://www.youtube.com/embed/${video.id}?loop=1&playlist=${video.id}&controls=1"
+                    title="${video.titulo}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
+                <div class="short-item__info">
+                    <p class="short-item__titulo">${video.titulo}</p>
+                    <p class="short-item__canal">${video.canal}</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza a lista vertical de Shorts (rolagem com "encaixe" tipo
+ * TikTok/Shorts real) e muda para essa view.
+ *
+ * @param {Array} videos - Lista de vídeos curtos retornados por /api/buscar.
+ */
+function renderizarShorts(videos) {
+    const areaDeShorts = document.getElementById("areaShorts");
+
+    if (!videos.length) {
+        areaDeShorts.innerHTML = `<p class="mensagem-vazia">Nenhum Short encontrado.</p>`;
+    } else {
+        areaDeShorts.innerHTML = `<div class="shorts-lista">${videos.map(montarShort).join("")}</div>`;
+    }
+
+    mostrarView("shorts");
+}
+
+/**
+ * Busca no backend os detalhes de um vídeo específico e o exibe na
+ * view de "assistir" (player principal + recomendados).
  *
  * @param {string} idDoVideo - ID do vídeo no YouTube (ex: "dQw4w9WgXcQ").
  */
@@ -336,7 +266,18 @@ async function abrirVideo(idDoVideo) {
         }
         const dadosDoVideo = await resposta.json();
         renderizarVideoPrincipal(dadosDoVideo);
+        mostrarView("assistir");
         window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Busca vídeos parecidos com o título para popular os recomendados.
+        const primeiraPalavra = dadosDoVideo.titulo.split(" ").slice(0, 3).join(" ");
+        const respostaDosRecomendados = await fetch(
+            `${URL_DO_BACKEND}/api/buscar?q=${encodeURIComponent(primeiraPalavra)}`
+        );
+        if (respostaDosRecomendados.ok) {
+            const recomendados = await respostaDosRecomendados.json();
+            renderizarVideosRecomendados(recomendados.filter((v) => v.id !== idDoVideo));
+        }
     } catch (erro) {
         avisarSobreErroDeConexao(erro);
     }
@@ -344,11 +285,11 @@ async function abrirVideo(idDoVideo) {
 
 /**
  * Busca no backend uma lista de vídeos reais pelo termo digitado e
- * renderiza como vídeos recomendados. Também abre o primeiro resultado
- * como vídeo principal, imitando o comportamento de uma busca real.
+ * mostra como grade de resultados (esconde as chips de categoria, já
+ * que no YouTube real a busca por texto não usa as mesmas categorias
+ * da Home), a menos que seja uma busca de Shorts.
  *
- * @param {string} termoDeBusca - Texto digitado na barra de pesquisa ou
- *   termo interno usado pela navegação da sidebar (ex: "javascript").
+ * @param {string} termoDeBusca - Texto digitado na barra de pesquisa.
  * @param {string} [filtroDeDuracao] - "short" para a seção de Shorts;
  *   deixe vazio para busca normal.
  */
@@ -365,13 +306,35 @@ async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
         }
         const videosEncontrados = await resposta.json();
 
-        if (!videosEncontrados.length) {
-            mostrarToast("Nenhum vídeo encontrado para essa busca.");
+        if (filtroDeDuracao === "short") {
+            renderizarShorts(videosEncontrados);
+        } else {
+            renderizarResultados(videosEncontrados, false, "lista");
+        }
+    } catch (erro) {
+        avisarSobreErroDeConexao(erro);
+    }
+}
+
+/**
+ * Busca os vídeos em alta no Brasil (Home real do YouTube não é uma
+ * busca por termo, e sim uma lista de vídeos populares) e os exibe na
+ * grade, com as chips de categoria visíveis.
+ *
+ * @param {string} [idDaCategoria] - ID numérico de categoria da YouTube
+ *   Data API (ex: "10" para Música). Vazio traz todas as categorias.
+ */
+async function buscarPopulares(idDaCategoria = "") {
+    try {
+        const parametroDeCategoria = idDaCategoria ? `?categoria=${idDaCategoria}` : "";
+        const resposta = await fetch(`${URL_DO_BACKEND}/api/populares${parametroDeCategoria}`);
+
+        if (!resposta.ok) {
+            mostrarToast("Não foi possível carregar os vídeos em alta agora.");
             return;
         }
-
-        renderizarVideosRecomendados(videosEncontrados);
-        await abrirVideo(videosEncontrados[0].id);
+        const videosEncontrados = await resposta.json();
+        renderizarResultados(videosEncontrados, true, "grid");
     } catch (erro) {
         avisarSobreErroDeConexao(erro);
     }
@@ -400,9 +363,10 @@ function marcarItemAtivoNaSidebar(itemClicado) {
 
 /**
  * Liga o formulário de busca do cabeçalho à função buscarVideos, o
- * clique em qualquer card de vídeo recomendado para abri-lo, e a
- * navegação da sidebar (Início, Shorts, Música, Filmes e os demais
- * itens, que mostram um toast explicativo por dependerem de login).
+ * clique em qualquer card de resultado ou de vídeo recomendado para
+ * abri-lo, e a navegação da sidebar (Início, Shorts, Música, Filmes e
+ * os demais itens, que mostram um toast explicativo por dependerem de
+ * login).
  */
 function configurarBuscaEClique() {
     const formularioDeBusca = document.getElementById("formulario-de-busca");
@@ -417,6 +381,15 @@ function configurarBuscaEClique() {
         });
     }
 
+    // Clique em um card da grade de resultados abre o vídeo (view "assistir").
+    document.getElementById("areaResultados").addEventListener("click", (evento) => {
+        const card = evento.target.closest("[data-id-do-video]");
+        if (card) {
+            abrirVideo(card.dataset.idDoVideo);
+        }
+    });
+
+    // Clique em um vídeo recomendado, dentro da view "assistir", abre outro vídeo.
     document.getElementById("recomendacoes").addEventListener("click", (evento) => {
         // Ignora o clique se foi no botão de menu (⋮), que já tem sua própria ação.
         if (evento.target.closest(".video-recomendado__menu")) return;
@@ -427,16 +400,28 @@ function configurarBuscaEClique() {
         }
     });
 
+    // Clique em uma chip de categoria filtra a Home por aquela categoria.
+    document.getElementById("chipsCategorias").addEventListener("click", (evento) => {
+        const chip = evento.target.closest(".chip");
+        if (!chip) return;
+
+        document.querySelectorAll(".chip.ativo").forEach((c) => c.classList.remove("ativo"));
+        chip.classList.add("ativo");
+        buscarPopulares(chip.dataset.categoria);
+    });
+
     document.querySelectorAll(".sidebar-item[data-secao]").forEach((item) => {
         item.addEventListener("click", (evento) => {
             evento.preventDefault();
             marcarItemAtivoNaSidebar(item);
 
             const secao = item.dataset.secao;
+            document.getElementById("search-input").value = "";
 
             if (secao === "inicio") {
-                document.getElementById("search-input").value = "";
-                buscarVideos("javascript");
+                document.querySelectorAll(".chip.ativo").forEach((c) => c.classList.remove("ativo"));
+                document.querySelector('.chip[data-categoria=""]').classList.add("ativo");
+                buscarPopulares();
             } else if (secao === "shorts") {
                 buscarVideos("shorts", "short");
             } else if (secao === "busca") {
@@ -448,9 +433,9 @@ function configurarBuscaEClique() {
 
 configurarBuscaEClique();
 
-// Busca inicial só para popular a página com conteúdo real assim que abre.
-// Troque "javascript" pelo termo que fizer mais sentido para sua aula.
-buscarVideos("javascript");
+// Carrega a Home com vídeos em alta reais, igual à Home de verdade do YouTube.
+buscarPopulares();
+
 
 /**
  * Exibe uma mensagem curta de feedback no rodapé da tela (toast),

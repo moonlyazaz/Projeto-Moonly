@@ -164,12 +164,30 @@
         </aside>
 
         <main class="area-principal">
-            <section class="area-player" id="areaPlayer"></section>
-            <aside class="recomendacoes" id="recomendacoes"></aside>
+            <section class="area-inicio" id="areaInicio">
+                <div class="chips-categorias" id="chipsCategorias" style="display: none;">
+                    <button class="chip ativo" data-categoria="">Tudo</button>
+                    <button class="chip" data-categoria="24">Ao vivo</button>
+                    <button class="chip" data-categoria="10">Música</button>
+                    <button class="chip" data-categoria="20">Jogos</button>
+                    <button class="chip" data-categoria="25">Notícias</button>
+                    <button class="chip" data-categoria="17">Esportes</button>
+                    <button class="chip" data-categoria="23">Comédia</button>
+                    <button class="chip" data-categoria="28">Ciência e tecnologia</button>
+                    <button class="chip" data-categoria="27">Educação</button>
+                    <button class="chip" data-categoria="1">Filmes e animação</button>
+                </div>
+                <div class="area-resultados" id="areaResultados"></div>
+            </section>
+
+            <section class="area-assistir" id="areaAssistir" style="display: none;">
+                <div class="area-player" id="areaPlayer"></div>
+                <aside class="recomendacoes" id="recomendacoes"></aside>
+            </section>
+
+            <section class="area-shorts" id="areaShorts" style="display: none;"></section>
         </main>
         </div>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
