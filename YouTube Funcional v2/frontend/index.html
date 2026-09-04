@@ -7,7 +7,9 @@
     <title>YouTube</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
        <header class="cabecalho">
@@ -53,10 +55,11 @@
 
 
          <div class="cabecalho-final">
-           <button class="icon-button" title="Mais opções" data-toast="Nenhuma opção disponível no momento.">
-             <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" aria-hidden="true">
-               <path d="M12 4a2 2 0 100 4 2 2 0 000-4Zm0 6a2 2 0 100 4 2 2 0 000-4Zm0 6a2 2 0 100 4 2 2 0 000-4Z"></path>
-             </svg>
+           <button class="icon-button" title="Criar" data-toast="Criação de vídeos indisponível.">
+             <i class="fa-solid fa-video"></i>
+           </button>
+           <button class="icon-button" title="Notificações" data-toast="Nenhuma notificação nova.">
+             <i class="fa-regular fa-bell"></i>
            </button>
 
            <div id="containerLoginGoogle">

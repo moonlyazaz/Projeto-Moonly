@@ -79,12 +79,33 @@ function formatarNumeroResumido(numero) {
  * @param {Array} itens - Array "items" retornado por videos.list.
  * @returns {Array} Lista de vídeos no formato do front-end.
  */
-function formatarListaDeVideos(itens) {
+async function formatarListaDeVideos(itens) {
+    if (!itens || !itens.length) return [];
+    
+    // Extrai IDs únicos de canais
+    const idsCanais = [...new Set(itens.map(item => item.snippet.channelId))];
+    const mapFotos = {};
+    
+    try {
+        const urlCanais = `${URL_BASE_DA_API}/channels?part=snippet&id=${idsCanais.join(',')}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const resposta = await fetch(urlCanais);
+        const dados = await resposta.json();
+        
+        if (dados.items) {
+            dados.items.forEach(canal => {
+                mapFotos[canal.id] = canal.snippet.thumbnails.default.url;
+            });
+        }
+    } catch (e) {
+        console.error("Erro ao buscar fotos dos canais", e);
+    }
+
     return itens.map((item) => ({
         id: item.id,
         titulo: item.snippet.title,
         canal: item.snippet.channelTitle,
         canalId: item.snippet.channelId,
+        fotoCanal: mapFotos[item.snippet.channelId] || "",
         miniatura: item.snippet.thumbnails.high.url,
         duracao: formatarDuracao(item.contentDetails.duration),
         visualizacoes: `${formatarNumeroResumido(item.statistics.viewCount)} visualizações`,
@@ -123,7 +144,7 @@ app.get("/api/populares", async (req, res) => {
             return res.status(502).json({ erro: dados.error.message });
         }
 
-        res.json(formatarListaDeVideos(dados.items || []));
+        res.json(await formatarListaDeVideos(dados.items || []));
     } catch (erro) {
         console.error("Erro ao buscar vídeos populares:", erro);
         res.status(500).json({ erro: "Falha ao buscar vídeos populares." });
@@ -187,7 +208,7 @@ app.get("/api/buscar", async (req, res) => {
         const respostaDosDetalhes = await fetch(urlDeDetalhes);
         const dadosDosDetalhes = await respostaDosDetalhes.json();
 
-        res.json(formatarListaDeVideos(dadosDosDetalhes.items || []));
+        res.json(await formatarListaDeVideos(dadosDosDetalhes.items || []));
     } catch (erro) {
         console.error("Erro ao buscar vídeos:", erro);
         res.status(500).json({ erro: "Falha ao buscar vídeos no YouTube." });
@@ -245,6 +266,44 @@ app.get("/api/video/:id", async (req, res) => {
     } catch (erro) {
         console.error("Erro ao buscar detalhes do vídeo:", erro);
         res.status(500).json({ erro: "Falha ao buscar detalhes do vídeo." });
+    }
+});
+
+/**
+ * Rota para buscar comentários de um vídeo.
+ */
+app.get("/api/comentarios/:id", async (req, res) => {
+    const idDoVideo = req.params.id;
+
+    try {
+        const urlComentarios =
+            `${URL_BASE_DA_API}/commentThreads?part=snippet&videoId=${idDoVideo}` +
+            `&order=relevance&maxResults=20&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+
+        const resposta = await fetch(urlComentarios);
+        const dados = await resposta.json();
+
+        if (dados.error) {
+            // Se os comentários estiverem desativados, a API retorna erro 403 (commentsDisabled)
+            return res.status(403).json({ erro: "Comentários desativados ou erro na API.", detalhe: dados.error });
+        }
+
+        const comentariosFormatados = (dados.items || []).map(item => {
+            const topLevel = item.snippet.topLevelComment.snippet;
+            return {
+                id: item.id,
+                autor: topLevel.authorDisplayName,
+                avatar: topLevel.authorProfileImageUrl,
+                texto: topLevel.textDisplay,
+                curtidas: formatarNumeroResumido(topLevel.likeCount || 0),
+                tempoPublicacao: new Date(topLevel.publishedAt).toLocaleDateString("pt-BR")
+            };
+        });
+
+        res.json(comentariosFormatados);
+    } catch (erro) {
+        console.error("Erro ao buscar comentários:", erro);
+        res.status(500).json({ erro: "Falha ao buscar comentários." });
     }
 });
 

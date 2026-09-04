@@ -23,15 +23,34 @@
 function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
     const elementoDaAreaDoPlayer = document.getElementById("areaPlayer");
 
+    const loginSalvo = localStorage.getItem("usuarioLogadoComGoogle");
+    let fotoDoUsuario = "";
+    if (loginSalvo) {
+        try { fotoDoUsuario = JSON.parse(loginSalvo).picture; } catch(e){}
+    }
+
     elementoDaAreaDoPlayer.innerHTML = `
-        <div class="player">
+        <div class="video-assistir-player" id="main-player-container">
             <iframe
-                class="player__video"
-                src="${dadosDoVideoPrincipal.embedUrl}"
-                title="${dadosDoVideoPrincipal.titulo}"
+                id="main-video-iframe"
+                class="video-assistir-player__video"
+                src="https://www.youtube.com/embed/${dadosDoVideoPrincipal.id}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${window.location.origin}"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
             ></iframe>
+            <div class="video-assistir-player__overlay" id="main-video-overlay"></div>
+            <div class="video-assistir-player__controls">
+                <div class="video-assistir-player__progress-container" id="main-progress-container">
+                    <div class="video-assistir-player__progress-bar" id="main-progress-bar"></div>
+                </div>
+                <div class="video-assistir-player__controls-buttons">
+                    <button class="video-assistir-player__btn" id="main-play-btn"><i class="fa-solid fa-play" id="main-play-icon"></i></button>
+                    <button class="video-assistir-player__btn" id="main-mute-btn"><i class="fa-solid fa-volume-high" id="main-mute-icon"></i></button>
+                    <span class="video-assistir-player__time" id="main-time-display">0:00 / 0:00</span>
+                    <div class="video-assistir-player__spacer"></div>
+                    <button class="video-assistir-player__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
+                </div>
+            </div>
         </div>
 
         <h1 class="video-titulo">${dadosDoVideoPrincipal.titulo}</h1>
@@ -50,20 +69,23 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
             </div>
 
             <div class="acoes-video">
-                <button class="acao" type="button" data-acao="curtir" data-video-id="${dadosDoVideoPrincipal.id}">
-                    <i class="fa-solid fa-thumbs-up"></i>
-                    <span>${dadosDoVideoPrincipal.curtidas}</span>
-                </button>
-                <button class="acao" type="button" data-toast="Obrigado pelo feedback.">
-                    <i class="fa-solid fa-thumbs-down"></i>
-                </button>
+                <div class="acao-grupo">
+                    <button class="acao acao-esquerda" type="button" data-acao="curtir" data-video-id="${dadosDoVideoPrincipal.id}">
+                        <i class="fa-regular fa-thumbs-up"></i>
+                        <span>${dadosDoVideoPrincipal.curtidas}</span>
+                    </button>
+                    <div class="acao-separador"></div>
+                    <button class="acao acao-direita" type="button" data-toast="Obrigado pelo feedback.">
+                        <i class="fa-regular fa-thumbs-down"></i>
+                    </button>
+                </div>
                 <button class="acao" data-toast="Link copiado para a área de transferência.">
                     <i class="fa-solid fa-share"></i>
                     <span>Compartilhar</span>
                 </button>
                 <button class="acao" data-toast="O YouTube não permite baixar vídeos por fora do app oficial.">
                     <i class="fa-solid fa-download"></i>
-                    <span>Fazer download</span>
+                    <span>Download</span>
                 </button>
                 <button class="acao" data-toast="Mais opções em breve.">
                     <i class="fa-solid fa-ellipsis"></i>
@@ -71,12 +93,24 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
             </div>
         </div>
 
-        <div class="descricao">
+        <div class="descricao" data-toast="Mostrar mais (em breve)">
             <div class="descricao__estatisticas">
-                <span>${dadosDoVideoPrincipal.visualizacoes}</span>
-                <span>${dadosDoVideoPrincipal.dataPublicacao}</span>
+                <span>${dadosDoVideoPrincipal.visualizacoes}</span> • <span>${dadosDoVideoPrincipal.dataPublicacao}</span>
             </div>
             <p class="descricao__texto">${dadosDoVideoPrincipal.descricao}</p>
+        </div>
+        
+        <div class="comentarios-secao">
+            <h3 id="contador-comentarios">Carregando comentários...</h3>
+            <div class="comentario-input-area">
+                ${fotoDoUsuario 
+                    ? `<img class="comentario-avatar-img" src="${fotoDoUsuario}">` 
+                    : `<div class="comentario-avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`
+                }
+                <input type="text" placeholder="Adicione um comentário..." class="comentario-input">
+            </div>
+            <div id="lista-de-comentarios" class="lista-de-comentarios">
+            </div>
         </div>
     `;
 }
@@ -174,7 +208,10 @@ function montarCardDeResultado(video) {
                 <span class="card-resultado__duracao">${video.duracao}</span>
             </div>
             <div class="card-resultado__corpo">
-                <div class="card-resultado__avatar">${inicialDoCanal}</div>
+                ${video.fotoCanal 
+                    ? `<div class="card-resultado__avatar" style="background-image: url('${video.fotoCanal}'); background-size: cover; background-position: center; color: transparent;"></div>`
+                    : `<div class="card-resultado__avatar">${inicialDoCanal}</div>`
+                }
                 <div class="card-resultado__informacoes">
                     <span class="card-resultado__titulo">${video.titulo}</span>
                     <span class="card-resultado__canal">${video.canal}</span>
@@ -227,19 +264,26 @@ function montarShort(video) {
         <div class="short-item">
             <div class="short-item__player-wrapper">
                 <iframe
+                    id="short-iframe-${video.id}"
                     class="short-item__iframe"
-                    src="https://www.youtube.com/embed/${video.id}?autoplay=1&mute=1&loop=1&playlist=${video.id}&controls=1&playsinline=1"
-                    title="${video.titulo}"
+                    src="https://www.youtube.com/embed/${video.id}?autoplay=0&mute=1&controls=0&playsinline=1&enablejsapi=1&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&origin=${window.location.origin}"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen
                 ></iframe>
+                <div class="short-item__overlay" data-video-id="${video.id}"></div>
                 <div class="short-item__info">
                     <p class="short-item__canal">
-                        <span class="short-item__avatar">${inicialDoCanal}</span>
+                        ${video.fotoCanal 
+                            ? `<span class="short-item__avatar" style="background-image: url('${video.fotoCanal}'); background-size: cover; background-position: center; color: transparent;"></span>`
+                            : `<span class="short-item__avatar">${inicialDoCanal}</span>`
+                        }
                         ${video.canal}
                         <button class="short-item__inscrever" type="button" data-acao="inscrever" data-canal-id="${video.canalId}">Inscrever-se</button>
                     </p>
                     <p class="short-item__titulo">${video.titulo}</p>
+                    <div class="short-item__progress-container">
+                        <div class="short-item__progress-bar" id="short-progress-${video.id}"></div>
+                    </div>
                 </div>
             </div>
             <div class="short-item__acoes">
@@ -279,6 +323,72 @@ function navegarShorts(direcao) {
     lista.scrollBy({ top: direcao * lista.clientHeight, behavior: "smooth" });
 }
 
+let playersDeShorts = {};
+let intervaloDeProgressoDeShorts = null;
+
+function inicializarPlayersDeShorts(videos) {
+    if (intervaloDeProgressoDeShorts) {
+        clearInterval(intervaloDeProgressoDeShorts);
+    }
+    
+    videos.forEach(video => {
+        playersDeShorts[video.id] = new YT.Player(`short-iframe-${video.id}`, {
+            events: {
+                'onStateChange': (evento) => {
+                    if (evento.data === 0) { // ENDED
+                        evento.target.seekTo(0);
+                        evento.target.playVideo();
+                    }
+                }
+            }
+        });
+    });
+
+    const observerDeShorts = new IntersectionObserver((entradas) => {
+        entradas.forEach(entrada => {
+            const id = entrada.target.dataset.videoId;
+            const player = playersDeShorts[id];
+            if (player && typeof player.playVideo === 'function' && typeof player.pauseVideo === 'function') {
+                if (entrada.isIntersecting) {
+                    player.playVideo();
+                } else {
+                    player.pauseVideo();
+                }
+            }
+        });
+    }, { threshold: 0.6 });
+
+    intervaloDeProgressoDeShorts = setInterval(() => {
+        videos.forEach(video => {
+            const player = playersDeShorts[video.id];
+            if (player && typeof player.getCurrentTime === 'function' && typeof player.getDuration === 'function') {
+                const tempo = player.getCurrentTime();
+                const duracao = player.getDuration();
+                if (duracao > 0) {
+                    const porcentagem = (tempo / duracao) * 100;
+                    const barra = document.getElementById(`short-progress-${video.id}`);
+                    if (barra) barra.style.width = `${porcentagem}%`;
+                }
+            }
+        });
+    }, 100);
+
+    document.querySelectorAll('.short-item__overlay').forEach(overlay => {
+        observerDeShorts.observe(overlay);
+        overlay.addEventListener('click', (e) => {
+            const id = e.target.dataset.videoId;
+            const player = playersDeShorts[id];
+            if (player && typeof player.getPlayerState === 'function') {
+                const estado = player.getPlayerState();
+                if (estado === 1 || estado === 3) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            }
+        });
+    });
+}
 
 /**
  * Renderiza a lista vertical de Shorts (rolagem com "encaixe" tipo
@@ -305,9 +415,113 @@ function renderizarShorts(videos) {
         `;
         document.getElementById("botaoShortAnterior").addEventListener("click", () => navegarShorts(-1));
         document.getElementById("botaoShortProximo").addEventListener("click", () => navegarShorts(1));
+
+        if (window.YT && window.YT.Player) {
+            inicializarPlayersDeShorts(videos);
+        } else {
+            window.onYouTubeIframeAPIReady = () => inicializarPlayersDeShorts(videos);
+        }
     }
 
     mostrarView("shorts");
+}
+
+let playerPrincipal = null;
+let intervaloDeProgressoPrincipal = null;
+
+function formatarTempo(segundos) {
+    if (isNaN(segundos)) return "0:00";
+    const m = Math.floor(segundos / 60);
+    const s = Math.floor(segundos % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function inicializarPlayerPrincipal() {
+    if (intervaloDeProgressoPrincipal) clearInterval(intervaloDeProgressoPrincipal);
+    
+    const iniciarControles = () => {
+        playerPrincipal = new YT.Player('main-video-iframe', {
+            events: {
+                'onStateChange': (e) => {
+                    const icone = document.getElementById('main-play-icon');
+                    if (e.data === 1) { // PLAYING
+                        if(icone) { icone.classList.remove('fa-play'); icone.classList.add('fa-pause'); }
+                    } else {
+                        if(icone) { icone.classList.remove('fa-pause'); icone.classList.add('fa-play'); }
+                    }
+                }
+            }
+        });
+
+        const alternarPlay = () => {
+            if (!playerPrincipal || !playerPrincipal.getPlayerState) return;
+            const estado = playerPrincipal.getPlayerState();
+            if (estado === 1) playerPrincipal.pauseVideo();
+            else playerPrincipal.playVideo();
+        };
+
+        const btnPlay = document.getElementById('main-play-btn');
+        if (btnPlay) btnPlay.addEventListener('click', alternarPlay);
+        
+        const overlay = document.getElementById('main-video-overlay');
+        if (overlay) overlay.addEventListener('click', alternarPlay);
+
+        const btnMute = document.getElementById('main-mute-btn');
+        if (btnMute) btnMute.addEventListener('click', () => {
+            if (!playerPrincipal || !playerPrincipal.isMuted) return;
+            const icon = document.getElementById('main-mute-icon');
+            if (playerPrincipal.isMuted()) {
+                playerPrincipal.unMute();
+                if(icon) { icon.classList.remove('fa-volume-xmark'); icon.classList.add('fa-volume-high'); }
+            } else {
+                playerPrincipal.mute();
+                if(icon) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark'); }
+            }
+        });
+
+        const btnFullscreen = document.getElementById('main-fullscreen-btn');
+        if (btnFullscreen) btnFullscreen.addEventListener('click', () => {
+            const container = document.getElementById('main-player-container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        const progressContainer = document.getElementById('main-progress-container');
+        if (progressContainer) progressContainer.addEventListener('click', (e) => {
+            if (!playerPrincipal || !playerPrincipal.getDuration) return;
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            playerPrincipal.seekTo(pos * playerPrincipal.getDuration());
+        });
+
+        intervaloDeProgressoPrincipal = setInterval(() => {
+            if (playerPrincipal && typeof playerPrincipal.getCurrentTime === 'function' && typeof playerPrincipal.getDuration === 'function') {
+                const tempo = playerPrincipal.getCurrentTime();
+                const duracao = playerPrincipal.getDuration();
+                if (duracao > 0) {
+                    const porcentagem = (tempo / duracao) * 100;
+                    const barra = document.getElementById('main-progress-bar');
+                    if (barra) barra.style.width = `${porcentagem}%`;
+                    
+                    const display = document.getElementById('main-time-display');
+                    if (display) display.textContent = `${formatarTempo(tempo)} / ${formatarTempo(duracao)}`;
+                }
+            }
+        }, 100);
+    };
+
+    if (window.YT && window.YT.Player) {
+        iniciarControles();
+    } else {
+        const oldCallback = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+            if (oldCallback) oldCallback();
+            iniciarControles();
+        };
+    }
 }
 
 /**
@@ -327,6 +541,46 @@ async function abrirVideo(idDoVideo) {
         renderizarVideoPrincipal(dadosDoVideo);
         mostrarView("assistir");
         window.scrollTo({ top: 0, behavior: "smooth" });
+        
+        inicializarPlayerPrincipal();
+        
+        verificarEstadoDoVideo(dadosDoVideo.id, dadosDoVideo.canal.id);
+
+        fetch(`${URL_DO_BACKEND}/api/comentarios/${idDoVideo}`)
+            .then(res => res.json())
+            .then(comentarios => {
+                const lista = document.getElementById("lista-de-comentarios");
+                const contador = document.getElementById("contador-comentarios");
+                if (lista && contador) {
+                    if (comentarios.erro || !Array.isArray(comentarios)) {
+                        contador.textContent = "Comentários desativados";
+                        lista.innerHTML = "";
+                        return;
+                    }
+                    contador.textContent = `${comentarios.length} Comentários`;
+                    lista.innerHTML = comentarios.map(c => `
+                        <div class="comentario-item">
+                            <div class="comentario-item__avatar" style="background-image: url('${c.avatar}')"></div>
+                            <div class="comentario-item__conteudo">
+                                <div class="comentario-item__cabecalho">
+                                    <span class="comentario-item__autor">@${c.autor}</span>
+                                    <span class="comentario-item__tempo">${c.tempoPublicacao}</span>
+                                </div>
+                                <div class="comentario-item__texto">${c.texto}</div>
+                                <div class="comentario-item__acoes">
+                                    <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> ${c.curtidas > 0 ? c.curtidas : ''}</button>
+                                    <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
+                                    <button class="comentario-item__acao" style="font-weight: 500; font-size: 12px; margin-left: 8px;">Responder</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(err => {
+                const contador = document.getElementById("contador-comentarios");
+                if(contador) contador.textContent = "Erro ao carregar comentários";
+            });
 
         // Busca vídeos parecidos com o título para popular os recomendados.
         const primeiraPalavra = dadosDoVideo.titulo.split(" ").slice(0, 3).join(" ");
@@ -458,6 +712,25 @@ function configurarBuscaEClique() {
             abrirVideo(card.dataset.idDoVideo);
         }
     });
+    
+    // Clique na logo volta para a Home
+    const logo = document.querySelector('.logotipo');
+    if (logo) {
+        logo.addEventListener('click', (evento) => {
+            evento.preventDefault();
+            document.querySelector('.sidebar-item[data-secao="inicio"]').click();
+        });
+        logo.style.cursor = 'pointer';
+    }
+
+    // Clique no menu hamburger para recolher a sidebar
+    const menuHamburger = document.querySelector('.fa-bars');
+    if (menuHamburger) {
+        menuHamburger.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('recolhida');
+        });
+        menuHamburger.style.cursor = 'pointer';
+    }
 
     // Clique em uma chip de categoria filtra a Home por aquela categoria.
     document.getElementById("chipsCategorias").addEventListener("click", (evento) => {
@@ -550,6 +823,9 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
  */
 function aplicarUsuarioDeslogado() {
     localStorage.removeItem("usuarioLogadoComGoogle");
+    localStorage.removeItem("youtube_access_token");
+    localStorage.removeItem("youtube_token_expires_at");
+    tokenDeAcessoDoYoutube = null;
 
     document.getElementById("containerLoginGoogle").style.display = "block";
     document.getElementById("sidebarLogin").style.display = "block";
@@ -623,6 +899,8 @@ configurarLoginComGoogle();
 const ESCOPOS_DO_YOUTUBE = "https://www.googleapis.com/auth/youtube.force-ssl";
 let clienteDeTokenDoYoutube = null;
 let tokenDeAcessoDoYoutube = null;
+const CHAVE_TOKEN_YT = "youtube_access_token";
+const CHAVE_EXPIRACAO_YT = "youtube_token_expires_at";
 
 /**
  * Garante que exista um token de acesso válido para chamar a YouTube
@@ -635,6 +913,20 @@ let tokenDeAcessoDoYoutube = null;
 function obterTokenDeAcessoDoYoutube() {
     return new Promise((resolver, rejeitar) => {
         if (tokenDeAcessoDoYoutube) {
+            resolver(tokenDeAcessoDoYoutube);
+            return;
+        }
+
+        const tokenSalvo = localStorage.getItem(CHAVE_TOKEN_YT);
+        const expiracaoSalva = localStorage.getItem(CHAVE_EXPIRACAO_YT);
+        if (tokenSalvo && expiracaoSalva && Date.now() < parseInt(expiracaoSalva)) {
+            tokenDeAcessoDoYoutube = tokenSalvo;
+            const tempoRestante = parseInt(expiracaoSalva) - Date.now();
+            setTimeout(() => { 
+                tokenDeAcessoDoYoutube = null; 
+                localStorage.removeItem(CHAVE_TOKEN_YT);
+                localStorage.removeItem(CHAVE_EXPIRACAO_YT);
+            }, Math.max(0, tempoRestante - 60000));
             resolver(tokenDeAcessoDoYoutube);
             return;
         }
@@ -654,9 +946,14 @@ function obterTokenDeAcessoDoYoutube() {
                         return;
                     }
                     tokenDeAcessoDoYoutube = resposta.access_token;
-                    // O token expira sozinho depois de um tempo; limpa o
-                    // cache local para pedir um novo na próxima ação.
-                    setTimeout(() => { tokenDeAcessoDoYoutube = null; }, (resposta.expires_in - 60) * 1000);
+                    localStorage.setItem(CHAVE_TOKEN_YT, tokenDeAcessoDoYoutube);
+                    localStorage.setItem(CHAVE_EXPIRACAO_YT, Date.now() + (resposta.expires_in * 1000));
+                    
+                    setTimeout(() => { 
+                        tokenDeAcessoDoYoutube = null; 
+                        localStorage.removeItem(CHAVE_TOKEN_YT);
+                        localStorage.removeItem(CHAVE_EXPIRACAO_YT);
+                    }, (resposta.expires_in - 60) * 1000);
                     resolver(tokenDeAcessoDoYoutube);
                 }
             });
@@ -664,6 +961,65 @@ function obterTokenDeAcessoDoYoutube() {
 
         clienteDeTokenDoYoutube.requestAccessToken();
     });
+}
+
+function possuiTokenSalvoValido() {
+    if (tokenDeAcessoDoYoutube) return true;
+    const tokenSalvo = localStorage.getItem(CHAVE_TOKEN_YT);
+    const expiracaoSalva = localStorage.getItem(CHAVE_EXPIRACAO_YT);
+    if (tokenSalvo && expiracaoSalva && Date.now() < parseInt(expiracaoSalva)) {
+        return true;
+    }
+    return false;
+}
+
+async function verificarEstadoDoVideo(idDoVideo, idDoCanal) {
+    if (!possuiTokenSalvoValido()) return;
+    
+    // Pega o token silenciosamente
+    const token = tokenDeAcessoDoYoutube || localStorage.getItem(CHAVE_TOKEN_YT);
+
+    try {
+        // Verificar curtida
+        if (idDoVideo) {
+            const resp = await fetch(`https://www.googleapis.com/youtube/v3/videos/getRating?id=${idDoVideo}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const dados = await resp.json();
+                if (dados.items && dados.items[0].rating === 'like') {
+                    const btn = document.querySelector(`[data-acao="curtir"][data-video-id="${idDoVideo}"]`);
+                    if (btn) {
+                        btn.classList.add('curtido');
+                        const icone = btn.querySelector('i');
+                        if (icone) {
+                            icone.classList.remove('fa-regular');
+                            icone.classList.add('fa-solid');
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Verificar inscrição
+        if (idDoCanal) {
+            const resp = await fetch(`https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&forChannelId=${idDoCanal}&mine=true`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const dados = await resp.json();
+                if (dados.items && dados.items.length > 0) {
+                    const btn = document.querySelector(`[data-acao="inscrever"][data-canal-id="${idDoCanal}"]`);
+                    if (btn) {
+                        btn.textContent = "Inscrito";
+                        btn.classList.add("inscrito");
+                    }
+                }
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao verificar estado:", erro);
+    }
 }
 
 /**
@@ -746,6 +1102,18 @@ async function curtirVideo(idDoVideo, botao) {
         if (resposta.ok) {
             if (botao) {
                 botao.classList.toggle("curtido", !jaEstavaCurtido);
+                
+                const icone = botao.querySelector('i');
+                if (icone) {
+                    if (!jaEstavaCurtido) {
+                        icone.classList.remove('fa-regular');
+                        icone.classList.add('fa-solid');
+                    } else {
+                        icone.classList.remove('fa-solid');
+                        icone.classList.add('fa-regular');
+                    }
+                }
+                
                 botao.classList.add("animacao-curtir");
                 setTimeout(() => botao.classList.remove("animacao-curtir"), 350);
             }
