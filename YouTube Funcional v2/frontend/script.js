@@ -848,64 +848,49 @@ function aplicarUsuarioDeslogado() {
  *
  * @param {Object} respostaDoGoogle - Objeto com o campo "credential" (JWT).
  */
-function aoReceberCredencialDoGoogle(respostaDoGoogle) {
-    const dadosDoUsuario = decodificarTokenJwt(respostaDoGoogle.credential);
-    aplicarUsuarioLogado(dadosDoUsuario);
-    mostrarToast(`Login realizado como ${dadosDoUsuario.given_name || dadosDoUsuario.name}.`);
-}
-
-/**
- * Inicializa o Google Identity Services e desenha os botões "Fazer
- * login com o Google" no cabeçalho e na sidebar. Se já existir um
- * login salvo no localStorage (de uma visita anterior), aplica direto
- * o estado logado sem precisar clicar em nada.
- */
-function configurarLoginComGoogle() {
+function fazerLoginCompleto() {
     if (GOOGLE_CLIENT_ID.startsWith("COLE_AQUI")) {
-        console.warn(
-            "[AVISO] Configure GOOGLE_CLIENT_ID no index.html para habilitar o Login com o Google " +
-            "(veja o passo a passo no README.md)."
-        );
+        alert("Configure o GOOGLE_CLIENT_ID no index.html primeiro!");
         return;
     }
-
-    if (!window.google || !window.google.accounts) {
-        // A biblioteca do Google ainda não carregou; tenta de novo em breve.
-        setTimeout(configurarLoginComGoogle, 300);
-        return;
-    }
-
-    google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: aoReceberCredencialDoGoogle
+    
+    // Usa a mesma função que já pede o token pro YouTube,
+    // mas como o escopo agora tem userinfo, vamos pegar o perfil também!
+    obterTokenDeAcessoDoYoutube().then(token => {
+        // Agora que temos o token unificado (permissões + identidade)
+        // Vamos buscar quem é o usuário
+        return fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+    })
+    .then(res => res.json())
+    .then(dadosDoUsuario => {
+        if (dadosDoUsuario.error) {
+            console.error("Erro ao buscar perfil:", dadosDoUsuario.error);
+            return;
+        }
+        
+        aplicarUsuarioLogado(dadosDoUsuario);
+        mostrarToast(`Login realizado como ${dadosDoUsuario.given_name || dadosDoUsuario.name}.`);
+    })
+    .catch(err => {
+        console.error("Erro no login completo:", err);
     });
-
-    // Remove o botão substituto antes de desenhar o botão real do Google.
-    document.getElementById("containerLoginGoogle").innerHTML = "";
-    document.getElementById("containerLoginGoogleSidebar").innerHTML = "";
-
-    google.accounts.id.renderButton(
-        document.getElementById("containerLoginGoogle"),
-        { theme: "filled_black", size: "medium", shape: "pill", text: "signin", locale: "pt-BR" }
-    );
-    google.accounts.id.renderButton(
-        document.getElementById("containerLoginGoogleSidebar"),
-        { theme: "outline", size: "medium", shape: "pill", text: "signin_with", locale: "pt-BR" }
-    );
-
-    const loginSalvo = localStorage.getItem("usuarioLogadoComGoogle");
-    if (loginSalvo) {
-        aplicarUsuarioLogado(JSON.parse(loginSalvo));
-    }
 }
 
-configurarLoginComGoogle();
+// Se já existir um login salvo no localStorage (de uma visita anterior), aplica direto
+const loginSalvo = localStorage.getItem("usuarioLogadoComGoogle");
+if (loginSalvo) {
+    aplicarUsuarioLogado(JSON.parse(loginSalvo));
+}
 
 // ===== Ações reais na conta do YouTube (curtir, inscrever, inscrições) =====
 // Usam um token OAuth separado do login (que só identifica quem é a
 // pessoa). Esse token só é pedido na hora em que a pessoa realmente
 // tenta curtir/inscrever, e o Google mostra uma tela de permissão.
-const ESCOPOS_DO_YOUTUBE = "https://www.googleapis.com/auth/youtube.force-ssl";
+const ESCOPOS_DO_YOUTUBE = "https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
 let clienteDeTokenDoYoutube = null;
 let tokenDeAcessoDoYoutube = null;
 const CHAVE_TOKEN_YT = "youtube_access_token";

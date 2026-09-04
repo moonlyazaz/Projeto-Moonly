@@ -1303,3 +1303,56 @@ body {
     background-color: #383838;
     color: #fff;
 }
+.btn-login-custom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #272727;
+    color: #3ea6ff;
+    border: 1px solid #3ea6ff;
+    border-radius: 18px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Roboto", Arial, sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-login-custom:hover {
+    background-color: #3ea6ff22;
+}
+.btn-login-custom img {
+    width: 20px;
+    height: 20px;
+}
+.btn-login-custom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #222222;
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    padding: 4px 14px 4px 4px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Roboto", Arial, sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-login-custom:hover {
+    background-color: #333333;
+}
+.btn-login-custom .img-circle {
+    background-color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-login-custom img {
+    width: 18px;
+    height: 18px;
+}
