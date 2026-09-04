@@ -334,6 +334,7 @@ function inicializarPlayersDeShorts(videos) {
     videos.forEach(video => {
         playersDeShorts[video.id] = new YT.Player(`short-iframe-${video.id}`, {
             events: {
+                'onReady': (e) => { e.target.playVideo(); }, 
                 'onStateChange': (evento) => {
                     if (evento.data === 0) { // ENDED
                         evento.target.seekTo(0);
@@ -442,6 +443,7 @@ function inicializarPlayerPrincipal() {
     const iniciarControles = () => {
         playerPrincipal = new YT.Player('main-video-iframe', {
             events: {
+                'onReady': (e) => { e.target.playVideo(); }, 
                 'onStateChange': (e) => {
                     const icone = document.getElementById('main-play-icon');
                     if (e.data === 1) { // PLAYING
