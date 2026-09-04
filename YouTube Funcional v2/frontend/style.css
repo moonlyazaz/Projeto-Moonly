@@ -508,7 +508,7 @@ body {
 .card-resultado__miniatura-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 9; min-height: 480px;
     border-radius: 12px;
     overflow: hidden;
     background-color: #181818;
@@ -779,17 +779,17 @@ body {
     background-color: #3f3f3f;
 }
 
-.video-assistir-player {
+.media-view-box {
     display: flex;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 9; min-height: 480px;
     border-radius: 12px;
     background-color: #000000;
     overflow: hidden;
     position: relative;
 }
 
-.video-assistir-player__video {
+.media-view-box__video {
     display: flex;
     width: 100%;
     height: 100%;
@@ -798,14 +798,14 @@ body {
     transform: scale(1.35); /* zoom hack */
 }
 
-.video-assistir-player__overlay {
+.media-view-box__overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 48px;
     z-index: 5;
     cursor: pointer;
 }
 
-.video-assistir-player__controls {
+.media-view-box__controls {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 48px;
@@ -818,11 +818,11 @@ body {
     transition: opacity 0.3s;
 }
 
-.video-assistir-player:hover .video-assistir-player__controls {
+.media-view-box:hover .media-view-box__controls {
     opacity: 1;
 }
 
-.video-assistir-player__progress-container {
+.media-view-box__progress-container {
     width: 100%;
     height: 4px;
     background: rgba(255, 255, 255, 0.3);
@@ -831,21 +831,21 @@ body {
     position: relative;
 }
 
-.video-assistir-player__progress-bar {
+.media-view-box__progress-bar {
     height: 100%;
     background: #f00;
     width: 0%;
     pointer-events: none;
 }
 
-.video-assistir-player__controls-buttons {
+.media-view-box__controls-buttons {
     display: flex;
     align-items: center;
     gap: 16px;
     color: #fff;
 }
 
-.video-assistir-player__btn {
+.media-view-box__btn {
     background: none;
     border: none;
     color: #fff;
@@ -853,12 +853,12 @@ body {
     cursor: pointer;
 }
 
-.video-assistir-player__time {
+.media-view-box__time {
     font-size: 13px;
     font-weight: 500;
 }
 
-.video-assistir-player__spacer {
+.media-view-box__spacer {
     flex: 1;
 }
 

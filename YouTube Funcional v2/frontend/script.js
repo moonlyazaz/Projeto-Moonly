@@ -30,25 +30,25 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
     }
 
     elementoDaAreaDoPlayer.innerHTML = `
-        <div class="video-assistir-player" id="main-player-container">
+        <div class="media-view-box" id="main-player-container">
             <iframe
                 id="main-video-iframe"
-                class="video-assistir-player__video"
-                src="https://www.youtube.com/embed/${dadosDoVideoPrincipal.id}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${window.location.origin}"
+                class="media-view-box__video"
+                src="https://www.youtube.com/embed/${dadosDoVideoPrincipal.id}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
             ></iframe>
-            <div class="video-assistir-player__overlay" id="main-video-overlay"></div>
-            <div class="video-assistir-player__controls">
-                <div class="video-assistir-player__progress-container" id="main-progress-container">
-                    <div class="video-assistir-player__progress-bar" id="main-progress-bar"></div>
+            <div class="media-view-box__overlay" id="main-video-overlay"></div>
+            <div class="media-view-box__controls">
+                <div class="media-view-box__progress-container" id="main-progress-container">
+                    <div class="media-view-box__progress-bar" id="main-progress-bar"></div>
                 </div>
-                <div class="video-assistir-player__controls-buttons">
-                    <button class="video-assistir-player__btn" id="main-play-btn"><i class="fa-solid fa-play" id="main-play-icon"></i></button>
-                    <button class="video-assistir-player__btn" id="main-mute-btn"><i class="fa-solid fa-volume-high" id="main-mute-icon"></i></button>
-                    <span class="video-assistir-player__time" id="main-time-display">0:00 / 0:00</span>
-                    <div class="video-assistir-player__spacer"></div>
-                    <button class="video-assistir-player__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
+                <div class="media-view-box__controls-buttons">
+                    <button class="media-view-box__btn" id="main-play-btn"><i class="fa-solid fa-play" id="main-play-icon"></i></button>
+                    <button class="media-view-box__btn" id="main-mute-btn"><i class="fa-solid fa-volume-high" id="main-mute-icon"></i></button>
+                    <span class="media-view-box__time" id="main-time-display">0:00 / 0:00</span>
+                    <div class="media-view-box__spacer"></div>
+                    <button class="media-view-box__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
                 </div>
             </div>
         </div>
@@ -266,7 +266,7 @@ function montarShort(video) {
                 <iframe
                     id="short-iframe-${video.id}"
                     class="short-item__iframe"
-                    src="https://www.youtube.com/embed/${video.id}?autoplay=0&mute=1&controls=0&playsinline=1&enablejsapi=1&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&origin=${window.location.origin}"
+                    src="https://www.youtube.com/embed/${video.id}?autoplay=0&mute=1&controls=0&playsinline=1&enablejsapi=1&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&origin=${encodeURIComponent(window.location.origin)}"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen
                 ></iframe>
