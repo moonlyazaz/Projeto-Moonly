@@ -508,7 +508,7 @@ body {
 .card-resultado__miniatura-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9; min-height: 480px;
+    aspect-ratio: 16 / 9;
     border-radius: 12px;
     overflow: hidden;
     background-color: #181818;
@@ -782,7 +782,7 @@ body {
 .media-view-box {
     display: flex;
     width: 100%;
-    aspect-ratio: 16 / 9; min-height: 480px;
+    aspect-ratio: 16 / 9;
     border-radius: 12px;
     background-color: #000000;
     overflow: hidden;
