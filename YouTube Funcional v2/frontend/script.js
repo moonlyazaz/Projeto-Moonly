@@ -107,7 +107,13 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                     ? `<img class="comentario-avatar-img" src="${fotoDoUsuario}">` 
                     : `<div class="comentario-avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`
                 }
-                <input type="text" placeholder="Adicione um comentário..." class="comentario-input">
+                <div class="comentario-input-container" style="flex:1;">
+                    <input type="text" placeholder="Adicione um comentário..." class="comentario-input" id="comentario-input-box">
+                    <div class="comentario-acoes" id="comentario-acoes" style="display: none; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                        <button class="comentario-btn-cancelar" id="btn-cancelar-comentario" style="background: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                        <button class="comentario-btn-enviar" id="btn-enviar-comentario" disabled style="background-color: #272727; color: #717171; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: default; transition: background-color 0.2s;">Comentar</button>
+                    </div>
+                </div>
             </div>
             <div id="lista-de-comentarios" class="lista-de-comentarios">
             </div>
@@ -545,6 +551,7 @@ async function abrirVideo(idDoVideo) {
         window.scrollTo({ top: 0, behavior: "smooth" });
         
         inicializarPlayerPrincipal();
+        inicializarEventosDeComentario(dadosDoVideo.id);
         
         verificarEstadoDoVideo(dadosDoVideo.id, dadosDoVideo.canal.id);
 
@@ -1276,3 +1283,131 @@ function configurarFeedbackDeAcoes() {
 }
 
 configurarFeedbackDeAcoes();
+
+function inicializarEventosDeComentario(videoId) {
+    const input = document.getElementById('comentario-input-box');
+    const acoes = document.getElementById('comentario-acoes');
+    const btnCancelar = document.getElementById('btn-cancelar-comentario');
+    const btnEnviar = document.getElementById('btn-enviar-comentario');
+
+    if (!input || !acoes || !btnCancelar || !btnEnviar) return;
+
+    input.addEventListener('focus', () => {
+        acoes.style.display = 'flex';
+    });
+
+    input.addEventListener('input', () => {
+        if (input.value.trim().length > 0) {
+            btnEnviar.disabled = false;
+            btnEnviar.style.backgroundColor = '#3ea6ff';
+            btnEnviar.style.color = '#000';
+            btnEnviar.style.cursor = 'pointer';
+        } else {
+            btnEnviar.disabled = true;
+            btnEnviar.style.backgroundColor = '#272727';
+            btnEnviar.style.color = '#717171';
+            btnEnviar.style.cursor = 'default';
+        }
+    });
+
+    btnCancelar.addEventListener('click', () => {
+        input.value = '';
+        acoes.style.display = 'none';
+        btnEnviar.disabled = true;
+        btnEnviar.style.backgroundColor = '#272727';
+        btnEnviar.style.color = '#717171';
+        btnEnviar.style.cursor = 'default';
+    });
+
+    btnEnviar.addEventListener('click', () => {
+        const texto = input.value.trim();
+        if (texto.length > 0) {
+            enviarComentarioReal(videoId, texto);
+        }
+    });
+}
+
+function enviarComentarioReal(videoId, texto) {
+    if (!tokenDeAcessoDoYoutube) {
+        if (clienteDeTokenDoYoutube) {
+            clienteDeTokenDoYoutube.requestAccessToken();
+        } else {
+            alert('Erro: Login do Google não configurado adequadamente.');
+        }
+        return;
+    }
+
+    const btnEnviar = document.getElementById('btn-enviar-comentario');
+    btnEnviar.disabled = true;
+    btnEnviar.innerText = 'Enviando...';
+
+    fetch('https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + tokenDeAcessoDoYoutube,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            snippet: {
+                videoId: videoId,
+                topLevelComment: {
+                    snippet: { textOriginal: texto }
+                }
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Erro ao postar comentario:', data.error);
+            alert('Falha ao enviar comentario.');
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = 'Comentar';
+            return;
+        }
+
+        const btnCancelar = document.getElementById('btn-cancelar-comentario');
+        if (btnCancelar) btnCancelar.click();
+        btnEnviar.innerText = 'Comentar';
+
+        const listaDeComentarios = document.getElementById('lista-de-comentarios');
+        if (listaDeComentarios) {
+            const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
+            let nomeUsuario = 'Você';
+            let fotoUsuario = '';
+            if (loginSalvo) {
+                try { 
+                    const parsed = JSON.parse(loginSalvo);
+                    nomeUsuario = parsed.name || 'Você';
+                    fotoUsuario = parsed.picture || '';
+                } catch(e){}
+            }
+
+            const novoComentarioHTML = `
+                <div class="comentario-item">
+                    ${fotoUsuario ? `<img class="comentario-avatar" src="${fotoUsuario}">` : `<div class="comentario-item__avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`}
+                    <div class="comentario-item__conteudo">
+                        <div class="comentario-item__cabecalho">
+                            <span class="comentario-item__autor">@${nomeUsuario}</span>
+                            <span class="comentario-item__tempo">agora mesmo</span>
+                        </div>
+                        <div class="comentario-item__texto">
+                            ${texto.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                        </div>
+                        <div class="comentario-item__acoes">
+                            <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> 0</button>
+                            <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
+                            <span style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            listaDeComentarios.insertAdjacentHTML('afterbegin', novoComentarioHTML);
+        }
+    })
+    .catch(err => {
+        console.error('Erro rede ao postar:', err);
+        btnEnviar.disabled = false;
+        btnEnviar.innerText = 'Comentar';
+    });
+}
