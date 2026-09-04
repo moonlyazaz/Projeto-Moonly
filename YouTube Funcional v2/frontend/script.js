@@ -1328,86 +1328,82 @@ function inicializarEventosDeComentario(videoId) {
 }
 
 function enviarComentarioReal(videoId, texto) {
-    if (!tokenDeAcessoDoYoutube) {
-        if (clienteDeTokenDoYoutube) {
-            clienteDeTokenDoYoutube.requestAccessToken();
-        } else {
-            alert('Erro: Login do Google não configurado adequadamente.');
-        }
-        return;
-    }
-
     const btnEnviar = document.getElementById('btn-enviar-comentario');
     btnEnviar.disabled = true;
-    btnEnviar.innerText = 'Enviando...';
+    btnEnviar.innerText = 'Autenticando...';
 
-    fetch('https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet', {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + tokenDeAcessoDoYoutube,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            snippet: {
-                videoId: videoId,
-                topLevelComment: {
-                    snippet: { textOriginal: texto }
-                }
-            }
+    obterTokenDeAcessoDoYoutube()
+        .then(token => {
+            btnEnviar.innerText = 'Enviando...';
+            return fetch('https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    snippet: {
+                        videoId: videoId,
+                        topLevelComment: {
+                            snippet: { textOriginal: texto }
+                        }
+                    }
+                })
+            });
         })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            console.error('Erro ao postar comentario:', data.error);
-            alert('Falha ao enviar comentario.');
-            btnEnviar.disabled = false;
-            btnEnviar.innerText = 'Comentar';
-            return;
-        }
-
-        const btnCancelar = document.getElementById('btn-cancelar-comentario');
-        if (btnCancelar) btnCancelar.click();
-        btnEnviar.innerText = 'Comentar';
-
-        const listaDeComentarios = document.getElementById('lista-de-comentarios');
-        if (listaDeComentarios) {
-            const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
-            let nomeUsuario = 'Você';
-            let fotoUsuario = '';
-            if (loginSalvo) {
-                try { 
-                    const parsed = JSON.parse(loginSalvo);
-                    nomeUsuario = parsed.name || 'Você';
-                    fotoUsuario = parsed.picture || '';
-                } catch(e){}
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Erro ao postar comentario:', data.error);
+                alert('Falha ao enviar comentario.');
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = 'Comentar';
+                return;
             }
 
-            const novoComentarioHTML = `
-                <div class="comentario-item">
-                    ${fotoUsuario ? `<img class="comentario-avatar" src="${fotoUsuario}">` : `<div class="comentario-item__avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`}
-                    <div class="comentario-item__conteudo">
-                        <div class="comentario-item__cabecalho">
-                            <span class="comentario-item__autor">@${nomeUsuario}</span>
-                            <span class="comentario-item__tempo">agora mesmo</span>
-                        </div>
-                        <div class="comentario-item__texto">
-                            ${texto.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
-                        </div>
-                        <div class="comentario-item__acoes">
-                            <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> 0</button>
-                            <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
-                            <span style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
+            const btnCancelar = document.getElementById('btn-cancelar-comentario');
+            if (btnCancelar) btnCancelar.click();
+            btnEnviar.innerText = 'Comentar';
+
+            const listaDeComentarios = document.getElementById('lista-de-comentarios');
+            if (listaDeComentarios) {
+                const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
+                let nomeUsuario = 'Você';
+                let fotoUsuario = '';
+                if (loginSalvo) {
+                    try { 
+                        const parsed = JSON.parse(loginSalvo);
+                        nomeUsuario = parsed.name || 'Você';
+                        fotoUsuario = parsed.picture || '';
+                    } catch(e){}
+                }
+
+                const novoComentarioHTML = `
+                    <div class="comentario-item">
+                        ${fotoUsuario ? `<img class="comentario-avatar" src="${fotoUsuario}">` : `<div class="comentario-item__avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`}
+                        <div class="comentario-item__conteudo">
+                            <div class="comentario-item__cabecalho">
+                                <span class="comentario-item__autor">@${nomeUsuario}</span>
+                                <span class="comentario-item__tempo">agora mesmo</span>
+                            </div>
+                            <div class="comentario-item__texto">
+                                ${texto.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                            </div>
+                            <div class="comentario-item__acoes">
+                                <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> 0</button>
+                                <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
+                                <span style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            listaDeComentarios.insertAdjacentHTML('afterbegin', novoComentarioHTML);
-        }
-    })
-    .catch(err => {
-        console.error('Erro rede ao postar:', err);
-        btnEnviar.disabled = false;
-        btnEnviar.innerText = 'Comentar';
-    });
+                `;
+                listaDeComentarios.insertAdjacentHTML('afterbegin', novoComentarioHTML);
+            }
+        })
+        .catch(err => {
+            console.error('Erro rede ao postar:', err);
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = 'Comentar';
+        });
 }
+
