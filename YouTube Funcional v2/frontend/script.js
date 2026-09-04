@@ -1355,7 +1355,18 @@ function enviarComentarioReal(videoId, texto) {
         .then(data => {
             if (data.error) {
                 console.error('Erro ao postar comentario:', data.error);
-                alert('Falha ao enviar comentario.');
+                let motivo = data.error.message || 'Erro desconhecido';
+                if (data.error.errors && data.error.errors.length > 0) {
+                    motivo = data.error.errors[0].reason;
+                }
+                
+                if (motivo === 'youtubeSignupRequired') {
+                    alert('Sua conta do Google não tem um canal no YouTube! Crie um canal no YouTube.com primeiro para poder comentar.');
+                } else if (motivo === 'commentsDisabled') {
+                    alert('Os comentários estão desativados para este vídeo.');
+                } else {
+                    alert('Falha ao enviar comentario. Motivo: ' + motivo);
+                }
                 btnEnviar.disabled = false;
                 btnEnviar.innerText = 'Comentar';
                 return;
