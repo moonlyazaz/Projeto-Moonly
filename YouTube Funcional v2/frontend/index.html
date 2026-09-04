@@ -7,6 +7,7 @@
     <title>YouTube</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
        <header class="cabecalho">
@@ -58,12 +59,24 @@
              </svg>
            </button>
 
-           <a href="#" class="login-button" aria-label="Fazer login" data-toast="O login não está disponível neste clone de estudo.">
-             <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" aria-hidden="true">
-               <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm0 2a9 9 0 016.447 15.276 7 7 0 00-12.895 0A9 9 0 0112 3Zm0 2a4 4 0 100 8 4 4 0 000-8Zm0 2a2 2 0 110 4 2 2 0 010-4Zm-.1 9.001L11.899 16a5 5 0 014.904 3.61A8.96 8.96 0 0112 21a8.96 8.96 0 01-4.804-1.391 5 5 0 014.704-3.608Z"></path>
-             </svg>
-             <span>Fazer login</span>
-           </a>
+           <div id="containerLoginGoogle">
+             <a href="#" class="login-button" data-toast="Configure o GOOGLE_CLIENT_ID no index.html para habilitar o login real (veja o README).">
+               <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" aria-hidden="true">
+                 <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm0 2a9 9 0 016.447 15.276 7 7 0 00-12.895 0A9 9 0 0112 3Zm0 2a4 4 0 100 8 4 4 0 000-8Zm0 2a2 2 0 110 4 2 2 0 010-4Zm-.1 9.001L11.899 16a5 5 0 014.904 3.61A8.96 8.96 0 0112 21a8.96 8.96 0 01-4.804-1.391 5 5 0 014.704-3.608Z"></path>
+               </svg>
+               <span>Fazer login</span>
+             </a>
+           </div>
+
+           <div id="containerUsuarioLogado" class="usuario-logado" style="display: none;">
+                <img id="avatarDoUsuario" class="usuario-logado__avatar" src="" alt="Sua foto de perfil" referrerpolicy="no-referrer">
+                <span id="avatarDoUsuarioFallback" class="usuario-logado__avatar usuario-logado__avatar--fallback" style="display: none;"></span>
+                <div class="usuario-logado__menu">
+                    <p id="nomeDoUsuario"></p>
+                    <p id="emailDoUsuario"></p>
+                    <button type="button" id="botaoSair">Sair</button>
+                </div>
+           </div>
          </div>
  
         </header>
@@ -79,7 +92,7 @@
                     <i class="fa-brands fa-youtube"></i>
                     <span>Shorts</span>
                 </a>
-                <a href="#" class="sidebar-item" data-toast="Faça login para ver suas inscrições.">
+                <a href="#" class="sidebar-item" data-secao="inscricoes">
                     <i class="fa-solid fa-clapperboard"></i>
                     <span>Inscrições</span>
                 </a>
@@ -95,14 +108,16 @@
 
             <hr class="sidebar-divisor">
 
-            <div class="sidebar-login">
+            <div class="sidebar-login" id="sidebarLogin">
                 <p>Faça login para curtir vídeos, comentar e se inscrever.</p>
-                <a href="#" class="login-button" data-toast="O login não está disponível neste clone de estudo.">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" aria-hidden="true">
-                        <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm0 2a9 9 0 016.447 15.276 7 7 0 00-12.895 0A9 9 0 0112 3Zm0 2a4 4 0 100 8 4 4 0 000-8Zm0 2a2 2 0 110 4 2 2 0 010-4Zm-.1 9.001L11.899 16a5 5 0 014.904 3.61A8.96 8.96 0 0112 21a8.96 8.96 0 01-4.804-1.391 5 5 0 014.704-3.608Z"></path>
-                    </svg>
-                    <span>Fazer login</span>
-                </a>
+                <div id="containerLoginGoogleSidebar">
+                    <a href="#" class="login-button" data-toast="Configure o GOOGLE_CLIENT_ID no index.html para habilitar o login real (veja o README).">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false" aria-hidden="true">
+                            <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm0 2a9 9 0 016.447 15.276 7 7 0 00-12.895 0A9 9 0 0112 3Zm0 2a4 4 0 100 8 4 4 0 000-8Zm0 2a2 2 0 110 4 2 2 0 010-4Zm-.1 9.001L11.899 16a5 5 0 014.904 3.61A8.96 8.96 0 0112 21a8.96 8.96 0 01-4.804-1.391 5 5 0 014.704-3.608Z"></path>
+                        </svg>
+                        <span>Fazer login</span>
+                    </a>
+                </div>
             </div>
 
             <hr class="sidebar-divisor">
@@ -192,9 +207,15 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
-        // Endereço do backend Node.js que fala com a YouTube Data API.
-        // Ajuste caso rode o backend em outra porta ou domínio.
-        const URL_DO_BACKEND = "http://localhost:3000";
+        // Como o próprio backend agora serve esta página, as chamadas à
+        // API usam caminhos relativos (mesma origem). Não é mais preciso
+        // apontar para "http://localhost:3000" manualmente.
+        const URL_DO_BACKEND = "";
+
+        // Client ID do Google Cloud Console (tela "Credenciais" → "Criar
+        // credenciais" → "ID do cliente OAuth" → tipo "Aplicativo da Web").
+        // Veja o passo a passo completo no README.md.
+        const GOOGLE_CLIENT_ID = "706045740692-s3dligdlr7ogmf2e8mf9hqr6j1ghuh89.apps.googleusercontent.com";
     </script>
     <script src="script.js"></script>
 

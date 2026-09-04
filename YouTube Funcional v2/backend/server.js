@@ -6,15 +6,24 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const fetch = require("node-fetch"); // Necessário no Node 16, que não tem fetch() nativo.
 
 const app = express();
 const PORTA = process.env.PORTA || 3000;
 const CHAVE_DA_API_DO_YOUTUBE = process.env.YOUTUBE_API_KEY;
 const URL_BASE_DA_API = "https://www.googleapis.com/youtube/v3";
+const PASTA_DO_FRONTEND = path.join(__dirname, "..", "frontend");
 
 app.use(cors());
 app.use(express.json());
+
+// Serve os arquivos do front-end (index.html, style.css, script.js) pelo
+// próprio backend. Isso é essencial: o player embutido do YouTube e o
+// Login com Google só funcionam quando a página é aberta via
+// http://localhost, nunca abrindo o arquivo index.html diretamente
+// (file://) — por isso não abrimos mais o HTML direto no navegador.
+app.use(express.static(PASTA_DO_FRONTEND));
 
 if (!CHAVE_DA_API_DO_YOUTUBE) {
     console.warn(
@@ -75,6 +84,7 @@ function formatarListaDeVideos(itens) {
         id: item.id,
         titulo: item.snippet.title,
         canal: item.snippet.channelTitle,
+        canalId: item.snippet.channelId,
         miniatura: item.snippet.thumbnails.high.url,
         duracao: formatarDuracao(item.contentDetails.duration),
         visualizacoes: `${formatarNumeroResumido(item.statistics.viewCount)} visualizações`,
@@ -136,18 +146,23 @@ app.get("/api/populares", async (req, res) => {
 app.get("/api/buscar", async (req, res) => {
     const termoDeBusca = req.query.q;
     const filtroDeDuracao = req.query.duracao; // "short" | "medium" | "long" | undefined
+    const idDoCanal = req.query.canalId; // Opcional: restringe a busca a um canal específico.
 
-    if (!termoDeBusca) {
-        return res.status(400).json({ erro: "Parâmetro 'q' (termo de busca) é obrigatório." });
+    if (!termoDeBusca && !idDoCanal) {
+        return res.status(400).json({ erro: "Informe 'q' (termo de busca) ou 'canalId'." });
     }
 
     try {
         const parametroDeDuracao = filtroDeDuracao ? `&videoDuration=${filtroDeDuracao}` : "";
+        const parametroDeCanal = idDoCanal ? `&channelId=${idDoCanal}&order=date` : "";
+        const parametroDeTermo = termoDeBusca ? `&q=${encodeURIComponent(termoDeBusca)}` : "";
 
         const urlDeBusca =
             `${URL_BASE_DA_API}/search?part=snippet&type=video&maxResults=24` +
             parametroDeDuracao +
-            `&q=${encodeURIComponent(termoDeBusca)}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+            parametroDeCanal +
+            parametroDeTermo +
+            `&key=${CHAVE_DA_API_DO_YOUTUBE}`;
 
         const respostaDaBusca = await fetch(urlDeBusca);
         const dadosDaBusca = await respostaDaBusca.json();
@@ -215,6 +230,7 @@ app.get("/api/video/:id", async (req, res) => {
             embedUrl: `https://www.youtube.com/embed/${item.id}`,
             imagemCapa: item.snippet.thumbnails.high.url,
             canal: {
+                id: item.snippet.channelId,
                 nome: item.snippet.channelTitle,
                 foto: canal?.snippet.thumbnails.default.url || "",
                 inscritos: canal
@@ -232,6 +248,12 @@ app.get("/api/video/:id", async (req, res) => {
     }
 });
 
+// Qualquer rota que não seja da API cai no index.html (SPA simples).
+app.get(/^(?!\/api\/).*/, (req, res) => {
+    res.sendFile(path.join(PASTA_DO_FRONTEND, "index.html"));
+});
+
 app.listen(PORTA, () => {
     console.log(`Servidor rodando em http://localhost:${PORTA}`);
+    console.log(`Abra http://localhost:${PORTA} no navegador (não abra o index.html direto).`);
 });
