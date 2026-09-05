@@ -314,6 +314,22 @@ app.get(/^(?!\/api\/).*/, (req, res) => {
     res.sendFile(path.join(PASTA_DO_FRONTEND, "index.html"));
 });
 
+
+app.get("/api/sugestoes", async (req, res) => {
+    const q = req.query.q;
+    if (!q) return res.json([]);
+    try {
+        const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(q)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        // Google's format for client=firefox is [ "query", ["sugg1", "sugg2", ...] ]
+        res.json(data[1] || []);
+    } catch (err) {
+        console.error("Erro ao buscar sugestões:", err);
+        res.status(500).json({ error: "Erro ao buscar sugestões" });
+    }
+});
+
 app.listen(PORTA, () => {
     console.log(`Servidor rodando em http://localhost:${PORTA}`);
     console.log(`Abra http://localhost:${PORTA} no navegador (não abra o index.html direto).`);

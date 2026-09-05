@@ -48,6 +48,8 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                     <button class="media-view-box__btn" id="main-mute-btn"><i class="fa-solid fa-volume-high" id="main-mute-icon"></i></button>
                     <span class="media-view-box__time" id="main-time-display">0:00 / 0:00</span>
                     <div class="media-view-box__spacer"></div>
+                      <button class="media-view-box__btn" id="main-like-btn" title="Gostei" onclick="adicionarGostei('${dadosDoVideoPrincipal.id}', '${dadosDoVideoPrincipal.snippet.title.replace(/'/g, "\'")}', '${dadosDoVideoPrincipal.snippet.thumbnails.high.url}', '${dadosDoVideoPrincipal.snippet.channelTitle.replace(/'/g, "\'")}', '')"><i class="fa-regular fa-thumbs-up"></i></button>
+                      <button class="media-view-box__btn" id="main-watch-later-btn" title="Assistir mais tarde" onclick="adicionarAssistirMaisTarde(null, '${dadosDoVideoPrincipal.id}', '${dadosDoVideoPrincipal.snippet.title.replace(/'/g, "\'")}', '${dadosDoVideoPrincipal.snippet.thumbnails.high.url}', '${dadosDoVideoPrincipal.snippet.channelTitle.replace(/'/g, "\'")}', '')"><i class="fa-regular fa-clock"></i></button>
                     <button class="media-view-box__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
                 </div>
             </div>
@@ -189,33 +191,50 @@ function renderizarVideosRecomendados(listaDeVideosRecomendados) {
  * @param {"resultados"|"assistir"|"shorts"} nomeDaView - View a ser exibida.
  */
 function mostrarView(nomeDaView) {
-    document.getElementById("areaInicio").style.display = nomeDaView === "inicio" ? "flex" : "none";
-    document.getElementById("areaAssistir").style.display = nomeDaView === "assistir" ? "flex" : "none";
-    document.getElementById("areaShorts").style.display = nomeDaView === "shorts" ? "flex" : "none";
-    const areaHistorico = document.getElementById("areaHistorico");
-    if (areaHistorico) areaHistorico.style.display = nomeDaView === "historico" ? "block" : "none";
-    const areaVoce = document.getElementById("areaVoce");
-    if (areaVoce) areaVoce.style.display = nomeDaView === "voce" ? "block" : "none";
+    // Esconde todas
+    document.querySelectorAll('.area-view').forEach(v => v.style.display = 'none');
+    document.getElementById("areaAssistir").style.display = "none";
+    document.getElementById("areaShorts").style.display = "none";
+    document.getElementById("areaResultados").parentElement.style.display = "none";
 
-    // No YouTube real, a página de Shorts usa quase toda a altura da tela,
-    // com bem pouco respiro ao redor do player — bem menos que as outras views.
-    document.querySelector(".area-principal").classList.toggle("modo-shorts", nomeDaView === "shorts");
+    // Mostra a correta
+    if (nomeDaView === 'inicio' || nomeDaView === 'busca' || nomeDaView === 'inscricoes') {
+        document.getElementById("areaResultados").parentElement.style.display = "block";
+    } else if (nomeDaView === 'assistir') {
+        document.getElementById("areaAssistir").style.display = "block";
+    } else if (nomeDaView === 'shorts') {
+        document.getElementById("areaShorts").style.display = "block";
+    } else if (nomeDaView === 'historico') {
+        document.getElementById("areaHistorico").style.display = "block";
+        carregarHistorico();
+    } else if (nomeDaView === 'voce') {
+        document.getElementById("areaVoce").style.display = "block";
+        carregarCanalDoUsuario();
+    } else if (nomeDaView === 'assistir_mais_tarde') {
+        const area = document.getElementById("areaAssistirMaisTarde");
+        if(area) {
+            area.style.display = "block";
+            carregarListaSalva('assistirMaisTarde', 'gradeAssistirMaisTarde');
+        }
+    } else if (nomeDaView === 'curtidos') {
+        const area = document.getElementById("areaCurtidos");
+        if(area) {
+            area.style.display = "block";
+            carregarListaSalva('videosCurtidos', 'gradeCurtidos');
+        }
+    }
 }
-
-/**
- * Monta o HTML de um card de resultado (usado na grade de Início e de
- * pesquisa), no formato de grade parecido com a home real do YouTube.
- *
- * @param {Object} video - Objeto de vídeo retornado por /api/buscar.
- */
 function montarCardDeResultado(video) {
     const inicialDoCanal = video.canal ? video.canal.charAt(0).toUpperCase() : "?";
 
     return `
         <div class="card-resultado" data-id-do-video="${video.id}">
-            <div class="card-resultado__miniatura-wrapper">
+            <div class="card-resultado__miniatura-wrapper" style="position:relative;">
                 <img class="card-resultado__miniatura" src="${video.miniatura}" alt="${video.titulo}" loading="lazy">
                 <span class="card-resultado__duracao">${video.duracao}</span>
+                <button class="btn-assistir-mais-tarde-overlay" onclick="adicionarAssistirMaisTarde(event, '${video.id}', '${video.titulo.replace(/'/g, "\'")}', '${video.miniatura}', '${video.canal.replace(/'/g, "\'")}', '${video.visualizacoes}')" title="Assistir mais tarde">
+                    <i class="fa-regular fa-clock"></i>
+                </button>
             </div>
             <div class="card-resultado__corpo">
                 ${video.fotoCanal 
@@ -432,6 +451,34 @@ function renderizarShorts(videos) {
         } else {
             window.onYouTubeIframeAPIReady = () => inicializarPlayersDeShorts(videos);
         }
+        
+        // Fase 4: TikTok style scroll & autoplay
+        setTimeout(() => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const idx = entry.target.dataset.indice;
+                    if (entry.isIntersecting) {
+                        indiceDoShortAtual = parseInt(idx);
+                        // Tentar dar play
+                        const player = playersDeShorts[indiceDoShortAtual];
+                        if (player && typeof player.playVideo === 'function') {
+                            player.playVideo();
+                        }
+                    } else {
+                        // Pausar
+                        const player = playersDeShorts[idx];
+                        if (player && typeof player.pauseVideo === 'function') {
+                            player.pauseVideo();
+                        }
+                    }
+                });
+            }, { threshold: 0.6 });
+            
+            document.querySelectorAll('.short-item').forEach(item => {
+                observer.observe(item);
+            });
+        }, 1000);
+
     }
 
     mostrarView("shorts");
@@ -1868,3 +1915,130 @@ function renderizarInscricoesSidebar(mostrarTodas) {
         }
     }
 }
+
+// ====== FASE 2: AUTOCOMPLETAR PESQUISA ======
+const searchInput = document.getElementById('search-input');
+const searchSuggestions = document.getElementById('search-suggestions');
+let suggestionTimeout;
+
+if (searchInput && searchSuggestions) {
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        if (!query) {
+            searchSuggestions.style.display = 'none';
+            return;
+        }
+        
+        clearTimeout(suggestionTimeout);
+        suggestionTimeout = setTimeout(async () => {
+            try {
+                const res = await fetch('/api/sugestoes?q=' + encodeURIComponent(query));
+                const terms = await res.json();
+                
+                if (terms && terms.length > 0) {
+                    searchSuggestions.innerHTML = terms.map(term => `
+                        <div class="search-suggestion-item">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>${term}</span>
+                        </div>
+                    `).join('');
+                    
+                    // Add click events
+                    searchSuggestions.querySelectorAll('.search-suggestion-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const selectedTerm = item.querySelector('span').innerText;
+                            searchInput.value = selectedTerm;
+                            searchSuggestions.style.display = 'none';
+                            
+                            // Trigger search
+                            document.querySelector('.sidebar-item[data-secao="inicio"]').click();
+                            buscarVideos(selectedTerm);
+                        });
+                    });
+                    
+                    searchSuggestions.style.display = 'block';
+                } else {
+                    searchSuggestions.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Erro ao buscar sugestões:", err);
+            }
+        }, 300); // 300ms debounce
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-input-wrapper')) {
+            searchSuggestions.style.display = 'none';
+        }
+    });
+    
+    // Show suggestions again on focus if there's text
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim() && searchSuggestions.innerHTML) {
+            searchSuggestions.style.display = 'block';
+        }
+    });
+}
+// ====== FIM FASE 2 ======
+
+// ====== FASE 3: ASSISTIR MAIS TARDE & GOSTEI ======
+function adicionarAssistirMaisTarde(e, id, titulo, miniatura, canal, visualizacoes) {
+    if (e) e.stopPropagation();
+    let lista = JSON.parse(localStorage.getItem('assistirMaisTarde') || '[]');
+    if (!lista.find(v => v.id === id)) {
+        lista.unshift({id, titulo, miniatura, canal, visualizacoes});
+        localStorage.setItem('assistirMaisTarde', JSON.stringify(lista));
+        mostrarToast('Adicionado a Assistir mais tarde');
+    } else {
+        mostrarToast('Vídeo já está na lista');
+    }
+}
+
+function adicionarGostei(id, titulo, miniatura, canal, visualizacoes) {
+    let lista = JSON.parse(localStorage.getItem('videosCurtidos') || '[]');
+    if (!lista.find(v => v.id === id)) {
+        lista.unshift({id, titulo, miniatura, canal, visualizacoes});
+        localStorage.setItem('videosCurtidos', JSON.stringify(lista));
+        mostrarToast('Adicionado aos vídeos que gostei');
+    } else {
+        // Remove if already liked
+        lista = lista.filter(v => v.id !== id);
+        localStorage.setItem('videosCurtidos', JSON.stringify(lista));
+        mostrarToast('Removido dos vídeos que gostei');
+    }
+}
+
+function carregarListaSalva(chave, containerId) {
+    const lista = JSON.parse(localStorage.getItem(chave) || '[]');
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    if (lista.length === 0) {
+        container.innerHTML = '<p style="color:#aaa;">Nenhum vídeo salvo ainda.</p>';
+        return;
+    }
+    
+    container.innerHTML = lista.map(video => `
+        <div class="card-resultado" data-id-do-video="${video.id}">
+            <div class="card-resultado__miniatura-wrapper">
+                <img class="card-resultado__miniatura" src="${video.miniatura}" alt="${video.titulo}">
+            </div>
+            <div class="card-resultado__corpo">
+                <div class="card-resultado__informacoes" style="margin-left: 0;">
+                    <span class="card-resultado__titulo">${video.titulo}</span>
+                    <span class="card-resultado__canal">${video.canal}</span>
+                    <span class="card-resultado__dados">${video.visualizacoes || ''}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    container.querySelectorAll('.card-resultado').forEach(card => {
+        card.addEventListener('click', () => {
+            const vidId = card.getAttribute('data-id-do-video');
+            abrirVideo(vidId);
+        });
+    });
+}
+// ====== FIM FASE 3 ======

@@ -41,9 +41,10 @@
 
           <div class="cabecalho-centro">
             <form class="search" id="formulario-de-busca">
-                <div class="search-input-wrapper">
+                <div class="search-input-wrapper" style="position: relative;">
                     <input type="text" name="search" id="search-input" placeholder="Pesquisar" autocomplete="off">
                     <i class="fa-regular fa-keyboard search-keyboard-icon"></i>
+                    <div class="search-suggestions" id="search-suggestions" style="display:none;"></div>
                 </div>
                <button class="search-button" type="submit">
                    <i class="fa-solid fa-magnifying-glass"></i>
@@ -250,11 +251,11 @@
                       <i class="fa-solid fa-list-ul"></i>
                       <span>Playlists</span>
                   </a>
-                  <a class="sidebar-item" data-toast="Assistir mais tarde em breve.">
+                  <a class="sidebar-item" data-secao="assistir_mais_tarde">
                       <i class="fa-regular fa-clock"></i>
                       <span>Assistir mais tarde</span>
                   </a>
-                  <a class="sidebar-item" data-toast="Vídeos marcados com Gostei em breve.">
+                  <a class="sidebar-item" data-secao="curtidos">
                       <i class="fa-regular fa-thumbs-up"></i>
                       <span>Vídeos com "Gostei"</span>
                   </a>
@@ -366,7 +367,17 @@
 
             <section class="area-shorts" id="areaShorts" style="display: none;"></section>
             
-            <div id="areaHistorico" class="area-view" style="display: none; padding: 24px; color: #fff;">
+            
+            <div id="areaAssistirMaisTarde" class="area-view" style="display: none; padding: 24px; color: #fff;">
+                <h2 style="color: #fff; margin-bottom: 24px; font-size: 24px;">Assistir mais tarde</h2>
+                <div id="gradeAssistirMaisTarde" class="area-resultados lista"></div>
+            </div>
+            
+            <div id="areaCurtidos" class="area-view" style="display: none; padding: 24px; color: #fff;">
+                <h2 style="color: #fff; margin-bottom: 24px; font-size: 24px;">Vídeos com "Gostei"</h2>
+                <div id="gradeCurtidos" class="area-resultados lista"></div>
+            </div>
+<div id="areaHistorico" class="area-view" style="display: none; padding: 24px; color: #fff;">
                 <h2 style="color: #fff; margin-bottom: 24px; font-size: 24px;">Histórico de exibição</h2>
                 <div id="gradeHistorico" class="area-resultados lista"></div>
             </div>

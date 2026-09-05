@@ -1618,3 +1618,79 @@ a.card-video { cursor: pointer; }
     color: var(--text-primary) !important;
     fill: var(--text-primary) !important;
 }
+
+
+/* Fase 2: Search Suggestions */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1000;
+    padding: 16px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+.search-suggestion-item {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 500;
+}
+.search-suggestion-item:hover {
+    background-color: var(--bg-hover);
+}
+.search-suggestion-item i {
+    color: var(--text-secondary);
+}
+
+/* Fase 3: Watch Later overlay on thumbnails */
+.btn-assistir-mais-tarde-overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+.card-resultado__miniatura-wrapper:hover .btn-assistir-mais-tarde-overlay {
+    display: flex;
+}
+.btn-assistir-mais-tarde-overlay:hover {
+    background-color: #000;
+}
+
+/* Fase 4: Shorts com scroll estilo TikTok */
+.shorts-lista {
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    height: 100vh;
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+}
+.shorts-lista::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+.short-item {
+    scroll-snap-align: start;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
