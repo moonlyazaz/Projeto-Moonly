@@ -621,7 +621,7 @@ async function abrirVideo(idDoVideo) {
         mostrarView("assistir");
         window.scrollTo({ top: 0, behavior: "smooth" });
         
-        inicializarPlayerPrincipal(typeof dadosDoVideo !== "undefined" && (dadosDoVideo.duracao === "Ao vivo" || dadosDoVideo.duracao === "0:00"));
+        inicializarPlayerPrincipal(typeof dadosDoVideo !== "undefined" && (dadosDoVideo.duracao === "Ao vivo" || dadosDoVideo.duracao === "0:00"), dadosDoVideo.id);
         inicializarEventosDeComentario(dadosDoVideo.id);
         finalizarCarregamento();
         
