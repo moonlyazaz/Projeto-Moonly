@@ -246,7 +246,7 @@ function montarCardDeResultado(video) {
                 }
                 <div class="card-resultado__informacoes">
                     <span class="card-resultado__titulo">${video.titulo}</span>
-                    <span class="card-resultado__canal" data-canal-id="${video.canalId || \'\'}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
+                    <span class="card-resultado__canal" data-canal-id="${video.canalId || ''}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
                     <span class="card-resultado__dados">${video.visualizacoes} • ${video.tempoPublicacao}</span>
                 </div>
             </div>
@@ -2051,7 +2051,7 @@ function carregarListaSalva(chave, containerId) {
             <div class="card-resultado__corpo">
                 <div class="card-resultado__informacoes" style="margin-left: 0;">
                     <span class="card-resultado__titulo">${video.titulo}</span>
-                    <span class="card-resultado__canal" data-canal-id="${video.canalId || \'\'}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
+                    <span class="card-resultado__canal" data-canal-id="${video.canalId || ''}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
                     <span class="card-resultado__dados">${video.visualizacoes || ''}</span>
                 </div>
             </div>
