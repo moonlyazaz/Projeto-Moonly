@@ -40,7 +40,9 @@ if (!CHAVE_DA_API_DO_YOUTUBE) {
  * @returns {string} Duração formatada como "hh:mm:ss" ou "mm:ss".
  */
 function formatarDuracao(duracaoIso) {
+    if (!duracaoIso) return "0:00";
     const correspondencia = duracaoIso.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    if (!correspondencia) return "Ao vivo";
     const horas = parseInt(correspondencia[1]) || 0;
     const minutos = parseInt(correspondencia[2]) || 0;
     const segundos = parseInt(correspondencia[3]) || 0;
