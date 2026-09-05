@@ -1402,3 +1402,127 @@ function enviarComentarioReal(videoId, texto) {
         });
 }
 
+function iniciarCarregamento() {
+    const barra = document.getElementById('barra-progresso');
+    if (!barra) return;
+    barra.style.opacity = '1';
+    barra.style.width = '30%';
+    setTimeout(() => { if (barra.style.opacity === '1') barra.style.width = '60%'; }, 500);
+}
+
+function finalizarCarregamento() {
+    const barra = document.getElementById('barra-progresso');
+    if (!barra) return;
+    barra.style.width = '100%';
+    setTimeout(() => {
+        barra.style.opacity = '0';
+        setTimeout(() => { barra.style.width = '0%'; }, 300);
+    }, 400);
+}
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-responder-comentario')) {
+        const parentId = e.target.getAttribute('data-comment-id');
+        const commentItem = e.target.closest('.comentario-item');
+        
+        // Remove caixas antigas se houver
+        const antigas = document.querySelectorAll('.caixa-resposta-temp');
+        antigas.forEach(a => a.remove());
+
+        const formResposta = document.createElement('div');
+        formResposta.className = 'comentario-input-container caixa-resposta-temp';
+        formResposta.style.flex = '1';
+        formResposta.style.marginTop = '12px';
+        formResposta.innerHTML = `
+            <input type="text" placeholder="Adicione uma resposta..." class="comentario-input" id="input-resposta-${parentId}">
+            <div class="comentario-acoes" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                <button class="comentario-btn-cancelar" onclick="this.closest('.caixa-resposta-temp').remove()" style="background: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                <button class="comentario-btn-enviar" onclick="enviarRespostaReal('${parentId}', this)" style="background-color: #3ea6ff; color: #000; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">Responder</button>
+            </div>
+        `;
+        
+        commentItem.querySelector('.comentario-item__conteudo').appendChild(formResposta);
+        setTimeout(() => document.getElementById('input-resposta-' + parentId).focus(), 50);
+    }
+});
+
+function enviarRespostaReal(parentId, btnElement) {
+    const input = document.getElementById('input-resposta-' + parentId);
+    if (!input) return;
+    const texto = input.value.trim();
+    if (texto.length === 0) return;
+
+    btnElement.disabled = true;
+    btnElement.innerText = 'Autenticando...';
+    iniciarCarregamento();
+
+    obterTokenDeAcessoDoYoutube()
+        .then(token => {
+            btnElement.innerText = 'Enviando...';
+            return fetch('https://youtube.googleapis.com/youtube/v3/comments?part=snippet', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    snippet: {
+                        parentId: parentId,
+                        textOriginal: texto
+                    }
+                })
+            });
+        })
+        .then(res => res.json())
+        .then(data => {
+            finalizarCarregamento();
+            if (data.error) {
+                console.error('Erro ao postar resposta:', data.error);
+                let motivo = data.error.message || 'Erro desconhecido';
+                if (data.error.errors && data.error.errors.length > 0) {
+                    motivo = data.error.errors[0].reason;
+                }
+                alert('Falha ao enviar resposta. Motivo: ' + motivo);
+                btnElement.disabled = false;
+                btnElement.innerText = 'Responder';
+                return;
+            }
+
+            const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
+            let nomeUsuario = 'Você';
+            let fotoUsuario = '';
+            if (loginSalvo) {
+                try { 
+                    const parsed = JSON.parse(loginSalvo);
+                    nomeUsuario = parsed.name || 'Você';
+                    fotoUsuario = parsed.picture || '';
+                } catch(e){}
+            }
+
+            const novaRespostaHTML = `
+                <div class="comentario-item" style="margin-top: 16px; margin-left: 24px;">
+                    ${fotoUsuario ? `<img class="comentario-avatar" style="width:24px;height:24px;" src="${fotoUsuario}">` : `<div class="comentario-item__avatar" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;font-size:12px;"></i></div>`}
+                    <div class="comentario-item__conteudo">
+                        <div class="comentario-item__cabecalho">
+                            <span class="comentario-item__autor">@${nomeUsuario}</span>
+                            <span class="comentario-item__tempo">agora mesmo</span>
+                        </div>
+                        <div class="comentario-item__texto">
+                            ${texto.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const container = btnElement.closest('.comentario-item__conteudo');
+            btnElement.closest('.caixa-resposta-temp').remove();
+            container.insertAdjacentHTML('beforeend', novaRespostaHTML);
+        })
+        .catch(err => {
+            finalizarCarregamento();
+            console.error('Erro de rede ao responder:', err);
+            btnElement.disabled = false;
+            btnElement.innerText = 'Responder';
+        });
+}
+
