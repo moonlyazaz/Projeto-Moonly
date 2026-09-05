@@ -335,7 +335,15 @@ body {
 .sidebar-item i {
     width: 24px;
     text-align: center;
-    font-size: 16px;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.sidebar-item svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    fill: currentColor;
 }
 
 .icone-vermelho {

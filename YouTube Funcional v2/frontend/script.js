@@ -834,10 +834,12 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
     if(sidebarVoceDivisor) sidebarVoceDivisor.style.display = "block";
     document.getElementById("sidebarInscricoesGroup").style.display = "block";
     document.getElementById("sidebarInscricoesDivisor").style.display = "block";
-    // Carrega inscrições reais da API
-    if (typeof carregarInscricoesSidebar === 'function') {
-        carregarInscricoesSidebar();
-    }
+    // Defer to avoid TDZ - tokenDeAcessoDoYoutube is declared later in the file
+    setTimeout(() => {
+        if (typeof carregarInscricoesSidebar === 'function') {
+            carregarInscricoesSidebar();
+        }
+    }, 100);
     const containerDoUsuario = document.getElementById("containerUsuarioLogado");
     containerDoUsuario.style.display = "flex";
 
