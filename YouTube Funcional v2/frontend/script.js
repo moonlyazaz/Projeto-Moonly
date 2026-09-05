@@ -834,7 +834,10 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
     if(sidebarVoceDivisor) sidebarVoceDivisor.style.display = "block";
     document.getElementById("sidebarInscricoesGroup").style.display = "block";
     document.getElementById("sidebarInscricoesDivisor").style.display = "block";
-
+    // Carrega inscrições reais da API
+    if (typeof carregarInscricoesSidebar === 'function') {
+        carregarInscricoesSidebar();
+    }
     const containerDoUsuario = document.getElementById("containerUsuarioLogado");
     containerDoUsuario.style.display = "flex";
 
@@ -1777,3 +1780,66 @@ if (themeSalvo === 'light') {
     if (checkEscuro) checkEscuro.style.opacity = '1';
 }
 
+// ===== INSCRIÇÕES REAIS DA YOUTUBE DATA API =====
+
+const MAX_INSCRICOES_SIDEBAR = 7;
+let todasInscricoes = [];
+let mostrandoTodas = false;
+
+async function carregarInscricoesSidebar() {
+    const lista = document.getElementById('sidebarInscricoesLista');
+    if (!lista) return;
+    lista.innerHTML = '<a class="sidebar-item"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:16px;margin-right:16px;"></i><span>Carregando...</span></a>';
+
+    try {
+        const token = await obterTokenDeAcessoDoYoutube();
+        const res = await fetch(
+            'https://youtube.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50&order=alphabetical',
+            { headers: { 'Authorization': 'Bearer ' + token } }
+        );
+        const data = await res.json();
+
+        if (data.error || !data.items || data.items.length === 0) {
+            lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Nenhuma inscrição encontrada.</span></a>';
+            return;
+        }
+
+        todasInscricoes = data.items;
+        renderizarInscricoesSidebar(false);
+
+    } catch (err) {
+        console.error('Erro ao carregar inscrições:', err);
+        lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Erro ao carregar inscrições.</span></a>';
+    }
+}
+
+function renderizarInscricoesSidebar(mostrarTodas) {
+    const lista = document.getElementById('sidebarInscricoesLista');
+    const btnMais = document.getElementById('btnMaisInscricoes');
+    if (!lista) return;
+
+    const itens = mostrarTodas ? todasInscricoes : todasInscricoes.slice(0, MAX_INSCRICOES_SIDEBAR);
+
+    lista.innerHTML = itens.map(item => {
+        const titulo = item.snippet.title;
+        const thumb = item.snippet.thumbnails?.default?.url || '';
+        const channelId = item.snippet.resourceId?.channelId || '';
+        return `
+        <a class="sidebar-item" data-secao="busca" data-termo="${titulo}" title="${titulo}" referrerpolicy="no-referrer">
+            <img src="${thumb}" class="sidebar-avatar" alt="${titulo}" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+            <span>${titulo.length > 18 ? titulo.substring(0, 18) + '...' : titulo}</span>
+        </a>`;
+    }).join('');
+
+    if (btnMais) {
+        if (todasInscricoes.length > MAX_INSCRICOES_SIDEBAR && !mostrarTodas) {
+            btnMais.style.display = 'flex';
+            btnMais.onclick = (e) => {
+                e.stopPropagation();
+                renderizarInscricoesSidebar(true);
+            };
+        } else {
+            btnMais.style.display = 'none';
+        }
+    }
+}
