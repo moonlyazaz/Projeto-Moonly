@@ -1860,28 +1860,37 @@ a.card-video { cursor: pointer; }
         overflow: auto;
     }
 
+    /* Header: Logo à esquerda, ícone de busca à direita */
     .cabecalho {
-        padding: 8px 12px;
+        padding: 8px 16px;
         position: sticky;
         top: 0;
         z-index: 100;
     }
 
+    /* Esconde a barra de busca central */
     .cabecalho-centro {
         display: none;
     }
 
-    .cabecalho-final .icon-button:not(:last-child):not(:nth-last-child(2)) {
+    /* Esconde ícones extras no header (notificações, criar, etc.) */
+    .cabecalho-final .icon-button {
         display: none;
     }
 
+    /* Hamburguer também some */
+    .cabecalho-inicio .fa-bars {
+        display: none;
+    }
+
+    /* Conteúdo principal ocupa tudo */
     .corpo {
         flex-direction: column;
         height: auto;
         overflow: visible;
     }
 
-    /* Sidebar vira barra de navegação inferior */
+    /* ===== SIDEBAR → BOTTOM NAV BAR (igual YouTube) ===== */
     .sidebar {
         position: fixed;
         bottom: 0;
@@ -1891,7 +1900,7 @@ a.card-video { cursor: pointer; }
         height: 60px;
         display: flex;
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         justify-content: space-around;
         padding: 0;
         z-index: 200;
@@ -1905,38 +1914,12 @@ a.card-video { cursor: pointer; }
         width: 100%;
         justify-content: space-around;
         padding: 0;
+        align-items: stretch;
     }
 
-    /* Na barra mobile, mostrar apenas os primeiros 5 itens de nav */
+    /* Mostrar apenas os primeiros 5 itens */
     .sidebar-item:nth-child(n+6) {
         display: none;
-    }
-
-    .sidebar-item {
-        flex-direction: column;
-        gap: 2px;
-        height: auto;
-        padding: 6px 4px;
-        border-radius: 8px;
-        font-size: 10px;
-        flex: 1;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .sidebar-item span {
-        display: block;
-        font-size: 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 60px;
-        text-align: center;
-    }
-
-    .sidebar-item i {
-        font-size: 20px;
-        width: auto;
     }
 
     .sidebar-separador,
@@ -1945,56 +1928,129 @@ a.card-video { cursor: pointer; }
         display: none;
     }
 
-    /* Conteúdo principal ocupa toda largura */
+    .sidebar-item {
+        flex-direction: column;
+        gap: 3px;
+        height: 100%;
+        padding: 8px 4px 4px;
+        border-radius: 0;
+        font-size: 10px;
+        flex: 1;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    .sidebar-item span {
+        display: block;
+        font-size: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 64px;
+        text-align: center;
+    }
+
+    .sidebar-item i {
+        font-size: 22px;
+        width: auto;
+    }
+
+    .sidebar-item svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* ===== CONTEÚDO PRINCIPAL ===== */
     .conteudo-principal {
         width: 100%;
         overflow: visible;
-        padding-bottom: 70px; /* espaço para a barra inferior */
+        padding-bottom: 68px;
+    }
+
+    /* ===== CARDS: 1 coluna, largura total (igual YouTube mobile) ===== */
+    .area-resultados {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 
     .grade-de-videos {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        padding: 12px;
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 0;
     }
 
-    /* Chips de filtro */
-    .chips {
+    /* Card sem bordas arredondadas, thumbnail borda a borda */
+    .card-resultado {
+        border-radius: 0;
+        margin-bottom: 0;
+        padding: 0 0 16px 0;
+    }
+
+    .card-do-video {
+        border-radius: 0;
+        margin-bottom: 0;
+    }
+
+    .card-do-video__thumbnail,
+    .card-resultado__miniatura-wrapper,
+    .card-resultado__miniatura {
+        border-radius: 0;
+        width: 100%;
+    }
+
+    /* Info do card com avatar + texto + 3 pontos */
+    .card-do-video__info {
         padding: 8px 12px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .card-resultado__corpo {
+        padding: 8px 12px;
+    }
+
+    /* Chips de filtro com scroll horizontal */
+    .chips,
+    .chips-categorias {
+        padding: 8px 0 8px 12px;
         gap: 8px;
     }
 
-    /* View de assistir: player em cima, info embaixo */
+    /* ===== VIEW DE ASSISTIR (Player + Info) ===== */
     #viewAssistir {
         flex-direction: column;
         padding: 0;
     }
 
-    .area-do-player {
+    .area-do-player,
+    .area-player {
         width: 100%;
+        max-width: 100%;
     }
 
     .area-recomendados {
         width: 100%;
-        padding: 12px;
+        padding: 0 0 12px 0;
     }
 
     .media-view-box {
         border-radius: 0;
     }
 
-    /* Informações do vídeo */
     .video-info {
         padding: 12px;
     }
 
     .video-info__titulo {
         font-size: 16px;
+        font-weight: 600;
     }
 
     .video-acoes {
         flex-wrap: wrap;
         gap: 8px;
+        padding: 0 12px 12px;
     }
 
     /* Shorts */
@@ -2002,47 +2058,35 @@ a.card-video { cursor: pointer; }
         height: calc(100vh - 120px);
     }
 
-    /* Miniplayer mobile fica na parte inferior */
+    /* Miniplayer sobe acima da bottom bar */
     .miniplayer-ativo {
         bottom: 70px !important;
         right: 8px !important;
         width: 220px !important;
         height: 124px !important;
     }
+
+    /* Resultados de lista (pesquisa) viram vertical no mobile */
+    .area-resultados.lista .card-resultado {
+        flex-direction: column;
+    }
+
+    .area-resultados.lista .card-resultado__miniatura-wrapper {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+    }
 }
 
 /* Mobile pequeno (até 480px) */
 @media (max-width: 480px) {
-    .grade-de-videos {
-        grid-template-columns: 1fr;
-        gap: 0;
-        padding: 0;
-    }
-
-    .card-do-video {
-        border-radius: 0;
-        margin-bottom: 8px;
-    }
-
-    .card-do-video__thumbnail {
-        border-radius: 0;
-    }
-
-    .card-do-video__info {
-        padding: 8px 12px;
-    }
-
     .cabecalho-inicio {
-        gap: 12px;
-    }
-
-    /* Esconde botão de criar no mobile pequeno */
-    .cabecalho-final .icon-button:not(.icon-button--perfil) {
-        display: none;
+        gap: 8px;
     }
 }
 
-/* Barra de busca mobile expandida (quando clica no ícone de busca) */
+/* ===== Barra de busca mobile expandida ===== */
 .busca-mobile-aberta .cabecalho-centro {
     display: flex;
     position: fixed;
@@ -2053,6 +2097,8 @@ a.card-video { cursor: pointer; }
     padding: 8px 12px;
     z-index: 300;
     border-bottom: 1px solid var(--border-color);
+    gap: 8px;
+    align-items: center;
 }
 
 .busca-mobile-aberta .cabecalho-centro #search-input {
@@ -2062,4 +2108,5 @@ a.card-video { cursor: pointer; }
 
 .busca-mobile-aberta .cabecalho-centro .search {
     width: 100%;
+    flex: 1;
 }
