@@ -1368,3 +1368,12 @@ body {
     opacity: 0;
     pointer-events: none;
 }
+.icon-button i {
+    color: #fff;
+    font-size: 20px;
+}
+.cabecalho-inicio i {
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+}
