@@ -349,8 +349,8 @@ app.get('/api/download', async (req, res) => {
 
 
 
-app.get(/^(?!\/api\/).*/, (req, res) => {
-    res.sendFile(path.join(PASTA_DO_FRONTEND, "index.html"));
+app.get('/', (req, res) => {
+    res.send("API do Projeto Moonly rodando 100%!");
 });
 
 app.get("/api/sugestoes", async (req, res) => {
