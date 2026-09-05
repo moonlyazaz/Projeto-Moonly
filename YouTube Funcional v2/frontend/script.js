@@ -1792,6 +1792,8 @@ async function carregarInscricoesSidebar() {
     lista.innerHTML = '<a class="sidebar-item"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:16px;margin-right:16px;"></i><span>Carregando...</span></a>';
 
     try {
+        // Force new token for subscriptions scope (clear cached token to ensure 
+        // user can grant subscriptions permission)
         const token = await obterTokenDeAcessoDoYoutube();
         const res = await fetch(
             'https://youtube.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50&order=alphabetical',
@@ -1799,7 +1801,21 @@ async function carregarInscricoesSidebar() {
         );
         const data = await res.json();
 
-        if (data.error || !data.items || data.items.length === 0) {
+        if (data.error) {
+            console.error('API error:', data.error);
+            // If 403, token doesn't have subscriptions scope — clear and retry
+            if (data.error.code === 403 || data.error.code === 401) {
+                tokenDeAcessoDoYoutube = null;
+                localStorage.removeItem(CHAVE_TOKEN_YT);
+                localStorage.removeItem(CHAVE_EXPIRACAO_YT);
+                lista.innerHTML = '<a class="sidebar-item" style="height:auto;padding:12px 16px;"><span style="color:#aaa;font-size:13px;">Autorize o acesso às inscrições:</span><br><button onclick="carregarInscricoesSidebar()" style="margin-top:8px;background:#ff0000;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">Autorizar</button></a>';
+                return;
+            }
+            lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Erro: ' + (data.error.message || 'desconhecido') + '</span></a>';
+            return;
+        }
+
+        if (!data.items || data.items.length === 0) {
             lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Nenhuma inscrição encontrada.</span></a>';
             return;
         }
@@ -1809,7 +1825,8 @@ async function carregarInscricoesSidebar() {
 
     } catch (err) {
         console.error('Erro ao carregar inscrições:', err);
-        lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Erro ao carregar inscrições.</span></a>';
+        lista.innerHTML = '<a class="sidebar-item" style="flex-direction:column;align-items:flex-start;height:auto;padding:12px 16px;"><span style="color:#aaa;font-size:13px;">Inscrições não carregadas.</span><span style="color:#3ea6ff;font-size:12px;margin-top:4px;cursor:pointer;" onclick="carregarInscricoesSidebar()">Tentar novamente</span></a>';
+        mostrarToast('Clique "Tentar novamente" nas Inscrições para autorizar.');
     }
 }
 
