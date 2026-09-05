@@ -575,11 +575,10 @@ async function abrirVideo(idDoVideo) {
                                     <span class="comentario-item__autor">@${c.autor}</span>
                                     <span class="comentario-item__tempo">${c.tempoPublicacao}</span>
                                 </div>
-                                <div class="comentario-item__texto">${c.texto}</div>
                                 <div class="comentario-item__acoes">
                                     <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> ${c.curtidas > 0 ? c.curtidas : ''}</button>
                                     <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
-                                    <button class="comentario-item__acao" style="font-weight: 500; font-size: 12px; margin-left: 8px;">Responder</button>
+                                    <span class="btn-responder-comentario" data-comment-id="${c.id}" style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
                                 </div>
                             </div>
                         </div>
@@ -1388,7 +1387,7 @@ function enviarComentarioReal(videoId, texto) {
                             <div class="comentario-item__acoes">
                                 <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> 0</button>
                                 <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
-                                <span style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
+                                <span class="btn-responder-comentario" data-comment-id="${data.id}" style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
                             </div>
                         </div>
                     </div>

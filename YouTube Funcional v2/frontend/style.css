@@ -1356,3 +1356,15 @@ body {
     width: 18px;
     height: 18px;
 }
+.barra-progresso {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background-color: #ff0000;
+    width: 0%;
+    z-index: 99999;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
