@@ -2191,6 +2191,63 @@ setTimeout(() => {
 }, 50);
 
 
+// ==================== BUSCA MOBILE ====================
+(function configurarBuscaMobile() {
+    const cabecalhoFinal = document.querySelector('.cabecalho-final');
+    const cabecalho = document.querySelector('.cabecalho');
+    const inputBusca = document.getElementById('search-input');
+    const formBusca = document.querySelector('.search');
+
+    if (!cabecalhoFinal || !inputBusca) return;
+
+    // Cria botão de busca para mobile
+    const btnBuscaMobile = document.createElement('button');
+    btnBuscaMobile.className = 'icon-button busca-mobile-btn';
+    btnBuscaMobile.setAttribute('aria-label', 'Buscar');
+    btnBuscaMobile.innerHTML = '<i class="fa-solid fa-magnifying-glass" style="font-size:18px; color: var(--text-primary);"></i>';
+    btnBuscaMobile.style.cssText = 'display:none;';
+
+    // Inserir antes do primeiro filho
+    cabecalhoFinal.insertBefore(btnBuscaMobile, cabecalhoFinal.firstChild);
+
+    // Botão de fechar busca mobile
+    const btnFecharBusca = document.createElement('button');
+    btnFecharBusca.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+    btnFecharBusca.style.cssText = 'background:none; border:none; color:var(--text-primary); font-size:20px; cursor:pointer; padding:0 12px; display:none;';
+    btnFecharBusca.id = 'btn-fechar-busca-mobile';
+    cabecalho.insertBefore(btnFecharBusca, cabecalho.firstChild);
+
+    btnBuscaMobile.addEventListener('click', () => {
+        document.body.classList.add('busca-mobile-aberta');
+        inputBusca.focus();
+        btnFecharBusca.style.display = 'flex';
+        btnBuscaMobile.style.display = 'none';
+    });
+
+    btnFecharBusca.addEventListener('click', () => {
+        document.body.classList.remove('busca-mobile-aberta');
+        btnFecharBusca.style.display = 'none';
+        if (window.innerWidth <= 768) btnBuscaMobile.style.display = 'flex';
+    });
+
+    // Mostra/esconde botão de busca mobile conforme largura
+    function verificarTamanho() {
+        if (window.innerWidth <= 768) {
+            btnBuscaMobile.style.display = 'flex';
+            btnBuscaMobile.style.alignItems = 'center';
+            btnBuscaMobile.style.justifyContent = 'center';
+        } else {
+            btnBuscaMobile.style.display = 'none';
+            document.body.classList.remove('busca-mobile-aberta');
+            btnFecharBusca.style.display = 'none';
+        }
+    }
+
+    verificarTamanho();
+    window.addEventListener('resize', verificarTamanho);
+})();
+
+
 // ==================== PESQUISA POR VOZ ====================
 function configurarPesquisaPorVoz() {
     const btnMic = document.querySelector('.microphone');
