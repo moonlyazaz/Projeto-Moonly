@@ -763,6 +763,26 @@ function marcarItemAtivoNaSidebar(itemClicado) {
  * login).
  */
 function configurarBuscaEClique() {
+
+    // Robusto clique para sidebar items (Assistir mais tarde e Gostei)
+    document.body.addEventListener("click", (evento) => {
+        const item = evento.target.closest(".sidebar-item[data-secao]");
+        if (item) {
+            const secao = item.getAttribute("data-secao");
+            if (secao === "assistir_mais_tarde") {
+                evento.preventDefault();
+                marcarItemAtivoNaSidebar(item);
+                document.getElementById("search-input").value = "";
+                mostrarView("assistir_mais_tarde");
+            } else if (secao === "curtidos") {
+                evento.preventDefault();
+                marcarItemAtivoNaSidebar(item);
+                document.getElementById("search-input").value = "";
+                mostrarView("curtidos");
+            }
+        }
+    });
+
     const formularioDeBusca = document.getElementById("formulario-de-busca");
     if (formularioDeBusca) {
         formularioDeBusca.addEventListener("submit", (evento) => {
@@ -2020,7 +2040,13 @@ function adicionarGostei(id, titulo, miniatura, canal, visualizacoes) {
 }
 
 function carregarListaSalva(chave, containerId) {
-    const lista = JSON.parse(localStorage.getItem(chave) || '[]');
+    let lista = [];
+    try {
+        lista = JSON.parse(localStorage.getItem(chave) || '[]');
+    } catch(e) {
+        console.error("Erro ao ler", chave, e);
+        lista = [];
+    }
     const container = document.getElementById(containerId);
     if (!container) return;
     
