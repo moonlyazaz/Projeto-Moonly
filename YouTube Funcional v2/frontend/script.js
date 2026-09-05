@@ -219,6 +219,9 @@ function mostrarView(nomeDaView) {
             area.style.display = "block";
             carregarListaSalva('assistirMaisTarde', 'gradeAssistirMaisTarde');
         }
+    } else if (nomeDaView === 'playlists') {
+        document.getElementById('areaMinhasPlaylists').style.display = 'block';
+        carregarMinhasPlaylists();
     } else if (nomeDaView === 'curtidos') {
         const area = document.getElementById("areaCurtidos");
         if(area) {
@@ -2092,7 +2095,7 @@ window.mostrarView = function(nomeDaView, fromHistory = false) {
             }
         } else if (nomeDaView === 'shorts') {
             window.history.pushState({ view: 'shorts' }, "", "?shorts=true");
-        } else if (['historico', 'voce', 'assistir_mais_tarde', 'curtidos'].includes(nomeDaView)) {
+        } else if (['historico', 'voce', 'assistir_mais_tarde', 'curtidos', 'playlists'].includes(nomeDaView)) {
             window.history.pushState({ view: nomeDaView }, "", "?view=" + nomeDaView);
         }
     }
@@ -2436,3 +2439,80 @@ window.abrirVideo = async function(idDoVideo, fromHistory = false, playlistId = 
         window.estadoPlaylist = null;
     }
 };
+
+
+// ==================== MINHAS PLAYLISTS REAIS ====================
+window.carregarMinhasPlaylists = async function() {
+    const grade = document.getElementById("gradeMinhasPlaylists");
+    if (!grade) return;
+    
+    grade.innerHTML = '<p style="color:#aaa;">Carregando suas playlists oficiais do YouTube...</p>';
+    
+    try {
+        const token = await obterTokenDeAcessoDoYoutube();
+        const resposta = await fetch("https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&mine=true&maxResults=20", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        
+        const dados = await resposta.json();
+        
+        if (dados.items && dados.items.length > 0) {
+            let html = "";
+            dados.items.forEach(pl => {
+                const img = pl.snippet.thumbnails.high ? pl.snippet.thumbnails.high.url : (pl.snippet.thumbnails.default ? pl.snippet.thumbnails.default.url : '');
+                html += `
+                    <div class="card-resultado" onclick="abrirVideoDaPlaylist(null, '${pl.id}')" style="cursor:pointer">
+                        <div class="card-resultado__miniatura-wrapper">
+                            <img class="card-resultado__miniatura" src="${img}" alt="${pl.snippet.title}">
+                            <div style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); padding:4px 8px; border-radius:4px; font-size:12px;">
+                                <i class="fa-solid fa-list"></i> ${pl.contentDetails.itemCount} vídeos
+                            </div>
+                        </div>
+                        <div class="card-resultado__corpo">
+                            <div class="card-resultado__informacoes" style="margin-left: 0;">
+                                <span class="card-resultado__titulo">${pl.snippet.title}</span>
+                                <span class="card-resultado__canal">${pl.snippet.channelTitle}</span>
+                                <span class="card-resultado__dados">Sua playlist real do YouTube</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            grade.innerHTML = html;
+        } else {
+            grade.innerHTML = '<p style="color:#aaa;">Nenhuma playlist encontrada na sua conta.</p>';
+        }
+    } catch (erro) {
+        console.error(erro);
+        grade.innerHTML = '<p style="color:#aaa;">Precisa de permissăo do YouTube para ver suas playlists.</p>';
+    }
+};
+
+const originalAbrirVideoDaPlaylist = window.abrirVideoDaPlaylist;
+window.abrirVideoDaPlaylist = async function(idVideo, idPlaylist) {
+    if (!idVideo) {
+        iniciarCarregamento();
+        try {
+            const res = await fetch(`${URL_DO_BACKEND}/api/playlist/${idPlaylist}`);
+            const dados = await res.json();
+            if (dados.videos && dados.videos.length > 0) {
+                idVideo = dados.videos[0].id;
+            } else {
+                mostrarToast("Playlist vazia.");
+                finalizarCarregamento();
+                return;
+            }
+        } catch (e) {
+            mostrarToast("Erro ao carregar playlist.");
+            finalizarCarregamento();
+            return;
+        }
+        finalizarCarregamento();
+    }
+    
+    // Call original
+    originalAbrirVideoDaPlaylist(idVideo, idPlaylist);
+};
+
