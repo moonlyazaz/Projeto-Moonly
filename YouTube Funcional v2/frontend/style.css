@@ -1464,6 +1464,40 @@ body {
     margin: 8px 0;
 }
 
+.menu-painel {
+    display: none;
+}
+.menu-painel.ativo {
+    display: block;
+}
+
+.menu-painel-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 16px;
+}
+.menu-painel-header i {
+    font-size: 18px;
+    margin-right: 16px;
+    color: var(--text-primary);
+}
+
+.menu-tema-opcao, .menu-idioma-opcao {
+    padding-left: 16px !important;
+}
+
+.icone-check {
+    font-size: 16px !important;
+    width: 24px !important;
+    margin-right: 16px !important;
+    text-align: center !important;
+    color: var(--text-primary) !important;
+    transition: opacity 0.2s;
+}
+
 .menu-item {
     display: flex !important;
     align-items: center !important;

@@ -1244,9 +1244,12 @@ document.getElementById("avatarDoUsuarioFallback").addEventListener("click", (ev
     document.getElementById("containerUsuarioLogado").classList.toggle("aberto");
 });
 
-// Clique em qualquer lugar fora do menu o fecha.
+// Clique em qualquer lugar fora do menu o fecha e reseta pro painel principal
 document.addEventListener("click", () => {
     document.getElementById("containerUsuarioLogado").classList.remove("aberto");
+    if (typeof abrirPainel === 'function') {
+        abrirPainel('painel-principal');
+    }
 });
 
 document.getElementById("botaoSair").addEventListener("click", (evento) => {
@@ -1695,24 +1698,70 @@ document.getElementById('btn-menu-canal-link').addEventListener('click', (e) => 
     if (btnVoce) btnVoce.click(); 
 });
 
+// --- LOGICA DE PAINEIS DO MENU ---
+function abrirPainel(idPainel) {
+    document.querySelectorAll('.menu-painel').forEach(p => p.classList.remove('ativo'));
+    document.getElementById(idPainel).classList.add('ativo');
+}
+
 document.getElementById('btn-menu-tema').addEventListener('click', (e) => {
-    e.stopPropagation(); 
-    const isLight = document.body.getAttribute('data-theme') === 'light';
-    if (isLight) {
-        document.body.removeAttribute('data-theme');
-        localStorage.setItem('youtubeTheme', 'dark');
-        document.getElementById('texto-menu-tema').innerText = 'Aparência: tema escuro';
-    } else {
-        document.body.setAttribute('data-theme', 'light');
-        localStorage.setItem('youtubeTheme', 'light');
-        document.getElementById('texto-menu-tema').innerText = 'Aparência: tema claro';
-    }
+    e.stopPropagation();
+    abrirPainel('painel-tema');
 });
+
+document.getElementById('btn-menu-idioma').addEventListener('click', (e) => {
+    e.stopPropagation();
+    abrirPainel('painel-idioma');
+});
+
+document.getElementById('btn-voltar-tema').addEventListener('click', (e) => {
+    e.stopPropagation();
+    abrirPainel('painel-principal');
+});
+
+document.getElementById('btn-voltar-idioma').addEventListener('click', (e) => {
+    e.stopPropagation();
+    abrirPainel('painel-principal');
+});
+
+// Acoes do tema
+document.querySelectorAll('.menu-tema-opcao').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tema = btn.getAttribute('data-tema');
+        
+        // Remove check de todos
+        document.querySelectorAll('.menu-tema-opcao .icone-check').forEach(i => i.style.opacity = '0');
+        // Adiciona check no clicado
+        btn.querySelector('.icone-check').style.opacity = '1';
+        
+        if (tema === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            localStorage.setItem('youtubeTheme', 'light');
+            document.getElementById('texto-menu-tema').innerText = 'Aparência: tema claro';
+        } else {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('youtubeTheme', 'dark');
+            document.getElementById('texto-menu-tema').innerText = 'Aparência: tema escuro';
+        }
+    });
+});
+
+// Reseta o painel principal ao fechar o menu (document click handler existe e apenas remove classe 'aberto', entao adicionaremos logicamente no que ja existe)
 
 const themeSalvo = localStorage.getItem('youtubeTheme');
 if (themeSalvo === 'light') {
     document.body.setAttribute('data-theme', 'light');
     const spanTema = document.getElementById('texto-menu-tema');
     if (spanTema) spanTema.innerText = 'Aparência: tema claro';
+    
+    // Atualiza ícones de check
+    const checkClaro = document.querySelector('#opcao-tema-claro .icone-check');
+    const checkEscuro = document.querySelector('#opcao-tema-escuro .icone-check');
+    if (checkClaro) checkClaro.style.opacity = '1';
+    if (checkEscuro) checkEscuro.style.opacity = '0';
+} else {
+    const checkEscuro = document.querySelector('#opcao-tema-escuro .icone-check');
+    if (checkEscuro) checkEscuro.style.opacity = '1';
 }
 
