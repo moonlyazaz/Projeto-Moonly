@@ -1603,7 +1603,21 @@ if (initialParams.has('v')) {
 function adicionarAoHistorico(video) {
     let historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
     historico = historico.filter(v => v.id !== video.id);
-    historico.unshift(video);
+    
+    // Normalizar o objeto de vídeo para o formato esperado por montarCardDeResultado
+    const videoNormalizado = {
+        id: video.id,
+        titulo: video.titulo,
+        canal: video.canal.nome || video.canal,
+        canalId: video.canal.id,
+        fotoCanal: video.canal.foto,
+        miniatura: video.imagemCapa || video.miniatura,
+        duracao: video.duracao || '',
+        visualizacoes: video.visualizacoes || '',
+        tempoPublicacao: video.tempoPublicacao || ''
+    };
+
+    historico.unshift(videoNormalizado);
     if (historico.length > 50) historico.pop();
     localStorage.setItem('historicoYoutube', JSON.stringify(historico));
 }
@@ -1611,7 +1625,12 @@ function adicionarAoHistorico(video) {
 function renderizarHistorico() {
     const grade = document.getElementById('gradeHistorico');
     if (!grade) return;
-    const historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
+    
+    let historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
+    // Limpar histórico corrompido de versões anteriores
+    historico = historico.filter(v => typeof v.canal === 'string');
+    localStorage.setItem('historicoYoutube', JSON.stringify(historico));
+
     if (historico.length === 0) {
         grade.innerHTML = '<p style="color:#aaa;">Você ainda não assistiu a nenhum vídeo neste navegador.</p>';
     } else {
