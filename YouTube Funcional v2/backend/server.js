@@ -18,17 +18,8 @@ const app = express();
 const PORTA = process.env.PORTA || 3000;
 const CHAVE_DA_API_DO_YOUTUBE = process.env.YOUTUBE_API_KEY;
 const URL_BASE_DA_API = "https://www.googleapis.com/youtube/v3";
-const PASTA_DO_FRONTEND = path.join(__dirname, "..", "frontend");
-
 app.use(cors());
 app.use(express.json());
-
-// Serve os arquivos do front-end (index.html, style.css, script.js) pelo
-// próprio backend. Isso é essencial: o player embutido do YouTube e o
-// Login com Google só funcionam quando a página é aberta via
-// http://localhost, nunca abrindo o arquivo index.html diretamente
-// (file://) — por isso não abrimos mais o HTML direto no navegador.
-app.use(express.static(PASTA_DO_FRONTEND));
 
 if (!CHAVE_DA_API_DO_YOUTUBE) {
     console.warn(
