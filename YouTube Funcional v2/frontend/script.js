@@ -572,9 +572,10 @@ async function abrirVideo(idDoVideo) {
                             <div class="comentario-item__avatar" style="background-image: url('${c.avatar}')"></div>
                             <div class="comentario-item__conteudo">
                                 <div class="comentario-item__cabecalho">
-                                    <span class="comentario-item__autor">@${c.autor}</span>
+                                    <span class="comentario-item__autor">${c.autor.startsWith('@') ? c.autor : '@' + c.autor}</span>
                                     <span class="comentario-item__tempo">${c.tempoPublicacao}</span>
                                 </div>
+                                <div class="comentario-item__texto">${c.texto}</div>
                                 <div class="comentario-item__acoes">
                                     <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> ${c.curtidas > 0 ? c.curtidas : ''}</button>
                                     <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
