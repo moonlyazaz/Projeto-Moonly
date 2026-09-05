@@ -878,6 +878,8 @@ function configurarBuscaEClique() {
                     carregarCanalDoUsuario();
                     mostrarView("voce");
                 }
+            } else if (secao === "playlists") {
+                mostrarView("playlists");
             }
         });
     });
