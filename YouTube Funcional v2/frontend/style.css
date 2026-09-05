@@ -1875,19 +1875,6 @@ a.card-video { cursor: pointer; }
         display: none;
     }
 
-    /* Ícone de busca aparece no header mobile */
-    .cabecalho-final::before {
-        content: "\f002";
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        font-size: 18px;
-        color: var(--text-primary);
-        cursor: pointer;
-        padding: 0 10px;
-        display: flex;
-        align-items: center;
-    }
-
     .corpo {
         flex-direction: column;
         height: auto;
@@ -1920,8 +1907,8 @@ a.card-video { cursor: pointer; }
         padding: 0;
     }
 
-    /* Esconder seções secundárias na barra mobile */
-    .sidebar-secao:not(:first-child) {
+    /* Na barra mobile, mostrar apenas os primeiros 5 itens de nav */
+    .sidebar-item:nth-child(n+6) {
         display: none;
     }
 
