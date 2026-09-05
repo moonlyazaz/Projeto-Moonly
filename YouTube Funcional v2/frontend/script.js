@@ -48,8 +48,8 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                     <button class="media-view-box__btn" id="main-mute-btn"><i class="fa-solid fa-volume-high" id="main-mute-icon"></i></button>
                     <span class="media-view-box__time" id="main-time-display">0:00 / 0:00</span>
                     <div class="media-view-box__spacer"></div>
-                      <button class="media-view-box__btn" id="main-like-btn" title="Gostei" onclick="adicionarGostei('${dadosDoVideoPrincipal.id}', '${dadosDoVideoPrincipal.titulo.replace(/\'/g, \"\\'\")}', '${dadosDoVideoPrincipal.imagemCapa}', '${dadosDoVideoPrincipal.canal.nome.replace(/\'/g, \"\\'\")}', '${dadosDoVideoPrincipal.visualizacoes}')"><i class="fa-regular fa-thumbs-up"></i></button>
-                      <button class="media-view-box__btn" id="main-watch-later-btn" title="Assistir mais tarde" onclick="adicionarAssistirMaisTarde(null, '${dadosDoVideoPrincipal.id}', '${dadosDoVideoPrincipal.titulo.replace(/\'/g, \"\\'\")}', '${dadosDoVideoPrincipal.imagemCapa}', '${dadosDoVideoPrincipal.canal.nome.replace(/\'/g, \"\\'\")}', '${dadosDoVideoPrincipal.visualizacoes}')"><i class="fa-regular fa-clock"></i></button>
+                      <button class="media-view-box__btn" id="main-like-btn" title="Gostei" onclick="adicionarGostei('${dadosDoVideoPrincipal.id}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}'), '${dadosDoVideoPrincipal.imagemCapa}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}'), decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.visualizacoes)}'))"><i class="fa-regular fa-thumbs-up"></i></button>
+                      <button class="media-view-box__btn" id="main-watch-later-btn" title="Assistir mais tarde" onclick="adicionarAssistirMaisTarde(null, '${dadosDoVideoPrincipal.id}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}'), '${dadosDoVideoPrincipal.imagemCapa}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}'), decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.visualizacoes)}'))"><i class="fa-regular fa-clock"></i></button>
                     <button class="media-view-box__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
                 </div>
             </div>
@@ -232,7 +232,7 @@ function montarCardDeResultado(video) {
             <div class="card-resultado__miniatura-wrapper" style="position:relative;">
                 <img class="card-resultado__miniatura" src="${video.miniatura}" alt="${video.titulo}" loading="lazy">
                 <span class="card-resultado__duracao">${video.duracao}</span>
-                <button class="btn-assistir-mais-tarde-overlay" onclick="adicionarAssistirMaisTarde(event, '${video.id}', '${video.titulo.replace(/'/g, "\'")}', '${video.miniatura}', '${video.canal.replace(/'/g, "\'")}', '${video.visualizacoes}')" title="Assistir mais tarde">
+                <button class="btn-assistir-mais-tarde-overlay" onclick="adicionarAssistirMaisTarde(event, '${video.id}', decodeURIComponent('${encodeURIComponent(video.titulo)}'), '${video.miniatura}', decodeURIComponent('${encodeURIComponent(video.canal)}'), decodeURIComponent('${encodeURIComponent(video.visualizacoes)}'))" title="Assistir mais tarde">
                     <i class="fa-regular fa-clock"></i>
                 </button>
             </div>
