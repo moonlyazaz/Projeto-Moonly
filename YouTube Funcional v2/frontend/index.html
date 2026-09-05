@@ -385,7 +385,32 @@
             <div id="areaVoce" class="area-view" style="display: none; padding: 24px; color: #fff;">
                 <div id="conteudoCanalVoce"></div>
             </div>
-        </main>
+        
+            <!-- Area do Canal -->
+            <div id="areaCanalVisualizacao" class="area-view" style="display: none; color: #fff; width: 100%;">
+                <div class="canal-cabecalho">
+                    <div class="canal-banner" id="canal-banner-visualizacao"></div>
+                    <div class="canal-info-container">
+                        <img class="canal-avatar-grande" id="canal-avatar-visualizacao" src="" alt="Avatar">
+                        <div class="canal-detalhes-header">
+                            <h1 id="canal-nome-visualizacao"></h1>
+                            <p class="canal-estatisticas" id="canal-estatisticas-visualizacao"></p>
+                            <p class="canal-descricao-curta" id="canal-descricao-visualizacao"></p>
+                            <button class="botao-inscrever" id="canal-botao-inscrever" type="button" data-acao="inscrever">Inscrever-se</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="canal-abas">
+                    <div class="canal-aba ativa">Início</div>
+                    <div class="canal-aba">Vídeos</div>
+                    <div class="canal-aba">Playlists</div>
+                </div>
+                <div style="padding: 24px;">
+                    <div id="gradeCanalVisualizacao" class="area-resultados lista"></div>
+                </div>
+            </div>
+
+</main>
         </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

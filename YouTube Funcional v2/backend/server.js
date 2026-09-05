@@ -331,6 +331,119 @@ app.get("/api/sugestoes", async (req, res) => {
     }
 });
 
+
+// ==================== CANAIS ====================
+
+app.get("/api/canal/:id", async (req, res) => {
+    const idDoCanal = req.params.id;
+    try {
+        const url = `${URL_BASE_DA_API}/channels?part=snippet,statistics,brandingSettings&id=${idDoCanal}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+        
+        if (dados.error || !dados.items || dados.items.length === 0) {
+            return res.status(404).json({ erro: "Canal năo encontrado." });
+        }
+        
+        const item = dados.items[0];
+        res.json({
+            id: item.id,
+            nome: item.snippet.title,
+            descricao: item.snippet.description,
+            foto: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+            banner: item.brandingSettings?.image?.bannerExternalUrl || null,
+            inscritos: formatarNumeroResumido(item.statistics.subscriberCount),
+            videos: formatarNumeroResumido(item.statistics.videoCount),
+            visualizacoes: formatarNumeroResumido(item.statistics.viewCount)
+        });
+    } catch (erro) {
+        console.error("Erro ao buscar canal:", erro);
+        res.status(500).json({ erro: "Falha ao buscar detalhes do canal." });
+    }
+});
+
+app.get("/api/canal/:id/videos", async (req, res) => {
+    const idDoCanal = req.params.id;
+    try {
+        // Primeiro, encontrar a playlist de uploads do canal
+        const urlCanal = `${URL_BASE_DA_API}/channels?part=contentDetails&id=${idDoCanal}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const respostaCanal = await fetch(urlCanal);
+        const dadosCanal = await respostaCanal.json();
+        
+        if (dadosCanal.error || !dadosCanal.items || !dadosCanal.items.length) {
+            return res.status(404).json({ erro: "Canal năo encontrado." });
+        }
+        
+        const idDaPlaylist = dadosCanal.items[0].contentDetails.relatedPlaylists.uploads;
+        
+        // Agora buscar os itens da playlist
+        const urlVideos = `${URL_BASE_DA_API}/playlistItems?part=snippet,contentDetails&playlistId=${idDaPlaylist}&maxResults=20&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const respostaVideos = await fetch(urlVideos);
+        const dadosVideos = await respostaVideos.json();
+        
+        if (!dadosVideos.items) {
+            return res.json([]);
+        }
+        
+        // Puxar stats (duracao e views) para esses videos
+        const idsDosVideos = dadosVideos.items.map(item => item.contentDetails.videoId).join(",");
+        const urlStats = `${URL_BASE_DA_API}/videos?part=snippet,statistics,contentDetails&id=${idsDosVideos}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const respostaStats = await fetch(urlStats);
+        const dadosStats = await respostaStats.json();
+        
+        const listaFormatada = formatarListaDeVideos(dadosStats);
+        res.json(listaFormatada);
+    } catch (erro) {
+        console.error("Erro ao buscar videos do canal:", erro);
+        res.status(500).json({ erro: "Falha ao buscar videos do canal." });
+    }
+});
+
+
+// ==================== PLAYLISTS ====================
+app.get("/api/playlist/:id", async (req, res) => {
+    const idDaPlaylist = req.params.id;
+    try {
+        const urlVideos = `${URL_BASE_DA_API}/playlistItems?part=snippet,contentDetails&playlistId=${idDaPlaylist}&maxResults=25&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const respostaVideos = await fetch(urlVideos);
+        const dadosVideos = await respostaVideos.json();
+        
+        if (dadosVideos.error || !dadosVideos.items) {
+            return res.status(404).json({ erro: "Playlist năo encontrada." });
+        }
+        
+        const idsDosVideos = dadosVideos.items.map(item => item.contentDetails.videoId).filter(Boolean).join(",");
+        if (!idsDosVideos) return res.json({ titulo: "Playlist", videos: [] });
+
+        const urlStats = `${URL_BASE_DA_API}/videos?part=snippet,statistics,contentDetails&id=${idsDosVideos}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const respostaStats = await fetch(urlStats);
+        const dadosStats = await respostaStats.json();
+        
+        const listaFormatada = formatarListaDeVideos(dadosStats);
+        
+        // Vamos buscar o titulo da playlist
+        const urlPlay = `${URL_BASE_DA_API}/playlists?part=snippet&id=${idDaPlaylist}&key=${CHAVE_DA_API_DO_YOUTUBE}`;
+        const resPlay = await fetch(urlPlay);
+        const dadPlay = await resPlay.json();
+        let titulo = "Fila de Reproduçăo";
+        let canal = "";
+        if (dadPlay.items && dadPlay.items.length > 0) {
+            titulo = dadPlay.items[0].snippet.title;
+            canal = dadPlay.items[0].snippet.channelTitle;
+        }
+
+        res.json({
+            id: idDaPlaylist,
+            titulo,
+            canal,
+            videos: listaFormatada
+        });
+    } catch (erro) {
+        console.error("Erro ao buscar playlist:", erro);
+        res.status(500).json({ erro: "Falha ao buscar playlist." });
+    }
+});
+
 app.listen(PORTA, () => {
     console.log(`Servidor rodando em http://localhost:${PORTA}`);
     console.log(`Abra http://localhost:${PORTA} no navegador (não abra o index.html direto).`);

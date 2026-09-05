@@ -50,6 +50,7 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                     <div class="media-view-box__spacer"></div>
                       <button class="media-view-box__btn" id="main-like-btn" title="Gostei" onclick="adicionarGostei('${dadosDoVideoPrincipal.id}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}'), '${dadosDoVideoPrincipal.imagemCapa}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}'), decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.visualizacoes)}'))"><i class="fa-regular fa-thumbs-up"></i></button>
                       <button class="media-view-box__btn" id="main-watch-later-btn" title="Assistir mais tarde" onclick="adicionarAssistirMaisTarde(null, '${dadosDoVideoPrincipal.id}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}'), '${dadosDoVideoPrincipal.imagemCapa}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}'), decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.visualizacoes)}'))"><i class="fa-regular fa-clock"></i></button>
+                    <button class="media-view-box__btn" id="main-miniplayer-btn" title="Miniplayer" onclick="toggleMiniplayer()"><i class="fa-solid fa-compress"></i></button>
                     <button class="media-view-box__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
                 </div>
             </div>
@@ -61,10 +62,10 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
             <div class="canal">
                 <span
                     class="canal__foto"
-                    style="background-image: url('${dadosDoVideoPrincipal.canal.foto}')"
+                    style="background-image: url(\'${dadosDoVideoPrincipal.canal.foto}\'); cursor:pointer" data-canal-id="${dadosDoVideoPrincipal.canal.id}" onclick="abrirCanal(this.dataset.canalId)"
                 ></span>
                 <span class="canal__informacoes">
-                    <span class="canal__nome">${dadosDoVideoPrincipal.canal.nome}</span>
+                    <span class="canal__nome" data-canal-id="${dadosDoVideoPrincipal.canal.id}" onclick="abrirCanal(this.dataset.canalId)" style="cursor:pointer">${dadosDoVideoPrincipal.canal.nome}</span>
                     <span class="canal__inscritos">${dadosDoVideoPrincipal.canal.inscritos}</span>
                 </span>
                 <button class="botao-inscrever" type="button" data-acao="inscrever" data-canal-id="${dadosDoVideoPrincipal.canal.id}">Inscrever-se</button>
@@ -207,6 +208,8 @@ function mostrarView(nomeDaView) {
     } else if (nomeDaView === 'historico') {
         document.getElementById("areaHistorico").style.display = "block";
         if(typeof renderizarHistorico === 'function') renderizarHistorico();
+    } else if (nomeDaView === 'canal') {
+        document.getElementById('areaCanalVisualizacao').style.display = 'block';
     } else if (nomeDaView === 'voce') {
         document.getElementById("areaVoce").style.display = "block";
         carregarCanalDoUsuario();
@@ -243,7 +246,7 @@ function montarCardDeResultado(video) {
                 }
                 <div class="card-resultado__informacoes">
                     <span class="card-resultado__titulo">${video.titulo}</span>
-                    <span class="card-resultado__canal">${video.canal}</span>
+                    <span class="card-resultado__canal" data-canal-id="${video.canalId || \'\'}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
                     <span class="card-resultado__dados">${video.visualizacoes} • ${video.tempoPublicacao}</span>
                 </div>
             </div>
@@ -2048,7 +2051,7 @@ function carregarListaSalva(chave, containerId) {
             <div class="card-resultado__corpo">
                 <div class="card-resultado__informacoes" style="margin-left: 0;">
                     <span class="card-resultado__titulo">${video.titulo}</span>
-                    <span class="card-resultado__canal">${video.canal}</span>
+                    <span class="card-resultado__canal" data-canal-id="${video.canalId || \'\'}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
                     <span class="card-resultado__dados">${video.visualizacoes || ''}</span>
                 </div>
             </div>
@@ -2110,6 +2113,8 @@ window.addEventListener('popstate', (e) => {
             window.abrirVideo(state.id, true);
         } else if (state.view === 'busca') {
             window.buscarVideos(state.termo, "", true);
+        } else if (state.view === 'canal') {
+            window.abrirCanal(state.id, true);
         } else if (state.view === 'shorts') {
             window.buscarVideos("shorts", "short", true);
             window.mostrarView("shorts", true);
@@ -2128,7 +2133,7 @@ window.addEventListener('popstate', (e) => {
 function carregarEstadoInicialDaUrl(fromHistory = false) {
     const params = new URLSearchParams(window.location.search);
     if (params.has('watch')) {
-        window.abrirVideo(params.get('watch'), fromHistory);
+        window.abrirVideo(params.get("watch"), fromHistory, params.get("list"));
     } else if (params.has('v')) { // Compatibilidade com links antigos / yt normal
         window.abrirVideo(params.get('v'), fromHistory);
     } else if (params.has('search')) {
@@ -2137,6 +2142,8 @@ function carregarEstadoInicialDaUrl(fromHistory = false) {
         window.buscarVideos(t, "", fromHistory);
     } else if (params.has('shorts')) {
         document.querySelector('.sidebar-item[data-secao="shorts"]').click();
+    } else if (params.has('channel')) {
+        window.abrirCanal(params.get('channel'), fromHistory);
     } else if (params.has('view')) {
         const v = params.get('view');
         // Simular clique na sidebar para manter UI sincronizada
@@ -2152,3 +2159,276 @@ function carregarEstadoInicialDaUrl(fromHistory = false) {
 setTimeout(() => {
     carregarEstadoInicialDaUrl();
 }, 50);
+
+
+// ==================== PESQUISA POR VOZ ====================
+function configurarPesquisaPorVoz() {
+    const btnMic = document.querySelector('.microphone');
+    const inputBusca = document.getElementById('search-input');
+    if (!btnMic || !inputBusca) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return; // Navegador năo suporta
+
+    // Remove the data-toast so it doesn't conflict
+    btnMic.removeAttribute('data-toast');
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    let estaOuvindo = false;
+
+    btnMic.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (estaOuvindo) {
+            recognition.stop();
+            return;
+        }
+
+        try {
+            recognition.start();
+            estaOuvindo = true;
+            btnMic.classList.add('mic-ouvindo');
+            mostrarToast("Ouvindo... Fale agora");
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    recognition.addEventListener('result', (e) => {
+        const transcricao = e.results[0][0].transcript;
+        inputBusca.value = transcricao;
+        mostrarToast(`Você disse: "${transcricao}"`);
+        
+        // Simular envio de busca
+        document.querySelector('.sidebar-item[data-secao="inicio"]').click();
+        buscarVideos(transcricao);
+    });
+
+    recognition.addEventListener('end', () => {
+        estaOuvindo = false;
+        btnMic.classList.remove('mic-ouvindo');
+    });
+
+    recognition.addEventListener('error', (e) => {
+        estaOuvindo = false;
+        btnMic.classList.remove('mic-ouvindo');
+        if (e.error !== 'aborted') {
+            mostrarToast("Erro na gravação. Tente novamente.");
+        }
+    });
+}
+// Inicializar
+setTimeout(configurarPesquisaPorVoz, 500);
+
+
+// ==================== VISUALIZACAO DE CANAL ====================
+window.abrirCanal = async function(idDoCanal, fromHistory = false) {
+    if (!fromHistory) {
+        window.history.pushState({ view: 'canal', id: idDoCanal }, "", "?channel=" + idDoCanal);
+    }
+    
+    iniciarCarregamento();
+    mostrarView("canal");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    const banner = document.getElementById("canal-banner-visualizacao");
+    const avatar = document.getElementById("canal-avatar-visualizacao");
+    const nome = document.getElementById("canal-nome-visualizacao");
+    const stats = document.getElementById("canal-estatisticas-visualizacao");
+    const desc = document.getElementById("canal-descricao-visualizacao");
+    const btn = document.getElementById("canal-botao-inscrever");
+    const grade = document.getElementById("gradeCanalVisualizacao");
+    
+    banner.style.backgroundImage = "none";
+    avatar.src = "";
+    nome.textContent = "Carregando...";
+    stats.textContent = "";
+    desc.textContent = "";
+    btn.dataset.canalId = idDoCanal;
+    btn.textContent = "Inscrever-se";
+    btn.classList.remove("inscrito");
+    grade.innerHTML = "";
+    
+    try {
+        const res = await fetch(`${URL_DO_BACKEND}/api/canal/${idDoCanal}`);
+        if (!res.ok) throw new Error("Canal năo encontrado");
+        const canal = await res.json();
+        
+        if (canal.banner) banner.style.backgroundImage = `url('${canal.banner}')`;
+        avatar.src = canal.foto;
+        nome.textContent = canal.nome;
+        stats.textContent = `${canal.inscritos} inscritos • ${canal.videos} vídeos`;
+        desc.textContent = canal.descricao;
+        
+        // Verificar inscricao
+        verificarEstadoDoVideo(null, idDoCanal);
+        
+        const resVid = await fetch(`${URL_DO_BACKEND}/api/canal/${idDoCanal}/videos`);
+        const videos = await resVid.json();
+        grade.innerHTML = videos.map(montarCardDeResultado).join("");
+        
+    } catch (e) {
+        console.error(e);
+        nome.textContent = "Erro ao carregar o canal.";
+    }
+    finalizarCarregamento();
+};
+
+
+
+// ==================== MINIPLAYER ====================
+window.estadoMiniplayer = false;
+
+window.toggleMiniplayer = function() {
+    const box = document.querySelector('.media-view-box');
+    if (!box) return;
+
+    if (!window.estadoMiniplayer) {
+        // Ativar miniplayer
+        window.estadoMiniplayer = true;
+        box.classList.add('miniplayer-ativo');
+        
+        // Mover para o body para năo ser escondido pelo display:none do areaAssistir
+        document.body.appendChild(box);
+        
+        // Voltar para a home ou manter a view atual? 
+        // O padrăo do YouTube é voltar pra de onde veio, vamos apenas ir para o Início
+        document.querySelector('.sidebar-item[data-secao="inicio"]').click();
+        
+    } else {
+        // Desativar miniplayer e voltar a assistir
+        window.estadoMiniplayer = false;
+        box.classList.remove('miniplayer-ativo');
+        
+        // Devolver para o areaPlayer
+        const areaPlayer = document.getElementById('areaPlayer');
+        if (areaPlayer) {
+            areaPlayer.insertBefore(box, areaPlayer.firstChild); // Insere antes do titulo
+        }
+        
+        // Voltar para a tela de assistir pegando o ID atual
+        // Como saber o ID? O iframe tem a URL. Mas podemos usar o History.
+        // Ou simplesmente:
+        const videoIdMatch = box.querySelector('iframe').src.match(/embed\/([^?]+)/);
+        if (videoIdMatch) {
+            abrirVideo(videoIdMatch[1]);
+        }
+    }
+};
+
+// Se abrir um vídeo novo e o miniplayer estiver ativo, tem que restaurar o box pro lugar certo
+const originalAbrirVideoMini = window.abrirVideo;
+window.abrirVideo = async function(idDoVideo, fromHistory = false) {
+    if (window.estadoMiniplayer) {
+        window.estadoMiniplayer = false;
+        const box = document.querySelector('.media-view-box');
+        if (box) {
+            box.classList.remove('miniplayer-ativo');
+            const areaPlayer = document.getElementById('areaPlayer');
+            if (areaPlayer) areaPlayer.insertBefore(box, areaPlayer.firstChild);
+        }
+    }
+    return originalAbrirVideoMini(idDoVideo, fromHistory);
+};
+
+
+// ==================== PLAYLIST ====================
+window.estadoPlaylist = null; // { id, videos: [], currentIndex }
+
+window.carregarPlaylistNoPainel = async function(idDaPlaylist, idDoVideoAtual) {
+    const recomendacoes = document.getElementById("recomendacoes");
+    if (!recomendacoes) return;
+
+    try {
+        if (!window.estadoPlaylist || window.estadoPlaylist.id !== idDaPlaylist) {
+            recomendacoes.innerHTML = '<div style="padding:20px; color:#aaa;">Carregando playlist...</div>';
+            const res = await fetch(`${URL_DO_BACKEND}/api/playlist/${idDaPlaylist}`);
+            if (res.ok) {
+                const dados = await res.json();
+                window.estadoPlaylist = {
+                    id: dados.id,
+                    titulo: dados.titulo,
+                    canal: dados.canal,
+                    videos: dados.videos
+                };
+            }
+        }
+
+        if (window.estadoPlaylist && window.estadoPlaylist.videos.length > 0) {
+            const p = window.estadoPlaylist;
+            let index = p.videos.findIndex(v => v.id === idDoVideoAtual);
+            if (index === -1) index = 0;
+            p.currentIndex = index;
+
+            // Render UI
+            let html = `
+                <div class="playlist-painel" style="background:#212121; border-radius:12px; border:1px solid #3d3d3d; margin-bottom: 24px; overflow:hidden;">
+                    <div style="padding:16px; border-bottom:1px solid #3d3d3d;">
+                        <h3 style="font-size:18px; font-weight:bold; margin-bottom:4px;">${p.titulo}</h3>
+                        <p style="font-size:13px; color:#aaa;">${p.canal} - ${index + 1} / ${p.videos.length}</p>
+                    </div>
+                    <div class="playlist-painel-lista" style="max-height: 400px; overflow-y:auto; padding:8px 0;">
+            `;
+
+            p.videos.forEach((vid, i) => {
+                const ativo = (i === index) ? 'background: rgba(255,255,255,0.1);' : '';
+                html += `
+                    <div class="playlist-item" style="display:flex; gap:12px; padding:8px 16px; cursor:pointer; align-items:center; ${ativo}" onclick="abrirVideoDaPlaylist('${vid.id}', '${p.id}')">
+                        <span style="font-size:12px; color:#aaa; min-width:12px;">${i === index ? '▶' : i + 1}</span>
+                        <img src="${vid.miniatura}" style="width:100px; height:56px; border-radius:8px; object-fit:cover;">
+                        <div style="display:flex; flex-direction:column; overflow:hidden;">
+                            <span style="font-size:14px; font-weight:500; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${vid.titulo}</span>
+                            <span style="font-size:12px; color:#aaa;">${vid.canal}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+            
+            // Coloca a playlist no topo e as recomendacoes normais embaixo (mas não vamos recarregar recomendacoes aqui senao apaga)
+            // Na verdade, o `abrirVideo` original desenha recomendacoes e apaga tudo. 
+            // Precisamos que a playlist apareça no topo das recomendações!
+            const painelExistente = recomendacoes.querySelector('.playlist-painel');
+            if (painelExistente) painelExistente.remove();
+            recomendacoes.insertAdjacentHTML('afterbegin', html);
+        }
+    } catch (e) {
+        console.error("Erro na playlist:", e);
+    }
+};
+
+window.abrirVideoDaPlaylist = function(idVideo, idPlaylist) {
+    // Muda a rota e abre o video
+    window.history.pushState({ view: 'assistir', id: idVideo, list: idPlaylist }, "", `?watch=${idVideo}&list=${idPlaylist}`);
+    abrirVideo(idVideo, true, idPlaylist);
+};
+
+// Precisamos injetar suporte a playlist no final de `originalAbrirVideo` ou logo apos `renderizarRecomendacoes`
+// Como năo podemos alterar facilmente `abrirVideo` original, vamos criar um hook pós-carregamento.
+const superOriginalAbrirVideo = window.abrirVideo;
+window.abrirVideo = async function(idDoVideo, fromHistory = false, playlistId = null) {
+    if (!fromHistory) {
+        let url = "?watch=" + idDoVideo;
+        if (playlistId) url += "&list=" + playlistId;
+        window.history.pushState({ view: 'assistir', id: idDoVideo, list: playlistId }, "", url);
+    } else {
+        // Tentar extrair da URL
+        const params = new URLSearchParams(window.location.search);
+        if (!playlistId && params.has('list')) playlistId = params.get('list');
+    }
+    
+    // Call the rest of the chain (which might include miniplayer logic)
+    await superOriginalAbrirVideo(idDoVideo, true); 
+    
+    // After it loads video and recommendations, we inject playlist
+    if (playlistId) {
+        carregarPlaylistNoPainel(playlistId, idDoVideo);
+    } else {
+        window.estadoPlaylist = null;
+    }
+};
