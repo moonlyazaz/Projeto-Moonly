@@ -1377,3 +1377,6 @@ body {
     font-size: 20px;
     cursor: pointer;
 }
+.sidebar-item { cursor: pointer; }
+a.card-video { cursor: pointer; }
+.short-item__acoes button { cursor: pointer; }
