@@ -105,7 +105,7 @@ body {
 }
 
 #search-input {
-    background-color: #121212;
+    background-color: var(--bg-primary);
     border: 1px solid var(--border-color);
     outline: none;
     color: var(--text-primary);
@@ -117,7 +117,7 @@ body {
 }
 
 #search-input::placeholder {
-    color: #909090;
+    color: var(--text-secondary);
 }
 
 .search-keyboard-icon {
@@ -125,7 +125,7 @@ body {
     right: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: #909090;
+    color: var(--text-secondary);
     font-size: 16px;
     pointer-events: none;
 }
@@ -191,7 +191,7 @@ body {
 .icon-button svg {
     width: 24px;
     height: 24px;
-    fill: #fff;
+    fill: var(--text-primary);
 }
 
 .login-button {
@@ -200,7 +200,7 @@ body {
     gap: 6px;
     height: 36px;
     padding: 0 12px;
-    border: 1px solid #565656;
+    border: 1px solid var(--border-color);
     border-radius: 18px;
     color: var(--btn-login-text);
     text-decoration: none;
@@ -1000,7 +1000,7 @@ body {
 }
 
 .comentario-input:focus {
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid var(--text-primary);
     padding-bottom: 3px;
 }
 
@@ -1273,7 +1273,7 @@ body {
     flex-direction: row;
     gap: 4px;
     font-size: 12px;
-    color: #606060;
+    color: var(--text-secondary);
 }
 
 /* ===== Toast de feedback (adaptado do projeto cloneYou) ===== */
@@ -1282,7 +1282,7 @@ body {
     left: 50%;
     bottom: 24px;
     transform: translate(-50%, 16px);
-    background-color: #212121;
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
     padding: 10px 18px;
     border-radius: 8px;
@@ -1372,7 +1372,7 @@ body {
     transition: background-color 0.2s;
 }
 .btn-login-custom:hover {
-    background-color: #333333;
+    background-color: var(--bg-hover);
 }
 .btn-login-custom .img-circle {
     background-color: var(--text-primary);
