@@ -316,6 +316,54 @@ app.get("/api/comentarios/:id", async (req, res) => {
 });
 
 // Qualquer rota que não seja da API cai no index.html (SPA simples).
+
+// ==================== DOWNLOAD ====================
+app.get('/api/download', async (req, res) => {
+    const videoId = req.query.id;
+    const format = req.query.format || 'mp4';
+    
+    if (!videoId) return res.status(400).send("ID nao fornecido");
+    
+    try {
+        const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const info = await ytdl.getInfo(videoUrl);
+        const title = info.videoDetails.title.replace(/[^\w\s-]/gi, '') || "MoonlyVideo";
+        
+        if (format === 'mp3') {
+            res.header('Content-Disposition', `attachment; filename="${title}.mp3"`);
+            ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' }).pipe(res);
+        } else {
+            res.header('Content-Disposition', `attachment; filename="${title}.mp4"`);
+            ytdl(videoUrl, { filter: format => format.container === 'mp4' }).pipe(res);
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Erro ao baixar o video.");
+    }
+});
+
+// ==================== PROXY PIPED API ====================
+app.get('/api/piped/:id', async (req, res) => {
+    try {
+        const videoId = req.params.id;
+        const url = `https://pipedapi.kavin.rocks/streams/${videoId}`;
+        const resposta = await fetch(url);
+        
+        if (!resposta.ok) {
+            const fallback = await fetch(`https://pipedapi.adminforge.de/streams/${videoId}`);
+            const dados = await fallback.json();
+            return res.json(dados);
+        }
+        
+        const dados = await resposta.json();
+        res.json(dados);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: "Erro ao buscar do Piped" });
+    }
+});
+
+
 app.get(/^(?!\/api\/).*/, (req, res) => {
     res.sendFile(path.join(PASTA_DO_FRONTEND, "index.html"));
 });
