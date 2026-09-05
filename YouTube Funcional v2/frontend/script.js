@@ -539,6 +539,7 @@ function inicializarPlayerPrincipal() {
  * @param {string} idDoVideo - ID do vídeo no YouTube (ex: "dQw4w9WgXcQ").
  */
 async function abrirVideo(idDoVideo) {
+    iniciarCarregamento();
     try {
         const resposta = await fetch(`${URL_DO_BACKEND}/api/video/${idDoVideo}`);
         if (!resposta.ok) {
@@ -552,6 +553,7 @@ async function abrirVideo(idDoVideo) {
         
         inicializarPlayerPrincipal();
         inicializarEventosDeComentario(dadosDoVideo.id);
+        finalizarCarregamento();
         
         verificarEstadoDoVideo(dadosDoVideo.id, dadosDoVideo.canal.id);
 
@@ -616,6 +618,7 @@ async function abrirVideo(idDoVideo) {
  *   deixe vazio para busca normal.
  */
 async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
+    iniciarCarregamento();
     try {
         const parametroDeDuracao = filtroDeDuracao ? `&duracao=${filtroDeDuracao}` : "";
         const resposta = await fetch(
@@ -623,6 +626,7 @@ async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
         );
 
         if (!resposta.ok) {
+            finalizarCarregamento();
             mostrarToast("Não foi possível buscar vídeos agora.");
             return;
         }
@@ -633,7 +637,9 @@ async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
         } else {
             renderizarResultados(videosEncontrados, false, "lista");
         }
+        finalizarCarregamento();
     } catch (erro) {
+        finalizarCarregamento();
         avisarSobreErroDeConexao(erro);
     }
 }
@@ -647,17 +653,21 @@ async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
  *   Data API (ex: "10" para Música). Vazio traz todas as categorias.
  */
 async function buscarPopulares(idDaCategoria = "") {
+    iniciarCarregamento();
     try {
         const parametroDeCategoria = idDaCategoria ? `?categoria=${idDaCategoria}` : "";
         const resposta = await fetch(`${URL_DO_BACKEND}/api/populares${parametroDeCategoria}`);
 
         if (!resposta.ok) {
+            finalizarCarregamento();
             mostrarToast("Não foi possível carregar os vídeos em alta agora.");
             return;
         }
         const videosEncontrados = await resposta.json();
         renderizarResultados(videosEncontrados, true, "grid");
+        finalizarCarregamento();
     } catch (erro) {
+        finalizarCarregamento();
         avisarSobreErroDeConexao(erro);
     }
 }
