@@ -512,7 +512,7 @@ window.atualizarStreamPiped = async function(videoId) {
     video.poster = "https://img.youtube.com/vi/" + videoId + "/maxresdefault.jpg";
     
     try {
-        const res = await fetch("https://pipedapi.kavin.rocks/streams/" + videoId);
+        const res = await fetch(`${URL_DO_BACKEND}/api/piped/${videoId}`);
         const data = await res.json();
         
         let streamUrl = "";
