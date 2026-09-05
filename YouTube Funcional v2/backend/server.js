@@ -380,9 +380,6 @@ app.get('/api/piped/:id', async (req, res) => {
     }
 });
 
-    }
-});
-
 
 app.get(/^(?!\/api\/).*/, (req, res) => {
     res.sendFile(path.join(PASTA_DO_FRONTEND, "index.html"));
