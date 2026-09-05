@@ -887,7 +887,13 @@ function configurarBuscaEClique() {
             } else if (secao === "voce") {
                 const logado = localStorage.getItem('usuarioLogadoComGoogle');
                 if (!logado) {
-                    mostrarToast("Faça login para acessar seu canal.");
+                    // No mobile o botão de login do cabeçalho fica escondido
+                    // (fica só nesta aba), então aqui já dispara o login de verdade.
+                    if (typeof fazerLoginCompleto === "function") {
+                        fazerLoginCompleto();
+                    } else {
+                        mostrarToast("Faça login para acessar seu canal.");
+                    }
                 } else {
                     carregarCanalDoUsuario();
                     mostrarView("voce");
@@ -954,6 +960,11 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
         iconeVoce.parentNode.replaceChild(novoAvatar, iconeVoce);
     }
 
+    const iconeBottomNavVoce = document.getElementById('iconeBottomNavVoce');
+    if (iconeBottomNavVoce) {
+        iconeBottomNavVoce.innerHTML = `<img src="${dadosDoUsuario.picture}" referrerpolicy="no-referrer" alt="Você">`;
+    }
+
     avatarAlternativo.textContent = (dadosDoUsuario.given_name || dadosDoUsuario.name || "?").charAt(0).toUpperCase();
 
     // Algumas fotos do Google falham ao carregar (política de referrer);
@@ -992,6 +1003,11 @@ function aplicarUsuarioDeslogado() {
     document.getElementById("sidebarInscricoesDivisor").style.display = "none";
     document.getElementById("containerUsuarioLogado").style.display = "none";
     document.getElementById("containerUsuarioLogado").classList.remove("aberto");
+
+    const iconeBottomNavVoce = document.getElementById('iconeBottomNavVoce');
+    if (iconeBottomNavVoce) {
+        iconeBottomNavVoce.innerHTML = `<i class="fa-regular fa-circle-user"></i>`;
+    }
 }
 
 /**
@@ -2210,12 +2226,15 @@ setTimeout(() => {
     // Inserir antes do primeiro filho
     cabecalhoFinal.insertBefore(btnBuscaMobile, cabecalhoFinal.firstChild);
 
-    // Botão de fechar busca mobile
+    // Botão de fechar busca mobile — fica DENTRO da barra de busca
+    // expandida (não como irmão solto no cabeçalho), senão a barra fixa
+    // que aparece por cima acaba cobrindo a seta.
+    const cabecalhoCentro = document.querySelector('.cabecalho-centro');
     const btnFecharBusca = document.createElement('button');
     btnFecharBusca.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
-    btnFecharBusca.style.cssText = 'background:none; border:none; color:var(--text-primary); font-size:20px; cursor:pointer; padding:0 12px; display:none;';
+    btnFecharBusca.style.cssText = 'background:none; border:none; color:var(--text-primary); font-size:20px; cursor:pointer; padding:0 12px 0 0; display:none; flex-shrink:0;';
     btnFecharBusca.id = 'btn-fechar-busca-mobile';
-    cabecalho.insertBefore(btnFecharBusca, cabecalho.firstChild);
+    cabecalhoCentro.insertBefore(btnFecharBusca, cabecalhoCentro.firstChild);
 
     btnBuscaMobile.addEventListener('click', () => {
         document.body.classList.add('busca-mobile-aberta');

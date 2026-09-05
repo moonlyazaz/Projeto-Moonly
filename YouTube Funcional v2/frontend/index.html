@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>YouTube</title>
     <link rel="icon" href="https://www.youtube.com/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="https://www.youtube.com/favicon.ico" type="image/x-icon">
@@ -349,10 +349,13 @@
         <main class="area-principal">
             <section class="area-inicio" id="areaInicio">
                 <div class="chips-categorias" id="chipsCategorias" style="display: none;">
+                    <button class="chip chip--icone" type="button" data-toast="Filtros em breve.">
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
                     <button class="chip ativo" data-categoria="">Tudo</button>
+                    <button class="chip" data-categoria="20">Jogos</button>
                     <button class="chip" data-categoria="24">Ao vivo</button>
                     <button class="chip" data-categoria="10">Música</button>
-                    <button class="chip" data-categoria="20">Jogos</button>
                     <button class="chip" data-categoria="25">Notícias</button>
                     <button class="chip" data-categoria="17">Esportes</button>
                     <button class="chip" data-categoria="23">Comédia</button>
@@ -424,6 +427,27 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="#" class="sidebar-item mobile-bottom-nav__item ativo" data-secao="inicio">
+            <i class="fa-solid fa-house"></i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="sidebar-item mobile-bottom-nav__item" data-secao="shorts">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="m13.467 1.19-8 4.7a5 5 0 00-.255 8.46 5 5 0 005.32 8.462l8-4.7a5 5 0 00.258-8.462 5 5 0 001.641-6.464l-.12-.217a5 5 0 00-6.844-1.78m5.12 2.79a2.999 2.999 0 01-1.067 4.107l-1.327.78a1 1 0 00.096 1.775l.943.423a3 3 0 01.288 5.323l-8 4.7a3 3 0 01-3.039-5.173l1.327-.78a1 1 0 00-.097-1.775l-.942-.423a3 3 0 01-.288-5.323l8-4.7a3 3 0 014.106 1.066ZM15 12l-5-3v6l5-3Z"></path></svg>
+            <span>Shorts</span>
+        </a>
+        <a href="#" class="sidebar-item mobile-bottom-nav__item" data-secao="inscricoes">
+            <i class="fa-regular fa-rectangle-list"></i>
+            <span>Inscrições</span>
+        </a>
+        <a href="#" class="sidebar-item mobile-bottom-nav__item" data-secao="voce">
+            <span id="iconeBottomNavVoce" class="mobile-bottom-nav__avatar-generico">
+                <i class="fa-regular fa-circle-user"></i>
+            </span>
+            <span>Você</span>
+        </a>
+    </nav>
+
     <script>
         // Como o próprio backend agora serve esta página, as chamadas Ã 
         // API usam caminhos relativos (mesma origem). Não é mais preciso
@@ -435,7 +459,11 @@
         // Veja o passo a passo completo no README.md.
         const GOOGLE_CLIENT_ID = "706045740692-s3dligdlr7ogmf2e8mf9hqr6j1ghuh89.apps.googleusercontent.com";
     </script>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        // Carrega o socket.io a partir do MESMO backend configurado
+        // acima (local ou no Render), em vez de localhost fixo.
+        document.write('<script src="' + URL_DO_BACKEND + '/socket.io/socket.io.js"><\/script>');
+    </script>
     <script src="script.js"></script>
 
 </body>
