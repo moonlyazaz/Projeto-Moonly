@@ -100,11 +100,11 @@
                     <i class="fa-solid fa-clapperboard"></i>
                     <span>Inscrições</span>
                 </a>
-                <a  class="sidebar-item" data-toast="Faça login para acessar seu canal.">
-                    <i class="fa-regular fa-circle-user"></i>
+                <a  class="sidebar-item" data-secao="voce" id="btn-sidebar-voce">
+                    <i class="fa-regular fa-circle-user" id="icone-sidebar-voce"></i>
                     <span>Você</span>
                 </a>
-                <a  class="sidebar-item" data-toast="Faça login para ver seu histórico.">
+                <a  class="sidebar-item" data-secao="historico">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     <span>Histórico</span>
                 </a>
@@ -205,6 +205,15 @@
             </section>
 
             <section class="area-shorts" id="areaShorts" style="display: none;"></section>
+            
+            <div id="areaHistorico" class="area-view" style="display: none; padding: 24px; color: #fff;">
+                <h2 style="color: #fff; margin-bottom: 24px; font-size: 24px;">Histórico de exibição</h2>
+                <div id="gradeHistorico" class="area-resultados lista"></div>
+            </div>
+            
+            <div id="areaVoce" class="area-view" style="display: none; padding: 24px; color: #fff;">
+                <div id="conteudoCanalVoce"></div>
+            </div>
         </main>
         </div>
 
@@ -225,4 +234,5 @@
 
 </body>
 </html>
+
 

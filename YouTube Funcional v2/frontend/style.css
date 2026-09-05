@@ -1380,3 +1380,9 @@ body {
 .sidebar-item { cursor: pointer; }
 a.card-video { cursor: pointer; }
 .short-item__acoes button { cursor: pointer; }
+.sidebar-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}

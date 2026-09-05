@@ -192,6 +192,10 @@ function mostrarView(nomeDaView) {
     document.getElementById("areaInicio").style.display = nomeDaView === "inicio" ? "flex" : "none";
     document.getElementById("areaAssistir").style.display = nomeDaView === "assistir" ? "flex" : "none";
     document.getElementById("areaShorts").style.display = nomeDaView === "shorts" ? "flex" : "none";
+    const areaHistorico = document.getElementById("areaHistorico");
+    if (areaHistorico) areaHistorico.style.display = nomeDaView === "historico" ? "block" : "none";
+    const areaVoce = document.getElementById("areaVoce");
+    if (areaVoce) areaVoce.style.display = nomeDaView === "voce" ? "block" : "none";
 
     // No YouTube real, a página de Shorts usa quase toda a altura da tela,
     // com bem pouco respiro ao redor do player — bem menos que as outras views.
@@ -555,6 +559,7 @@ async function abrirVideo(idDoVideo) {
         inicializarEventosDeComentario(dadosDoVideo.id);
         finalizarCarregamento();
         
+        adicionarAoHistorico(dadosDoVideo);
         verificarEstadoDoVideo(dadosDoVideo.id, dadosDoVideo.canal.id);
 
         fetch(`${URL_DO_BACKEND}/api/comentarios/${idDoVideo}`)
@@ -779,6 +784,17 @@ function configurarBuscaEClique() {
                 buscarVideos(item.dataset.termo);
             } else if (secao === "inscricoes") {
                 abrirInscricoesReais();
+            } else if (secao === "historico") {
+                renderizarHistorico();
+                mostrarView("historico");
+            } else if (secao === "voce") {
+                const logado = localStorage.getItem('usuarioLogadoComGoogle');
+                if (!logado) {
+                    mostrarToast("Faça login para acessar seu canal.");
+                } else {
+                    carregarCanalDoUsuario();
+                    mostrarView("voce");
+                }
             }
         });
     });
@@ -818,6 +834,15 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
 
     const imagemDoAvatar = document.getElementById("avatarDoUsuario");
     const avatarAlternativo = document.getElementById("avatarDoUsuarioFallback");
+
+    const iconeVoce = document.getElementById('icone-sidebar-voce');
+    if (iconeVoce) {
+        const novoAvatar = document.createElement('img');
+        novoAvatar.src = dadosDoUsuario.picture;
+        novoAvatar.className = "sidebar-avatar";
+        novoAvatar.id = "icone-sidebar-voce";
+        iconeVoce.parentNode.replaceChild(novoAvatar, iconeVoce);
+    }
 
     avatarAlternativo.textContent = (dadosDoUsuario.given_name || dadosDoUsuario.name || "?").charAt(0).toUpperCase();
 
@@ -1571,5 +1596,68 @@ if (initialParams.has('v')) {
     window.abrirVideo(initialParams.get('v'), true);
 } else {
     buscarPopulares();
+}
+
+// --- SISTEMA DE HISTORICO E CANAL ---
+
+function adicionarAoHistorico(video) {
+    let historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
+    historico = historico.filter(v => v.id !== video.id);
+    historico.unshift(video);
+    if (historico.length > 50) historico.pop();
+    localStorage.setItem('historicoYoutube', JSON.stringify(historico));
+}
+
+function renderizarHistorico() {
+    const grade = document.getElementById('gradeHistorico');
+    if (!grade) return;
+    const historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
+    if (historico.length === 0) {
+        grade.innerHTML = '<p style="color:#aaa;">Você ainda não assistiu a nenhum vídeo neste navegador.</p>';
+    } else {
+        grade.innerHTML = historico.map(montarCardDeResultado).join('');
+    }
+}
+
+async function carregarCanalDoUsuario() {
+    const container = document.getElementById('conteudoCanalVoce');
+    if (!container) return;
+    container.innerHTML = '<p>Carregando canal...</p>';
+    iniciarCarregamento();
+
+    try {
+        const token = await obterTokenDeAcessoDoYoutube();
+        const res = await fetch('https://youtube.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        
+        if (data.error || !data.items || data.items.length === 0) {
+            container.innerHTML = '<p style="color: #aaa;">Você precisa criar um canal no YouTube primeiro para ter uma página "Você".</p>';
+        } else {
+            const canal = data.items[0];
+            container.innerHTML = `
+                <div style="display:flex; align-items:center; gap: 24px; margin-bottom: 32px;">
+                    <img src="${canal.snippet.thumbnails.high.url}" style="width: 128px; height: 128px; border-radius: 50%;">
+                    <div>
+                        <h1 style="font-size: 32px; font-weight: 500; margin:0 0 8px 0;">${canal.snippet.title}</h1>
+                        <p style="color: #aaa; margin:0;">
+                            @${canal.snippet.customUrl || canal.snippet.title.replace(/ /g, '')} • 
+                            ${canal.statistics.subscriberCount} inscritos • 
+                            ${canal.statistics.videoCount} vídeos
+                        </p>
+                        <p style="color: #ddd; margin-top: 12px; font-size: 14px;">${canal.snippet.description || 'Nenhuma descrição fornecida.'}</p>
+                    </div>
+                </div>
+                <hr style="border-color: #383838; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; font-weight: 500;">Vídeos recentes</h3>
+                <p style="color:#aaa; font-size: 14px; margin-top:8px;">(Apenas visualização das estatísticas do canal via API oficial)</p>
+            `;
+        }
+    } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p>Erro ao carregar os dados do canal.</p>';
+    }
+    finalizarCarregamento();
 }
 
