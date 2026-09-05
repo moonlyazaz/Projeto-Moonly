@@ -342,49 +342,11 @@ app.get('/api/download', async (req, res) => {
     }
 });
 
-// ==================== PROXY PIPED API ====================
-app.get('/api/piped/:id', async (req, res) => {
-    try {
-        const videoId = req.params.id;
-        const instances = [
-            `https://pipedapi.kavin.rocks/streams/${videoId}`,
-            `https://pipedapi.moomoo.me/streams/${videoId}`,
-            `https://piped-api.garudalinux.org/streams/${videoId}`,
-            `https://pipedapi.adminforge.de/streams/${videoId}`
-        ];
-        
-        for (const url of instances) {
-            try {
-                const resposta = await fetch(url);
-                if (resposta.ok) {
-                    const texto = await resposta.text();
-                    try {
-                        const dados = JSON.parse(texto);
-                        if (dados && dados.videoStreams) {
-                            return res.json(dados);
-                        }
-                    } catch (errJson) {
-                        console.log(`Instancia ${url} retornou HTML/Erro (nao JSON)`);
-                    }
-                }
-            } catch (errFetch) {
-                console.log(`Instancia ${url} falhou (CORS/Down)`);
-            }
-        }
-        
-        return res.status(500).json({ error: "Todas as instancias do Piped falharam." });
-        
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Erro interno no Proxy Piped" });
-    }
-});
 
 
 app.get(/^(?!\/api\/).*/, (req, res) => {
     res.sendFile(path.join(PASTA_DO_FRONTEND, "index.html"));
 });
-
 
 app.get("/api/sugestoes", async (req, res) => {
     const q = req.query.q;
@@ -400,7 +362,6 @@ app.get("/api/sugestoes", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar sugestões" });
     }
 });
-
 
 // ==================== CANAIS ====================
 
@@ -469,7 +430,6 @@ app.get("/api/canal/:id/videos", async (req, res) => {
     }
 });
 
-
 // ==================== PLAYLISTS ====================
 app.get("/api/playlist/:id", async (req, res) => {
     const idDaPlaylist = req.params.id;
@@ -513,7 +473,6 @@ app.get("/api/playlist/:id", async (req, res) => {
         res.status(500).json({ erro: "Falha ao buscar playlist." });
     }
 });
-
 
 // ==================== WATCH PARTY (SOCKET.IO) ====================
 const server = http.createServer(app);
