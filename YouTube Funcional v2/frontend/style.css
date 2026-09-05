@@ -439,7 +439,9 @@ body {
     display: flex;
     width: 100%;
     gap: 24px;
-}
+
+    justify-content: center;
+    margin: 0 auto;}
 
 .area-player {
     display: flex;
@@ -447,7 +449,8 @@ body {
     flex: 1;
     gap: 12px;
     min-width: 0;
-}
+
+    max-width: calc((100vh - 140px) * 16 / 9);}
 
 /* ===== Grade de resultados (Início / pesquisa) ===== */
 .area-inicio {
@@ -819,13 +822,17 @@ body {
 }
 
 .media-view-box {
-    display: block;
+    display: flex;
+    justify-content: center;
     width: 100%;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    max-width: calc((100vh - 140px) * 16 / 9); /* Limit width based on height to maintain 16:9 naturally */
+    max-height: calc(100vh - 140px);
+    aspect-ratio: 16 / 9;
     border-radius: 12px;
     background-color: #000000;
     overflow: hidden;
     position: relative;
+    margin: 0 auto;
 }
 
 .media-view-box__video {
