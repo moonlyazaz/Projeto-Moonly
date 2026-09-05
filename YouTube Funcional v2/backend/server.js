@@ -7,7 +7,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fetch = require("node-fetch"); // Necessário no Node 16, que não tem fetch() nativo.
+const fetch = require("node-fetch");
+
+const ytdl = require('@distube/ytdl-core');
+const http = require('http');
+const { Server } = require('socket.io');
+ // Necessário no Node 16, que não tem fetch() nativo.
 
 const app = express();
 const PORTA = process.env.PORTA || 3000;
@@ -444,7 +449,33 @@ app.get("/api/playlist/:id", async (req, res) => {
     }
 });
 
-app.listen(PORTA, () => {
-    console.log(`Servidor rodando em http://localhost:${PORTA}`);
-    console.log(`Abra http://localhost:${PORTA} no navegador (não abra o index.html direto).`);
+
+// ==================== WATCH PARTY (SOCKET.IO) ====================
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
 });
+
+io.on('connection', (socket) => {
+    socket.on('join-room', (roomId) => {
+        socket.join(roomId);
+        console.log(`Usuario ${socket.id} entrou na sala ${roomId}`);
+        // Notifica que alguem entrou
+        socket.to(roomId).emit('user-joined', socket.id);
+    });
+
+    socket.on('player-action', (data) => {
+        // data: { roomId, action: 'pause' | 'play' | 'seek', time: Number }
+        // Repassa para todos da sala MENOS quem enviou
+        socket.to(data.roomId).emit('sync-action', data);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Usuario desconectado:', socket.id);
+    });
+});
+
+server.listen(PORTA, () => { console.log("Servidor rodando na porta " + PORTA); });

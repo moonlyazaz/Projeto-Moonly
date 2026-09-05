@@ -49,6 +49,11 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                     <span class="media-view-box__time" id="main-time-display">0:00 / 0:00</span>
                     <div class="media-view-box__spacer"></div>
                       <button class="media-view-box__btn" id="main-like-btn" title="Gostei" onclick="adicionarGostei('${dadosDoVideoPrincipal.id}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}'), '${dadosDoVideoPrincipal.imagemCapa}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}'), decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.visualizacoes)}'))"><i class="fa-regular fa-thumbs-up"></i></button>
+                      
+                    <button class="media-view-box__btn" id="main-download-btn" title="Baixar Video" onclick="abrirModalDownload('${dadosDoVideoPrincipal.id}')"><i class="fa-solid fa-download"></i></button>
+                    <button class="media-view-box__btn" id="main-party-btn" title="Watch Party (Sala)" onclick="iniciarWatchParty()"><i class="fa-solid fa-users"></i></button>
+                    <button class="media-view-box__btn" id="main-lyrics-btn" title="Letra da Musica" onclick="abrirLetras('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}', '${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}')"><i class="fa-solid fa-microphone-lines"></i></button>
+
                       <button class="media-view-box__btn" id="main-watch-later-btn" title="Assistir mais tarde" onclick="adicionarAssistirMaisTarde(null, '${dadosDoVideoPrincipal.id}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.titulo)}'), '${dadosDoVideoPrincipal.imagemCapa}', decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.canal.nome)}'), decodeURIComponent('${encodeURIComponent(dadosDoVideoPrincipal.visualizacoes)}'))"><i class="fa-regular fa-clock"></i></button>
                     <button class="media-view-box__btn" id="main-miniplayer-btn" title="Miniplayer" onclick="toggleMiniplayer()"><i class="fa-solid fa-compress"></i></button>
                     <button class="media-view-box__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
@@ -511,6 +516,15 @@ function inicializarPlayerPrincipal(ehAoVivo = false) {
                     const icone = document.getElementById('main-play-icon');
                     if (e.data === 1) { // PLAYING
                         if(icone) { icone.classList.remove('fa-play'); icone.classList.add('fa-pause'); }
+
+                    if (!window.ignoreNextAction && window.partyRoomId && window.socket) {
+                        if (e.data === 1) { // PLAY
+                            window.socket.emit('player-action', { roomId: window.partyRoomId, action: 'play', time: e.target.getCurrentTime() });
+                        } else if (e.data === 2) { // PAUSE
+                            window.socket.emit('player-action', { roomId: window.partyRoomId, action: 'pause', time: e.target.getCurrentTime() });
+                        }
+                    }
+
                     } else {
                         if(icone) { icone.classList.remove('fa-pause'); icone.classList.add('fa-play'); }
                     }
@@ -2141,6 +2155,13 @@ window.addEventListener('popstate', (e) => {
 
 function carregarEstadoInicialDaUrl(fromHistory = false) {
     const params = new URLSearchParams(window.location.search);
+    
+    if (params.has('party')) {
+        setTimeout(() => {
+            window.conectarWatchParty(params.get('party'));
+        }, 1000);
+    }
+
     if (params.has('watch')) {
         window.abrirVideo(params.get("watch"), fromHistory, params.get("list"));
     } else if (params.has('v')) { // Compatibilidade com links antigos / yt normal
@@ -2518,3 +2539,214 @@ window.abrirVideoDaPlaylist = async function(idVideo, idPlaylist) {
     originalAbrirVideoDaPlaylist(idVideo, idPlaylist);
 };
 
+
+
+// ==================== DOWNLOAD ====================
+window.abrirModalDownload = function(videoId) {
+    const p = prompt("Digite 'mp3' para Audio ou 'mp4' para Video:");
+    if (p === 'mp3' || p === 'mp4') {
+        mostrarToast("Iniciando download... Pode demorar alguns instantes.");
+        window.open(`${URL_DO_BACKEND}/api/download?id=${videoId}&format=${p}`, '_blank');
+    }
+};
+
+// ==================== WATCH PARTY (SOCKET.IO) ====================
+window.socket = null;
+window.isPartyHost = false;
+window.partyRoomId = null;
+
+// Evitar loop de eventos (ex: recebe pause, e emite pause de novo)
+window.ignoreNextAction = false;
+
+window.iniciarWatchParty = function() {
+    if (window.partyRoomId) {
+        mostrarToast("Você já está em uma sala: " + window.partyRoomId);
+        return;
+    }
+    const salaId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    conectarWatchParty(salaId);
+    
+    // Atualiza a URL para o amigo poder entrar
+    const params = new URLSearchParams(window.location.search);
+    params.set('party', salaId);
+    window.history.pushState(history.state, "", "?" + params.toString());
+    
+    mostrarToast("Sala criada! Copie a URL e mande pro seu amigo. Sala: " + salaId);
+    
+    // Mostra indicador visual na tela
+    mostrarIndicadorParty(salaId);
+};
+
+window.conectarWatchParty = function(salaId) {
+    if (typeof io === 'undefined') {
+        mostrarToast("Servidor Socket.IO năo disponivel.");
+        return;
+    }
+    
+    window.socket = io(URL_DO_BACKEND);
+    window.partyRoomId = salaId;
+    
+    window.socket.emit('join-room', salaId);
+    
+    window.socket.on('user-joined', (id) => {
+        mostrarToast("Um amigo entrou na Watch Party!");
+    });
+    
+    window.socket.on('sync-action', (data) => {
+        if (!playerPrincipal) return;
+        
+        window.ignoreNextAction = true;
+        
+        if (data.action === 'pause') {
+            playerPrincipal.pauseVideo();
+        } else if (data.action === 'play') {
+            playerPrincipal.seekTo(data.time, true);
+            playerPrincipal.playVideo();
+        } else if (data.action === 'seek') {
+            playerPrincipal.seekTo(data.time, true);
+        }
+        
+        setTimeout(() => { window.ignoreNextAction = false; }, 1000);
+    });
+    mostrarIndicadorParty(salaId);
+};
+
+function mostrarIndicadorParty(salaId) {
+    const indic = document.createElement('div');
+    indic.style = "position:fixed; top:80px; right:20px; background:#e52d27; color:#fff; padding:8px 16px; border-radius:20px; z-index:9999; font-weight:bold;";
+    indic.innerText = "🔥 Watch Party: " + salaId;
+    document.body.appendChild(indic);
+}
+
+// ==================== LETRAS DE MÚSICA ====================
+window.abrirLetras = async function(tituloEncode, canalEncode) {
+    const titulo = decodeURIComponent(tituloEncode);
+    const canal = decodeURIComponent(canalEncode);
+    
+    const recomendacoes = document.getElementById("recomendacoes");
+    if (!recomendacoes) return;
+    
+    recomendacoes.innerHTML = '<div style="padding:20px; color:#fff;">Buscando letra...</div>';
+    
+    // Limpar o titulo (Tirar coisas como "Official Video", "Lyric", etc)
+    const tituloLimpo = titulo.replace(/\(.*?\)|\[.*?\]/g, '').split('-')[1] || titulo.replace(/\(.*?\)|\[.*?\]/g, '');
+    const artistaReal = titulo.split('-')[0] ? titulo.split('-')[0].trim() : canal;
+    
+    try {
+        const res = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(artistaReal)}/${encodeURIComponent(tituloLimpo.trim())}`);
+        const dados = await res.json();
+        
+        if (dados.lyrics) {
+            recomendacoes.innerHTML = `
+                <div style="background:#212121; padding:24px; border-radius:12px; color:#fff; border:1px solid #3d3d3d; font-family:sans-serif;">
+                    <h3 style="margin-bottom:16px; font-size:20px;">Letra</h3>
+                    <div style="white-space:pre-wrap; font-size:16px; line-height:1.6; color:#aaa; max-height:600px; overflow-y:auto;">${dados.lyrics}</div>
+                </div>
+            `;
+        } else {
+            recomendacoes.innerHTML = '<div style="padding:20px; color:#aaa;">Letra não encontrada na base pública.</div>';
+        }
+    } catch(e) {
+        recomendacoes.innerHTML = '<div style="padding:20px; color:#aaa;">Erro ao buscar letra.</div>';
+    }
+};
+
+// ==================== EASTER EGG (SNAKE) ====================
+window.secretBuffer = "";
+document.addEventListener("keydown", (e) => {
+    // Ignorar se estiver digitando em input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    window.secretBuffer += e.key.toLowerCase();
+    if (window.secretBuffer.length > 5) {
+        window.secretBuffer = window.secretBuffer.slice(1);
+    }
+    
+    if (window.secretBuffer === "jogar") {
+        iniciarJogoCobrinha();
+        window.secretBuffer = "";
+    }
+});
+
+function iniciarJogoCobrinha() {
+    const box = document.querySelector('.media-view-box');
+    if (!box) return;
+    
+    if (playerPrincipal) playerPrincipal.pauseVideo();
+    
+    let canvas = document.getElementById('snake-canvas');
+    if (canvas) canvas.remove();
+    
+    canvas = document.createElement('canvas');
+    canvas.id = 'snake-canvas';
+    canvas.width = box.clientWidth;
+    canvas.height = box.clientHeight;
+    canvas.style = "position:absolute; top:0; left:0; z-index:999; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px);";
+    box.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    const boxSize = 20;
+    let snake = [];
+    snake[0] = { x: 9 * boxSize, y: 10 * boxSize };
+    
+    let food = {
+        x: Math.floor(Math.random() * (canvas.width/boxSize)) * boxSize,
+        y: Math.floor(Math.random() * (canvas.height/boxSize)) * boxSize
+    };
+    
+    let d;
+    document.addEventListener("keydown", direction);
+    function direction(event) {
+        let key = event.keyCode;
+        if( key == 37 && d != "RIGHT"){ d = "LEFT"; }
+        else if(key == 38 && d != "DOWN"){ d = "UP"; }
+        else if(key == 39 && d != "LEFT"){ d = "RIGHT"; }
+        else if(key == 40 && d != "UP"){ d = "DOWN"; }
+    }
+    
+    const game = setInterval(draw, 100);
+    
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "white";
+        ctx.font = "24px Arial";
+        ctx.fillText("🐍 USE AS SETAS PARA JOGAR", 20, 30);
+        
+        for( let i = 0; i < snake.length ; i++){
+            ctx.fillStyle = ( i == 0 ) ? "#4CAF50" : "white";
+            ctx.fillRect(snake[i].x, snake[i].y, boxSize, boxSize);
+        }
+        
+        ctx.fillStyle = "red";
+        ctx.fillRect(food.x, food.y, boxSize, boxSize);
+        
+        let snakeX = snake[0].x;
+        let snakeY = snake[0].y;
+        
+        if( d == "LEFT") snakeX -= boxSize;
+        if( d == "UP") snakeY -= boxSize;
+        if( d == "RIGHT") snakeX += boxSize;
+        if( d == "DOWN") snakeY += boxSize;
+        
+        if(snakeX == food.x && snakeY == food.y){
+            food = {
+                x: Math.floor(Math.random() * (canvas.width/boxSize)) * boxSize,
+                y: Math.floor(Math.random() * (canvas.height/boxSize)) * boxSize
+            };
+        } else {
+            snake.pop();
+        }
+        
+        let newHead = { x: snakeX, y: snakeY };
+        
+        if(snakeX < 0 || snakeX > canvas.width || snakeY < 0 || snakeY > canvas.height){
+            clearInterval(game);
+            canvas.remove();
+            if(playerPrincipal) playerPrincipal.playVideo();
+            mostrarToast("Fim de Jogo!");
+        }
+        snake.unshift(newHead);
+    }
+}
