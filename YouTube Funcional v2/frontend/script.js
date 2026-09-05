@@ -1636,13 +1636,17 @@ async function carregarCanalDoUsuario() {
             container.innerHTML = '<p style="color: #aaa;">Você precisa criar um canal no YouTube primeiro para ter uma página "Você".</p>';
         } else {
             const canal = data.items[0];
+            const urlImagem = canal.snippet.thumbnails?.high?.url || canal.snippet.thumbnails?.default?.url || '';
+            let arrobaNome = canal.snippet.customUrl || canal.snippet.title.replace(/ /g, '');
+            if (!arrobaNome.startsWith('@')) arrobaNome = '@' + arrobaNome;
+
             container.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 24px; margin-bottom: 32px;">
-                    <img src="${canal.snippet.thumbnails.high.url}" style="width: 128px; height: 128px; border-radius: 50%;">
+                    <img src="${urlImagem}" referrerpolicy="no-referrer" style="width: 128px; height: 128px; border-radius: 50%; background-color: #333;">
                     <div>
                         <h1 style="font-size: 32px; font-weight: 500; margin:0 0 8px 0;">${canal.snippet.title}</h1>
                         <p style="color: #aaa; margin:0;">
-                            @${canal.snippet.customUrl || canal.snippet.title.replace(/ /g, '')} • 
+                            ${arrobaNome} • 
                             ${canal.statistics.subscriberCount} inscritos • 
                             ${canal.statistics.videoCount} vídeos
                         </p>
