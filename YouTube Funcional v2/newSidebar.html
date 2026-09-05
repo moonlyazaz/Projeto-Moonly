@@ -1,0 +1,66 @@
+﻿<!-- Início, Shorts, Inscrições -->
+            <nav class="sidebar-secao">
+                <a  class="sidebar-item ativo" data-secao="inicio">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Início</span>
+                </a>
+                <a  class="sidebar-item" data-secao="shorts">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Shorts</span>
+                </a>
+                <a  class="sidebar-item" data-secao="inscricoes">
+                    <i class="fa-brands fa-youtube"></i>
+                    <span>Inscrições</span>
+                </a>
+            </nav>
+
+            <hr class="sidebar-divisor">
+
+            <div class="sidebar-login" id="sidebarLogin">
+                <p>Faça login para curtir vídeos, comentar e se inscrever.</p>
+                <div id="containerLoginGoogleSidebar">
+                    <button class="btn-login-custom" onclick="fazerLoginCompleto()">
+                        <div class="img-circle">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
+                        </div>
+                        Fazer login
+                    </button>
+                </div>
+            </div>
+
+            <!-- Seção Você (Mostrada quando logado) -->
+            <nav class="sidebar-secao" id="sidebarVoceGroup" style="display:none;">
+                <a class="sidebar-item" data-secao="voce" id="btn-sidebar-voce" style="font-weight: 600; font-size: 16px;">
+                    <span>Você</span>
+                    <i class="fa-solid fa-chevron-right" style="font-size: 14px; margin-left: 8px;"></i>
+                </a>
+                <a class="sidebar-item" data-secao="voce">
+                    <i class="fa-regular fa-id-badge"></i>
+                    <span>Seu canal</span>
+                </a>
+                <a class="sidebar-item" data-secao="historico">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Histórico</span>
+                </a>
+                <a class="sidebar-item" data-toast="Playlists em breve.">
+                    <i class="fa-solid fa-list-ul"></i>
+                    <span>Playlists</span>
+                </a>
+                <a class="sidebar-item" data-toast="Assistir mais tarde em breve.">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Assistir mais tarde</span>
+                </a>
+                <a class="sidebar-item" data-toast="Vídeos marcados com Gostei em breve.">
+                    <i class="fa-regular fa-thumbs-up"></i>
+                    <span>Vídeos com "Gostei"</span>
+                </a>
+                <a class="sidebar-item" data-toast="Seus vídeos em breve.">
+                    <i class="fa-regular fa-circle-play"></i>
+                    <span>Seus vídeos</span>
+                </a>
+                <a class="sidebar-item" data-toast="Downloads não disponíveis.">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Downloads</span>
+                </a>
+            </nav>
+            <hr class="sidebar-divisor" id="sidebarVoceDivisor" style="display:none;">

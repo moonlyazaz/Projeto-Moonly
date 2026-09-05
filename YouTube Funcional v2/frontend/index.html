@@ -50,7 +50,7 @@
                </button>
             </form>
 
-           <button class="microphone" type="button" data-toast="Pesquisa por voz nÃ£o Ã© compatÃ­vel com este navegador.">            
+           <button class="microphone" type="button" data-toast="Pesquisa por voz não é compatível com este navegador.">            
                <i class="fa-solid fa-microphone"></i>
                </button>
         </div>
@@ -58,10 +58,10 @@
 
 
          <div class="cabecalho-final">
-           <button class="icon-button" title="Criar" data-toast="CriaÃ§Ã£o de vÃ­deos indisponÃ­vel.">
+           <button class="icon-button" title="Criar" data-toast="Criação de vídeos indisponível.">
              <i class="fa-solid fa-video"></i>
            </button>
-           <button class="icon-button" title="NotificaÃ§Ãµes" data-toast="Nenhuma notificaÃ§Ã£o nova.">
+           <button class="icon-button" title="Notificações" data-toast="Nenhuma notificação nova.">
              <i class="fa-regular fa-bell"></i>
            </button>
 
@@ -77,192 +77,245 @@
            <div id="containerUsuarioLogado" class="usuario-logado" style="display: none;">
                 <img id="avatarDoUsuario" class="usuario-logado__avatar" src="" alt="Sua foto de perfil" referrerpolicy="no-referrer">
                 <span id="avatarDoUsuarioFallback" class="usuario-logado__avatar usuario-logado__avatar--fallback" style="display: none;"></span>
-                                ﻿<div class="usuario-logado__menu">
-    <!-- Painel Principal -->
-    <div id="painel-principal" class="menu-painel ativo">
-        <div class="menu-header">
-            <img id="menuAvatar" class="menu-header__avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
-            <div class="menu-header__info">
-                <p id="nomeDoUsuario"></p>
-                <p id="emailDoUsuario"></p>
-                <a href="#" id="btn-menu-canal-link" class="menu-header__link">Acessar seu canal</a>
-            </div>
-        </div>
-        <hr class="menu-divisor">
-        
-        <div class="menu-item" data-toast="Redirecionando para a Conta do Google...">
-            <i class="fa-brands fa-google"></i>
-            <span>Conta do Google</span>
-        </div>
-        <div class="menu-item" data-toast="Troca de conta indisponível no clone.">
-            <i class="fa-solid fa-users"></i>
-            <span>Mudar de conta</span>
-            <i class="fa-solid fa-chevron-right menu-chevron"></i>
-        </div>
-        <div class="menu-item" id="botaoSair">
-            <i class="fa-solid fa-sign-out-alt"></i>
-            <span>Sair</span>
-        </div>
-        
-        <hr class="menu-divisor">
-        <div class="menu-item" data-toast="YouTube Studio não disponível.">
-            <i class="fa-brands fa-youtube"></i>
-            <span>YouTube Studio</span>
-        </div>
-        <div class="menu-item" data-toast="Compras indisponíveis.">
-            <i class="fa-solid fa-dollar-sign" style="width: 24px; text-align: center; font-size: 16px; border: 1px solid var(--text-primary); border-radius: 50%; height: 18px; line-height: 16px; display: inline-block;"></i>
-            <span>Compras e assinaturas</span>
-        </div>
-        
-        <hr class="menu-divisor">
-        <div class="menu-item" data-toast="Dados indisponíveis.">
-            <i class="fa-solid fa-shield-alt"></i>
-            <span>Seus dados no YouTube</span>
-        </div>
-        <div class="menu-item" id="btn-menu-tema">
-            <i class="fa-regular fa-moon"></i>
-            <span id="texto-menu-tema">Aparência: tema escuro</span>
-            <i class="fa-solid fa-chevron-right menu-chevron"></i>
-        </div>
-        <div class="menu-item" id="btn-menu-idioma">
-            <i class="fa-solid fa-language"></i>
-            <span id="texto-menu-idioma">Idioma de exibição: Português</span>
-            <i class="fa-solid fa-chevron-right menu-chevron"></i>
-        </div>
-        <div class="menu-item" data-toast="Modo restrito desativado.">
-            <i class="fa-solid fa-user-lock"></i>
-            <span>Modo restrito: desativado</span>
-            <i class="fa-solid fa-chevron-right menu-chevron"></i>
-        </div>
-        <div class="menu-item" data-toast="Local fixo no Brasil.">
-            <i class="fa-solid fa-globe"></i>
-            <span>Local: Brasil</span>
-            <i class="fa-solid fa-chevron-right menu-chevron"></i>
-        </div>
-        <div class="menu-item" data-toast="Atalhos não implementados.">
-            <i class="fa-regular fa-keyboard"></i>
-            <span>Atalhos do teclado</span>
-        </div>
-        
-        <hr class="menu-divisor">
-        <div class="menu-item" data-toast="Configurações não implementadas.">
-            <i class="fa-solid fa-cog"></i>
-            <span>Configurações</span>
-        </div>
-        
-        <hr class="menu-divisor">
-        <div class="menu-item" data-toast="Central de ajuda.">
-            <i class="fa-regular fa-circle-question"></i>
-            <span>Ajuda</span>
-        </div>
-        <div class="menu-item" data-toast="Feedback enviado.">
-            <i class="fa-regular fa-comment-dots"></i>
-            <span>Enviar feedback</span>
-        </div>
-    </div>
+                                <div class="usuario-logado__menu">
+                    <!-- Painel Principal -->
+                    <div id="painel-principal" class="menu-painel ativo">
+                        <div class="menu-header">
+                            <img id="menuAvatar" class="menu-header__avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
+                            <div class="menu-header__info">
+                                <p id="nomeDoUsuario"></p>
+                                <p id="emailDoUsuario"></p>
+                                <a href="#" id="btn-menu-canal-link" class="menu-header__link">Acessar seu canal</a>
+                            </div>
+                        </div>
+                        <hr class="menu-divisor">
+                        
+                        <div class="menu-item" data-toast="Redirecionando para a Conta do Google...">
+                            <i class="fa-brands fa-google"></i>
+                            <span>Conta do Google</span>
+                        </div>
+                        <div class="menu-item" data-toast="Troca de conta indisponível no clone.">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Mudar de conta</span>
+                            <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                        </div>
+                        <div class="menu-item" id="botaoSair">
+                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <span>Sair</span>
+                        </div>
+                        
+                        <hr class="menu-divisor">
+                        <div class="menu-item" data-toast="YouTube Studio não disponível.">
+                            <i class="fa-brands fa-youtube"></i>
+                            <span>YouTube Studio</span>
+                        </div>
+                        <div class="menu-item" data-toast="Compras indisponíveis.">
+                            <i class="fa-solid fa-dollar-sign" style="width: 24px; text-align: center; font-size: 16px; border: 1px solid var(--text-primary); border-radius: 50%; height: 18px; line-height: 16px; display: inline-block;"></i>
+                            <span>Compras e assinaturas</span>
+                        </div>
+                        
+                        <hr class="menu-divisor">
+                        <div class="menu-item" data-toast="Dados indisponíveis.">
+                            <i class="fa-solid fa-shield-alt"></i>
+                            <span>Seus dados no YouTube</span>
+                        </div>
+                        <div class="menu-item" id="btn-menu-tema">
+                            <i class="fa-regular fa-moon"></i>
+                            <span id="texto-menu-tema">Aparência: tema escuro</span>
+                            <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                        </div>
+                        <div class="menu-item" id="btn-menu-idioma">
+                            <i class="fa-solid fa-language"></i>
+                            <span id="texto-menu-idioma">Idioma de exibição: Português</span>
+                            <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                        </div>
+                        <div class="menu-item" data-toast="Modo restrito desativado.">
+                            <i class="fa-solid fa-user-lock"></i>
+                            <span>Modo restrito: desativado</span>
+                            <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                        </div>
+                        <div class="menu-item" data-toast="Local fixo no Brasil.">
+                            <i class="fa-solid fa-globe"></i>
+                            <span>Local: Brasil</span>
+                            <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                        </div>
+                        <div class="menu-item" data-toast="Atalhos não implementados.">
+                            <i class="fa-regular fa-keyboard"></i>
+                            <span>Atalhos do teclado</span>
+                        </div>
+                        
+                        <hr class="menu-divisor">
+                        <div class="menu-item" data-toast="Configurações não implementadas.">
+                            <i class="fa-solid fa-cog"></i>
+                            <span>Configurações</span>
+                        </div>
+                        
+                        <hr class="menu-divisor">
+                        <div class="menu-item" data-toast="Central de ajuda.">
+                            <i class="fa-regular fa-circle-question"></i>
+                            <span>Ajuda</span>
+                        </div>
+                        <div class="menu-item" data-toast="Feedback enviado.">
+                            <i class="fa-regular fa-comment-dots"></i>
+                            <span>Enviar feedback</span>
+                        </div>
+                    </div>
 
-    <!-- Painel de Tema -->
-    <div id="painel-tema" class="menu-painel" style="display:none;">
-        <div class="menu-painel-header" id="btn-voltar-tema">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Aparência</span>
-        </div>
-        <hr class="menu-divisor">
-        <div class="menu-item menu-tema-opcao" data-tema="dark" id="opcao-tema-escuro">
-            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
-            <span>Tema escuro</span>
-        </div>
-        <div class="menu-item menu-tema-opcao" data-tema="light" id="opcao-tema-claro">
-            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
-            <span>Tema claro</span>
-        </div>
-    </div>
+                    <!-- Painel de Tema -->
+                    <div id="painel-tema" class="menu-painel" style="display:none;">
+                        <div class="menu-painel-header" id="btn-voltar-tema">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Aparência</span>
+                        </div>
+                        <hr class="menu-divisor">
+                        <div class="menu-item menu-tema-opcao" data-tema="dark" id="opcao-tema-escuro">
+                            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
+                            <span>Tema escuro</span>
+                        </div>
+                        <div class="menu-item menu-tema-opcao" data-tema="light" id="opcao-tema-claro">
+                            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
+                            <span>Tema claro</span>
+                        </div>
+                    </div>
 
-    <!-- Painel de Idioma -->
-    <div id="painel-idioma" class="menu-painel" style="display:none;">
-        <div class="menu-painel-header" id="btn-voltar-idioma">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Escolha seu idioma</span>
-        </div>
-        <hr class="menu-divisor">
-        <div class="menu-item menu-idioma-opcao" onclick="mostrarToast('Idioma alterado para Português (Brasil).')">
-            <i class="fa-solid fa-check icone-check" style="opacity:1;"></i>
-            <span>Português (Brasil)</span>
-        </div>
-        <div class="menu-item menu-idioma-opcao" onclick="mostrarToast('Idioma Inglês (US) não suportado pelo clone.')">
-            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
-            <span>English (US)</span>
-        </div>
-        <div class="menu-item menu-idioma-opcao" onclick="mostrarToast('Idioma Espanhol não suportado pelo clone.')">
-            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
-            <span>Español (Latinoamérica)</span>
-        </div>
-    </div>
-</div>
-
-            </div>
-         </div>
-         </div>
+                    <!-- Painel de Idioma -->
+                    <div id="painel-idioma" class="menu-painel" style="display:none;">
+                        <div class="menu-painel-header" id="btn-voltar-idioma">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Escolha seu idioma</span>
+                        </div>
+                        <hr class="menu-divisor">
+                        <div class="menu-item menu-idioma-opcao" onclick="mostrarToast('Idioma alterado para Português (Brasil).')">
+                            <i class="fa-solid fa-check icone-check" style="opacity:1;"></i>
+                            <span>Português (Brasil)</span>
+                        </div>
+                        <div class="menu-item menu-idioma-opcao" onclick="mostrarToast('Idioma Inglês (US) não suportado pelo clone.')">
+                            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
+                            <span>English (US)</span>
+                        </div>
+                        <div class="menu-item menu-idioma-opcao" onclick="mostrarToast('Idioma Espanhol não suportado pelo clone.')">
+                            <i class="fa-solid fa-check icone-check" style="opacity:0;"></i>
+                            <span>Español (Latinoamérica)</span>
+                        </div>
+                    </div>
+                </div>
+           </div>
          </div>
  
         </header>
 
         <div class="corpo">
-        <aside class="sidebar" id="sidebar">
-            <nav class="sidebar-secao">
-                <a  class="sidebar-item ativo" data-secao="inicio">
-                    <i class="fa-solid fa-house"></i>
-                    <span>InÃ­cio</span>
-                </a>
-                <a  class="sidebar-item" data-secao="shorts">
-                    <i class="fa-brands fa-youtube"></i>
-                    <span>Shorts</span>
-                </a>
-                <a  class="sidebar-item" data-secao="inscricoes">
-                    <i class="fa-solid fa-clapperboard"></i>
-                    <span>InscriÃ§Ãµes</span>
-                </a>
-                <a  class="sidebar-item" data-secao="voce" id="btn-sidebar-voce">
-                    <i class="fa-regular fa-circle-user" id="icone-sidebar-voce"></i>
-                    <span>VocÃª</span>
-                </a>
-                <a  class="sidebar-item" data-secao="historico">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>HistÃ³rico</span>
-                </a>
-            </nav>
+                  <aside class="sidebar" id="sidebar">
+              <nav class="sidebar-secao">
+                  <a  class="sidebar-item ativo" data-secao="inicio">
+                      <i class="fa-solid fa-house"></i>
+                      <span>Início</span>
+                  </a>
+                  <a  class="sidebar-item" data-secao="shorts">
+                      <i class="fa-solid fa-bolt"></i>
+                      <span>Shorts</span>
+                  </a>
+                  <a  class="sidebar-item" data-secao="inscricoes">
+                      <i class="fa-brands fa-youtube"></i>
+                      <span>Inscrições</span>
+                  </a>
+              </nav>
 
-            <hr class="sidebar-divisor">
+              <hr class="sidebar-divisor">
 
-            <div class="sidebar-login" id="sidebarLogin">
-                <p>FaÃ§a login para curtir vÃ­deos, comentar e se inscrever.</p>
-                <div id="containerLoginGoogleSidebar">
-                    <button class="btn-login-custom" onclick="fazerLoginCompleto()">
-                        <div class="img-circle">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
-                        </div>
-                        Fazer login
-                    </button>
-                </div>
-            </div>
+              <div class="sidebar-login" id="sidebarLogin">
+                  <p>Faça login para curtir vídeos, comentar e se inscrever.</p>
+                  <div id="containerLoginGoogleSidebar">
+                      <button class="btn-login-custom" onclick="fazerLoginCompleto()">
+                          <div class="img-circle">
+                              <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G">
+                          </div>
+                          Fazer login
+                      </button>
+                  </div>
+              </div>
+
+              <!-- Seção Você (Mostrada quando logado) -->
+              <nav class="sidebar-secao" id="sidebarVoceGroup" style="display:none;">
+                  <a class="sidebar-item" data-secao="voce" id="btn-sidebar-voce" style="font-weight: 600; font-size: 16px;">
+                      <span>Você</span>
+                      <i class="fa-solid fa-chevron-right" style="font-size: 14px; margin-left: 8px;"></i>
+                  </a>
+                  <a class="sidebar-item" data-secao="voce">
+                      <i class="fa-regular fa-id-badge"></i>
+                      <span>Seu canal</span>
+                  </a>
+                  <a class="sidebar-item" data-secao="historico">
+                      <i class="fa-solid fa-clock-rotate-left"></i>
+                      <span>Histórico</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Playlists em breve.">
+                      <i class="fa-solid fa-list-ul"></i>
+                      <span>Playlists</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Assistir mais tarde em breve.">
+                      <i class="fa-regular fa-clock"></i>
+                      <span>Assistir mais tarde</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Vídeos marcados com Gostei em breve.">
+                      <i class="fa-regular fa-thumbs-up"></i>
+                      <span>Vídeos com "Gostei"</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Seus vídeos em breve.">
+                      <i class="fa-regular fa-circle-play"></i>
+                      <span>Seus vídeos</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Downloads não disponíveis.">
+                      <i class="fa-solid fa-download"></i>
+                      <span>Downloads</span>
+                  </a>
+              </nav>
+              <hr class="sidebar-divisor" id="sidebarVoceDivisor" style="display:none;">
+
+              <!-- Inscrições (Logado) -->
+              <nav class="sidebar-secao" id="sidebarInscricoesGroup" style="display:none;">
+                  <a class="sidebar-item" data-toast="Inscrições em breve." style="font-weight: 600; font-size: 16px;">
+                      <span>Inscrições</span>
+                      <i class="fa-solid fa-chevron-right" style="font-size: 14px; margin-left: 8px;"></i>
+                  </a>
+                  <a class="sidebar-item" data-toast="Acessar canal">
+                      <img src="https://yt3.googleusercontent.com/ytc/AIdro_kX4h1f6FhS2k2Y3F4X2g2X2Y2X2Y2X2Y2X2Y2X=s88-c-k-c0x00ffffff-no-rj" class="sidebar-avatar" alt="C1">
+                      <span>Harmonia Celeste ...</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Acessar canal">
+                      <img src="https://yt3.googleusercontent.com/ytc/AIdro_kX4h1f6FhS2k2Y3F4X2g2X2Y2X2Y2X2Y2X2Y2X=s88-c-k-c0x00ffffff-no-rj" class="sidebar-avatar" alt="C2">
+                      <span>Hinos CCB</span>
+                      <span style="color: #3ea6ff; font-size: 24px; line-height: 0; margin-left: auto;">•</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Acessar canal">
+                      <img src="https://yt3.googleusercontent.com/ytc/AIdro_kX4h1f6FhS2k2Y3F4X2g2X2Y2X2Y2X2Y2X2Y2X=s88-c-k-c0x00ffffff-no-rj" class="sidebar-avatar" alt="C3">
+                      <span>Samuel Gabriel</span>
+                      <span style="color: #3ea6ff; font-size: 24px; line-height: 0; margin-left: auto;">•</span>
+                  </a>
+                  <a class="sidebar-item" data-toast="Mais inscrições em breve.">
+                      <i class="fa-solid fa-chevron-down"></i>
+                      <span>Mostrar mais</span>
+                  </a>
+              </nav>
+              <hr class="sidebar-divisor" id="sidebarInscricoesDivisor" style="display:none;">
 
             <hr class="sidebar-divisor">
 
             <nav class="sidebar-secao">
                 <p class="sidebar-titulo">Explorar</p>
-                <a  class="sidebar-item" data-toast="FaÃ§a login para ver o Shopping.">
+                <a  class="sidebar-item" data-toast="Faça login para ver o Shopping.">
                     <i class="fa-solid fa-bag-shopping"></i>
                     <span>Shopping</span>
                 </a>
-                <a  class="sidebar-item" data-secao="busca" data-termo="mÃºsica">
+                <a  class="sidebar-item" data-secao="busca" data-termo="música">
                     <i class="fa-solid fa-music"></i>
-                    <span>MÃºsica</span>
+                    <span>Música</span>
                 </a>
                 <a  class="sidebar-item" data-secao="busca" data-termo="filmes completos">
                     <i class="fa-solid fa-film"></i>
                     <span>Filmes</span>
                 </a>
-                <a  class="sidebar-item" data-toast="NÃ£o hÃ¡ mais categorias no momento.">
+                <a  class="sidebar-item" data-toast="Não há mais categorias no momento.">
                     <i class="fa-solid fa-chevron-down"></i>
                     <span>Mostrar mais</span>
                 </a>
@@ -272,15 +325,15 @@
 
             <nav class="sidebar-secao">
                 <p class="sidebar-titulo">Mais do YouTube</p>
-                <a  class="sidebar-item" data-toast="O YouTube Premium nÃ£o estÃ¡ disponÃ­vel neste clone.">
+                <a  class="sidebar-item" data-toast="O YouTube Premium não está disponível neste clone.">
                     <i class="fa-brands fa-youtube icone-vermelho"></i>
                     <span>Teste o Premium p...</span>
                 </a>
-                <a  class="sidebar-item" data-toast="O YouTube Music nÃ£o estÃ¡ disponÃ­vel neste clone.">
+                <a  class="sidebar-item" data-toast="O YouTube Music não está disponível neste clone.">
                     <i class="fa-solid fa-circle-play icone-vermelho"></i>
                     <span>YouTube Music</span>
                 </a>
-                <a  class="sidebar-item" data-toast="O YouTube Kids nÃ£o estÃ¡ disponÃ­vel neste clone.">
+                <a  class="sidebar-item" data-toast="O YouTube Kids não está disponível neste clone.">
                     <i class="fa-brands fa-youtube icone-vermelho"></i>
                     <span>YouTube Kids</span>
                 </a>
@@ -289,9 +342,9 @@
             <hr class="sidebar-divisor">
 
             <nav class="sidebar-secao">
-                <a  class="sidebar-item" data-toast="Nenhuma denÃºncia registrada.">
+                <a  class="sidebar-item" data-toast="Nenhuma denúncia registrada.">
                     <i class="fa-solid fa-flag"></i>
-                    <span>HistÃ³rico de denÃºn...</span>
+                    <span>Histórico de denún...</span>
                 </a>
             </nav>
 
@@ -309,14 +362,14 @@
                 <div class="chips-categorias" id="chipsCategorias" style="display: none;">
                     <button class="chip ativo" data-categoria="">Tudo</button>
                     <button class="chip" data-categoria="24">Ao vivo</button>
-                    <button class="chip" data-categoria="10">MÃºsica</button>
+                    <button class="chip" data-categoria="10">Música</button>
                     <button class="chip" data-categoria="20">Jogos</button>
-                    <button class="chip" data-categoria="25">NotÃ­cias</button>
+                    <button class="chip" data-categoria="25">Notícias</button>
                     <button class="chip" data-categoria="17">Esportes</button>
-                    <button class="chip" data-categoria="23">ComÃ©dia</button>
-                    <button class="chip" data-categoria="28">CiÃªncia e tecnologia</button>
-                    <button class="chip" data-categoria="27">EducaÃ§Ã£o</button>
-                    <button class="chip" data-categoria="1">Filmes e animaÃ§Ã£o</button>
+                    <button class="chip" data-categoria="23">Comédia</button>
+                    <button class="chip" data-categoria="28">Ciência e tecnologia</button>
+                    <button class="chip" data-categoria="27">Educação</button>
+                    <button class="chip" data-categoria="1">Filmes e animação</button>
                 </div>
                 <div class="area-resultados" id="areaResultados"></div>
             </section>
@@ -329,7 +382,7 @@
             <section class="area-shorts" id="areaShorts" style="display: none;"></section>
             
             <div id="areaHistorico" class="area-view" style="display: none; padding: 24px; color: #fff;">
-                <h2 style="color: #fff; margin-bottom: 24px; font-size: 24px;">HistÃ³rico de exibiÃ§Ã£o</h2>
+                <h2 style="color: #fff; margin-bottom: 24px; font-size: 24px;">Histórico de exibição</h2>
                 <div id="gradeHistorico" class="area-resultados lista"></div>
             </div>
             
@@ -342,13 +395,13 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
-        // Como o prÃ³prio backend agora serve esta pÃ¡gina, as chamadas Ã 
-        // API usam caminhos relativos (mesma origem). NÃ£o Ã© mais preciso
+        // Como o próprio backend agora serve esta página, as chamadas à
+        // API usam caminhos relativos (mesma origem). Não é mais preciso
         // apontar para "http://localhost:3000" manualmente.
         const URL_DO_BACKEND = "";
 
-        // Client ID do Google Cloud Console (tela "Credenciais" â "Criar
-        // credenciais" â "ID do cliente OAuth" â tipo "Aplicativo da Web").
+        // Client ID do Google Cloud Console (tela "Credenciais" → "Criar
+        // credenciais" → "ID do cliente OAuth" → tipo "Aplicativo da Web").
         // Veja o passo a passo completo no README.md.
         const GOOGLE_CLIENT_ID = "706045740692-s3dligdlr7ogmf2e8mf9hqr6j1ghuh89.apps.googleusercontent.com";
     </script>
@@ -356,6 +409,5 @@
 
 </body>
 </html>
-
 
 

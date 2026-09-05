@@ -828,6 +828,12 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
 
     document.getElementById("containerLoginGoogle").style.display = "none";
     document.getElementById("sidebarLogin").style.display = "none";
+    const sidebarVoce = document.getElementById("sidebarVoceGroup");
+    if(sidebarVoce) sidebarVoce.style.display = "block";
+    const sidebarVoceDivisor = document.getElementById("sidebarVoceDivisor");
+    if(sidebarVoceDivisor) sidebarVoceDivisor.style.display = "block";
+    document.getElementById("sidebarInscricoesGroup").style.display = "block";
+    document.getElementById("sidebarInscricoesDivisor").style.display = "block";
 
     const containerDoUsuario = document.getElementById("containerUsuarioLogado");
     containerDoUsuario.style.display = "flex";
@@ -874,6 +880,12 @@ function aplicarUsuarioDeslogado() {
 
     document.getElementById("containerLoginGoogle").style.display = "block";
     document.getElementById("sidebarLogin").style.display = "block";
+    const sidebarVoce = document.getElementById("sidebarVoceGroup");
+    if(sidebarVoce) sidebarVoce.style.display = "none";
+    const sidebarVoceDivisor = document.getElementById("sidebarVoceDivisor");
+    if(sidebarVoceDivisor) sidebarVoceDivisor.style.display = "none";
+    document.getElementById("sidebarInscricoesGroup").style.display = "none";
+    document.getElementById("sidebarInscricoesDivisor").style.display = "none";
     document.getElementById("containerUsuarioLogado").style.display = "none";
     document.getElementById("containerUsuarioLogado").classList.remove("aberto");
 }
