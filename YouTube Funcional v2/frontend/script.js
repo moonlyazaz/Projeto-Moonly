@@ -1686,22 +1686,7 @@ window.mostrarView = function(nomeDaView, fromHistory = false) {
     return originalMostrarView(nomeDaView);
 };
 
-window.addEventListener('popstate', (e) => {
-    if (e.state && e.state.view === 'assistir') {
-        window.abrirVideo(e.state.id, true);
-    } else {
-        window.mostrarView('inicio', true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
 
-// Inicialização da Rota
-const initialParams = new URLSearchParams(window.location.search);
-if (initialParams.has('v')) {
-    window.abrirVideo(initialParams.get('v'), true);
-} else {
-    buscarPopulares();
-}
 
 // --- SISTEMA DE HISTORICO E CANAL ---
 
@@ -2078,3 +2063,92 @@ function carregarListaSalva(chave, containerId) {
     });
 }
 // ====== FIM FASE 3 ======
+
+
+// ==================== SISTEMA DE ROTEAMENTO (Fase 5) ====================
+// Monkey patch das funcões originais para injetar rotas URL
+
+const originalAbrirVideoRouter = window.abrirVideo || abrirVideo;
+window.abrirVideo = async function(idDoVideo, fromHistory = false) {
+    if (!fromHistory) {
+        window.history.pushState({ view: 'assistir', id: idDoVideo }, "", "?watch=" + idDoVideo);
+    }
+    return originalAbrirVideoRouter(idDoVideo);
+};
+// Garantir que a chamadas internas também usem o hook global (se possível, mas como script já carregou, funções globais podem ser chamadas diretamente. No JavaScript, a reatribuição de var global sem const altera a func)
+abrirVideo = window.abrirVideo;
+
+const originalMostrarViewRouter = window.mostrarView || mostrarView;
+window.mostrarView = function(nomeDaView, fromHistory = false) {
+    if (!fromHistory) {
+        if (nomeDaView === 'inicio') {
+            window.history.pushState({ view: 'inicio' }, "", window.location.pathname);
+        } else if (nomeDaView === 'shorts') {
+            window.history.pushState({ view: 'shorts' }, "", "?shorts=true");
+        } else if (['historico', 'voce', 'assistir_mais_tarde', 'curtidos'].includes(nomeDaView)) {
+            window.history.pushState({ view: nomeDaView }, "", "?view=" + nomeDaView);
+        }
+    }
+    return originalMostrarViewRouter(nomeDaView);
+};
+mostrarView = window.mostrarView;
+
+const originalBuscarVideosRouter = window.buscarVideos || buscarVideos;
+window.buscarVideos = async function(termoDeBusca, filtroDeDuracao = "", fromHistory = false) {
+    if (!fromHistory && filtroDeDuracao !== "short") {
+        window.history.pushState({ view: 'busca', termo: termoDeBusca }, "", "?search=" + encodeURIComponent(termoDeBusca));
+    }
+    return originalBuscarVideosRouter(termoDeBusca, filtroDeDuracao);
+};
+buscarVideos = window.buscarVideos;
+
+// Ouvinte do botăo voltar/avancar do navegador
+window.addEventListener('popstate', (e) => {
+    const state = e.state;
+    if (state) {
+        if (state.view === 'assistir') {
+            window.abrirVideo(state.id, true);
+        } else if (state.view === 'busca') {
+            window.buscarVideos(state.termo, "", true);
+        } else if (state.view === 'shorts') {
+            window.buscarVideos("shorts", "short", true);
+            window.mostrarView("shorts", true);
+        } else if (state.view === 'inicio') {
+            document.querySelector('.sidebar-item[data-secao="inicio"]').click();
+            window.mostrarView('inicio', true);
+        } else {
+            window.mostrarView(state.view, true);
+        }
+    } else {
+        // Se năo houver estado salvo (pressionou Voltar pro inicio inicial)
+        carregarEstadoInicialDaUrl(true);
+    }
+});
+
+function carregarEstadoInicialDaUrl(fromHistory = false) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('watch')) {
+        window.abrirVideo(params.get('watch'), fromHistory);
+    } else if (params.has('v')) { // Compatibilidade com links antigos / yt normal
+        window.abrirVideo(params.get('v'), fromHistory);
+    } else if (params.has('search')) {
+        const t = params.get('search');
+        document.getElementById("search-input").value = t;
+        window.buscarVideos(t, "", fromHistory);
+    } else if (params.has('shorts')) {
+        document.querySelector('.sidebar-item[data-secao="shorts"]').click();
+    } else if (params.has('view')) {
+        const v = params.get('view');
+        // Simular clique na sidebar para manter UI sincronizada
+        const item = document.querySelector(`.sidebar-item[data-secao="${v}"]`);
+        if (item) item.click();
+        else window.mostrarView(v, fromHistory);
+    } else {
+        buscarPopulares();
+    }
+}
+
+// Inicializacao da Rota (Atrasa 50ms para garantir que tudo no DOM/login foi carregado)
+setTimeout(() => {
+    carregarEstadoInicialDaUrl();
+}, 50);
