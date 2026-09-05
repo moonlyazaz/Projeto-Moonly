@@ -9,7 +9,7 @@ const cors = require("cors");
 const path = require("path");
 const fetch = require("node-fetch");
 
-const ytdl = require('@distube/ytdl-core');
+const play = require('play-dl');
 const http = require('http');
 const { Server } = require('socket.io');
  // Necessário no Node 16, que não tem fetch() nativo.
@@ -326,18 +326,23 @@ app.get('/api/download', async (req, res) => {
     
     try {
         const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        const info = await ytdl.getInfo(videoUrl);
-        const title = info.videoDetails.title.replace(/[^\w\s-]/gi, '') || "MoonlyVideo";
+        const info = await play.video_info(videoUrl);
+        const title = info.video_details.title.replace(/[^\w\s-]/gi, '') || "MoonlyVideo";
         
+        let streamInfo;
         if (format === 'mp3') {
             res.header('Content-Disposition', `attachment; filename="${title}.mp3"`);
-            ytdl(videoUrl, { filter: 'audioonly', quality: 'highestaudio' }).pipe(res);
+            // quality 2 = highest audio
+            streamInfo = await play.stream(videoUrl, { quality: 2, discordPlayerCompatibility: true });
         } else {
             res.header('Content-Disposition', `attachment; filename="${title}.mp4"`);
-            ytdl(videoUrl, { filter: format => format.container === 'mp4' }).pipe(res);
+            streamInfo = await play.stream(videoUrl);
         }
+        
+        streamInfo.stream.pipe(res);
+        
     } catch (e) {
-        console.error(e);
+        console.error("Play-dl error:", e);
         res.status(500).send("Erro ao baixar o video.");
     }
 });
