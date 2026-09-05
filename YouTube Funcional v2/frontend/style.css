@@ -1600,3 +1600,13 @@ a.card-video { cursor: pointer; }
     text-align: center;
     color: var(--text-primary);
 }
+
+/* Inline SVG icons in menu items */
+.menu-item > svg {
+    flex-shrink: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 16px !important;
+    color: var(--text-primary) !important;
+    fill: var(--text-primary) !important;
+}

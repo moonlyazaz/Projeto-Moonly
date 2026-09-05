@@ -935,6 +935,12 @@ function fazerLoginCompleto() {
 const loginSalvo = localStorage.getItem("usuarioLogadoComGoogle");
 if (loginSalvo) {
     aplicarUsuarioLogado(JSON.parse(loginSalvo));
+    // Auto-load subscriptions when restoring session
+    setTimeout(() => {
+        if (typeof carregarInscricoesSidebar === 'function') {
+            carregarInscricoesSidebar();
+        }
+    }, 500);
 }
 
 // ===== Ações reais na conta do YouTube (curtir, inscrever, inscrições) =====
