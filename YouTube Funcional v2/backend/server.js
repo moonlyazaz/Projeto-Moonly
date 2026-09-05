@@ -346,20 +346,40 @@ app.get('/api/download', async (req, res) => {
 app.get('/api/piped/:id', async (req, res) => {
     try {
         const videoId = req.params.id;
-        const url = `https://pipedapi.kavin.rocks/streams/${videoId}`;
-        const resposta = await fetch(url);
+        const instances = [
+            `https://pipedapi.kavin.rocks/streams/${videoId}`,
+            `https://pipedapi.moomoo.me/streams/${videoId}`,
+            `https://piped-api.garudalinux.org/streams/${videoId}`,
+            `https://pipedapi.adminforge.de/streams/${videoId}`
+        ];
         
-        if (!resposta.ok) {
-            const fallback = await fetch(`https://pipedapi.adminforge.de/streams/${videoId}`);
-            const dados = await fallback.json();
-            return res.json(dados);
+        for (const url of instances) {
+            try {
+                const resposta = await fetch(url);
+                if (resposta.ok) {
+                    const texto = await resposta.text();
+                    try {
+                        const dados = JSON.parse(texto);
+                        if (dados && dados.videoStreams) {
+                            return res.json(dados);
+                        }
+                    } catch (errJson) {
+                        console.log(`Instancia ${url} retornou HTML/Erro (nao JSON)`);
+                    }
+                }
+            } catch (errFetch) {
+                console.log(`Instancia ${url} falhou (CORS/Down)`);
+            }
         }
         
-        const dados = await resposta.json();
-        res.json(dados);
+        return res.status(500).json({ error: "Todas as instancias do Piped falharam." });
+        
     } catch (e) {
         console.error(e);
-        res.status(500).json({ error: "Erro ao buscar do Piped" });
+        res.status(500).json({ error: "Erro interno no Proxy Piped" });
+    }
+});
+
     }
 });
 
