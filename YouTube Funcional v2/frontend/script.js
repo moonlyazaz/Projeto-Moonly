@@ -504,6 +504,7 @@ function formatarTempo(segundos) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
+
 window.atualizarStreamPiped = async function(videoId) {
     const video = document.getElementById("main-video-player");
     if (!video) return;
@@ -513,6 +514,8 @@ window.atualizarStreamPiped = async function(videoId) {
     
     try {
         const res = await fetch(`${URL_DO_BACKEND}/api/piped/${videoId}`);
+        if (!res.ok) throw new Error("Backend retornou erro " + res.status);
+        
         const data = await res.json();
         
         let streamUrl = "";
@@ -528,9 +531,49 @@ window.atualizarStreamPiped = async function(videoId) {
         if (streamUrl) {
             video.src = streamUrl;
             video.play().catch(e => console.log("Autoplay block", e));
+        } else {
+            throw new Error("Nenhum stream encontrado");
         }
     } catch(e) {
-        console.error("Erro Piped API:", e);
+        console.warn("Piped API Falhou. Ativando Modo de Seguranca (Iframe Nativo do YouTube):", e);
+        
+        // Fallback robusto: Destruir a tag <video> e recriar o iframe
+        const container = document.getElementById("main-player-container");
+        if (container) {
+            container.innerHTML = `
+                <iframe
+                    id="main-video-iframe"
+                    class="media-view-box__video"
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                ></iframe>
+                <div class="media-view-box__overlay" id="main-video-overlay"></div>
+                <div class="media-view-box__controls">
+                    <div class="media-view-box__progress-container" id="main-progress-container">
+                        <div class="media-view-box__progress-bar" id="main-progress-bar"></div>
+                    </div>
+                    <div class="media-view-box__controls-left">
+                        <button class="media-view-box__btn" id="main-play-btn"><i class="fa-solid fa-pause" id="main-play-icon"></i></button>
+                        <button class="media-view-box__btn" id="main-mute-btn"><i class="fa-solid fa-volume-high" id="main-mute-icon"></i></button>
+                        <span class="media-view-box__time" id="main-time-display">0:00 / 0:00</span>
+                    </div>
+                    <div class="media-view-box__controls-right">
+                        <button class="media-view-box__btn" id="main-fullscreen-btn"><i class="fa-solid fa-expand"></i></button>
+                    </div>
+                </div>
+            `;
+            // Recriar eventos
+            setTimeout(() => {
+                if (window.YT && window.YT.Player) {
+                    window.playerPrincipal = new YT.Player('main-video-iframe', {
+                        events: {
+                            'onReady': (ev) => ev.target.playVideo()
+                        }
+                    });
+                }
+            }, 500);
+        }
     }
 };
 
