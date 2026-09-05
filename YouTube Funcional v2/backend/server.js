@@ -252,6 +252,7 @@ app.get("/api/video/:id", async (req, res) => {
             titulo: item.snippet.title,
             embedUrl: `https://www.youtube.com/embed/${item.id}`,
             imagemCapa: item.snippet.thumbnails.high.url,
+            duracao: formatarDuracao(item.contentDetails.duration),
             canal: {
                 id: item.snippet.channelId,
                 nome: item.snippet.channelTitle,

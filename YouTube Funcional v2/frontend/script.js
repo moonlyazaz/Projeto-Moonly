@@ -776,7 +776,7 @@ function configurarBuscaEClique() {
     }
 
     // Clique em um card da grade de resultados abre o vídeo (view "assistir").
-    document.getElementById("areaResultados").addEventListener("click", (evento) => {
+    document.body.addEventListener("click", (evento) => {
         const card = evento.target.closest("[data-id-do-video]");
         if (card) {
             abrirVideo(card.dataset.idDoVideo);
@@ -1286,7 +1286,7 @@ async function abrirInscricoesReais() {
 }
 
 // Clique em um canal inscrito abre os vídeos recentes dele.
-document.getElementById("areaResultados").addEventListener("click", (evento) => {
+document.body.addEventListener("click", (evento) => {
     const cardDeCanal = evento.target.closest("[data-id-do-canal]");
     if (cardDeCanal) {
         buscarPorCanal(cardDeCanal.dataset.idDoCanal);
