@@ -1694,3 +1694,19 @@ a.card-video { cursor: pointer; }
     justify-content: center;
     align-items: center;
 }
+
+/* Animação suave de abertura nas views */
+.area-resultados, .area-assistir, .area-shorts, .area-view, .menu-painel.ativo {
+    animation: fadeEsliza 0.3s ease-out;
+}
+
+@keyframes fadeEsliza {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

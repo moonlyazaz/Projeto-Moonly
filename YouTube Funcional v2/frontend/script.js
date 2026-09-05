@@ -494,7 +494,7 @@ function formatarTempo(segundos) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
-function inicializarPlayerPrincipal() {
+function inicializarPlayerPrincipal(ehAoVivo = false) {
     if (intervaloDeProgressoPrincipal) clearInterval(intervaloDeProgressoPrincipal);
     
     const iniciarControles = () => {
@@ -566,7 +566,17 @@ function inicializarPlayerPrincipal() {
                     if (barra) barra.style.width = `${porcentagem}%`;
                     
                     const display = document.getElementById('main-time-display');
-                    if (display) display.textContent = `${formatarTempo(tempo)} / ${formatarTempo(duracao)}`;
+                    if (display) {
+                        if (ehAoVivo) {
+                            display.textContent = 'Ao vivo';
+                            display.style.color = '#ff0000';
+                            display.style.fontWeight = 'bold';
+                        } else {
+                            display.textContent = `${formatarTempo(tempo)} / ${formatarTempo(duracao)}`;
+                            display.style.color = 'inherit';
+                            display.style.fontWeight = 'normal';
+                        }
+                    }
                 }
             }
         }, 100);
@@ -602,7 +612,7 @@ async function abrirVideo(idDoVideo) {
         mostrarView("assistir");
         window.scrollTo({ top: 0, behavior: "smooth" });
         
-        inicializarPlayerPrincipal();
+        inicializarPlayerPrincipal(typeof dadosDoVideo !== "undefined" && (dadosDoVideo.duracao === "Ao vivo" || dadosDoVideo.duracao === "0:00"));
         inicializarEventosDeComentario(dadosDoVideo.id);
         finalizarCarregamento();
         
