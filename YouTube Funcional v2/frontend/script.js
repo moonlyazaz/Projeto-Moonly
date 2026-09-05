@@ -2085,7 +2085,11 @@ const originalMostrarViewRouter = window.mostrarView || mostrarView;
 window.mostrarView = function(nomeDaView, fromHistory = false) {
     if (!fromHistory) {
         if (nomeDaView === 'inicio') {
-            window.history.pushState({ view: 'inicio' }, "", window.location.pathname);
+            if (window.history.state && window.history.state.view === 'busca') {
+                // Mantem a URL de busca
+            } else {
+                window.history.pushState({ view: 'inicio' }, "", window.location.pathname);
+            }
         } else if (nomeDaView === 'shorts') {
             window.history.pushState({ view: 'shorts' }, "", "?shorts=true");
         } else if (['historico', 'voce', 'assistir_mais_tarde', 'curtidos'].includes(nomeDaView)) {
