@@ -77,24 +77,89 @@
            <div id="containerUsuarioLogado" class="usuario-logado" style="display: none;">
                 <img id="avatarDoUsuario" class="usuario-logado__avatar" src="" alt="Sua foto de perfil" referrerpolicy="no-referrer">
                 <span id="avatarDoUsuarioFallback" class="usuario-logado__avatar usuario-logado__avatar--fallback" style="display: none;"></span>
-                <div class="usuario-logado__menu">
-                    <p id="nomeDoUsuario"></p>
-                    <p id="emailDoUsuario"></p>
-                    <hr style="border-color: var(--border-color); margin: 12px 0;">
-                    <div class="menu-item" id="btn-menu-canal">
-                        <i class="fa-regular fa-circle-user"></i>
-                        <span>Seu canal</span>
+                                <div class="usuario-logado__menu">
+                    <div class="menu-header">
+                        <img id="menuAvatar" class="menu-header__avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
+                        <div class="menu-header__info">
+                            <p id="nomeDoUsuario"></p>
+                            <p id="emailDoUsuario"></p>
+                            <a href="#" id="btn-menu-canal-link" class="menu-header__link">Acessar seu canal</a>
+                        </div>
                     </div>
-                    <div class="menu-item" id="btn-menu-tema">
-                        <i class="fa-solid fa-moon"></i>
-                        <span>AparÃªncia: Tema Escuro</span>
+                    <hr class="menu-divisor">
+                    
+                    <div class="menu-item" data-toast="Redirecionando para a Conta do Google...">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Conta do Google</span>
+                    </div>
+                    <div class="menu-item" data-toast="Troca de conta indisponível no clone.">
+                        <i class="fa-regular fa-square-caret-right"></i>
+                        <span>Mudar de conta</span>
+                        <i class="fa-solid fa-chevron-right menu-chevron"></i>
                     </div>
                     <div class="menu-item" id="botaoSair">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         <span>Sair</span>
                     </div>
+                    
+                    <hr class="menu-divisor">
+                    <div class="menu-item" data-toast="YouTube Studio não disponível.">
+                        <i class="fa-brands fa-youtube"></i>
+                        <span>YouTube Studio</span>
+                    </div>
+                    <div class="menu-item" data-toast="Compras indisponíveis.">
+                        <i class="fa-solid fa-dollar-sign" style="width: 24px; text-align: center; font-size: 16px; border: 1px solid var(--text-primary); border-radius: 50%; height: 18px; line-height: 16px; display: inline-block;"></i>
+                        <span>Compras e assinaturas</span>
+                    </div>
+                    
+                    <hr class="menu-divisor">
+                    <div class="menu-item" data-toast="Dados indisponíveis.">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Seus dados no YouTube</span>
+                    </div>
+                    <div class="menu-item" id="btn-menu-tema">
+                        <i class="fa-regular fa-moon"></i>
+                        <span id="texto-menu-tema">Aparência: tema escuro</span>
+                        <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                    </div>
+                    <div class="menu-item" data-toast="Idioma fixo em Português.">
+                        <i class="fa-solid fa-language"></i>
+                        <span>Idioma de exibição: Português</span>
+                        <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                    </div>
+                    <div class="menu-item" data-toast="Modo restrito desativado.">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Modo restrito: desativado</span>
+                        <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                    </div>
+                    <div class="menu-item" data-toast="Local fixo no Brasil.">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>Local: Brasil</span>
+                        <i class="fa-solid fa-chevron-right menu-chevron"></i>
+                    </div>
+                    <div class="menu-item" data-toast="Atalhos não implementados.">
+                        <i class="fa-regular fa-keyboard"></i>
+                        <span>Atalhos do teclado</span>
+                    </div>
+                    
+                    <hr class="menu-divisor">
+                    <div class="menu-item" data-toast="Configurações não implementadas.">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Configurações</span>
+                    </div>
+                    
+                    <hr class="menu-divisor">
+                    <div class="menu-item" data-toast="Central de ajuda.">
+                        <i class="fa-regular fa-circle-question"></i>
+                        <span>Ajuda</span>
+                    </div>
+                    <div class="menu-item" data-toast="Feedback enviado.">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <span>Enviar feedback</span>
+                    </div>
                 </div>
-           </div>
+            </div>
+         </div>
          </div>
  
         </header>
@@ -248,5 +313,6 @@
 
 </body>
 </html>
+
 
 

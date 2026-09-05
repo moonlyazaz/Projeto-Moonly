@@ -858,6 +858,8 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
 
     document.getElementById("nomeDoUsuario").textContent = dadosDoUsuario.name;
     document.getElementById("emailDoUsuario").textContent = dadosDoUsuario.email;
+    const avatarMenu = document.getElementById("menuAvatar");
+    if(avatarMenu) avatarMenu.src = dadosDoUsuario.picture;
 }
 
 /**
@@ -1686,7 +1688,8 @@ async function carregarCanalDoUsuario() {
 
 // --- SISTEMA DE TEMA CLARO / ESCURO E MENU ---
 
-document.getElementById('btn-menu-canal').addEventListener('click', () => {
+document.getElementById('btn-menu-canal-link').addEventListener('click', (e) => {
+    e.preventDefault();
     document.getElementById('containerUsuarioLogado').classList.remove('aberto');
     const btnVoce = document.getElementById('btn-sidebar-voce');
     if (btnVoce) btnVoce.click(); 
@@ -1698,18 +1701,18 @@ document.getElementById('btn-menu-tema').addEventListener('click', (e) => {
     if (isLight) {
         document.body.removeAttribute('data-theme');
         localStorage.setItem('youtubeTheme', 'dark');
-        document.querySelector('#btn-menu-tema span').innerText = 'Aparência: Tema Escuro';
+        document.getElementById('texto-menu-tema').innerText = 'Aparência: tema escuro';
     } else {
         document.body.setAttribute('data-theme', 'light');
         localStorage.setItem('youtubeTheme', 'light');
-        document.querySelector('#btn-menu-tema span').innerText = 'Aparência: Tema Claro';
+        document.getElementById('texto-menu-tema').innerText = 'Aparência: tema claro';
     }
 });
 
 const themeSalvo = localStorage.getItem('youtubeTheme');
 if (themeSalvo === 'light') {
     document.body.setAttribute('data-theme', 'light');
-    const spanTema = document.querySelector('#btn-menu-tema span');
-    if (spanTema) spanTema.innerText = 'Aparência: Tema Claro';
+    const spanTema = document.getElementById('texto-menu-tema');
+    if (spanTema) spanTema.innerText = 'Aparência: tema claro';
 }
 
