@@ -30,15 +30,13 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
     }
 
     elementoDaAreaDoPlayer.innerHTML = `
-        
-          <div class="media-view-box" id="main-player-container">
-              <video
-                  id="main-video-player"
-                  class="media-view-box__video"
-                  autoplay
-                  style="width: 100%; height: 100%; object-fit: contain; background: #000;"
-              ></video>
-
+        <div class="media-view-box" id="main-player-container">
+            <video
+                id="main-video-player"
+                class="media-view-box__video"
+                autoplay
+                style="width: 100%; height: 100%; object-fit: contain; background: #000;"
+            ></video>
             <div class="media-view-box__overlay" id="main-video-overlay"></div>
             <div class="media-view-box__controls">
                 <div class="media-view-box__progress-container" id="main-progress-container">
@@ -506,7 +504,6 @@ function formatarTempo(segundos) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
-
 window.atualizarStreamPiped = async function(videoId) {
     const video = document.getElementById("main-video-player");
     if (!video) return;
@@ -550,6 +547,7 @@ function inicializarPlayerPrincipal(ehAoVivo = false, videoId) {
         pauseVideo: () => videoEl.pause(),
         seekTo: (t) => { videoEl.currentTime = t; },
         getCurrentTime: () => videoEl.currentTime,
+        getDuration: () => videoEl.duration,
         destroy: () => { videoEl.pause(); videoEl.src = ""; }
     };
     
@@ -603,7 +601,1106 @@ function inicializarPlayerPrincipal(ehAoVivo = false, videoId) {
         !document.fullscreenElement ? container.requestFullscreen().catch(e => {}) : document.exitFullscreen();
     };
 }
+
+/**
+ * Busca no backend os detalhes de um vídeo específico e o exibe na
+ * view de "assistir" (player principal + recomendados).
+ *
+ * @param {string} idDoVideo - ID do vídeo no YouTube (ex: "dQw4w9WgXcQ").
+ */
+async function abrirVideo(idDoVideo) {
+    iniciarCarregamento();
+    try {
+        const resposta = await fetch(`${URL_DO_BACKEND}/api/video/${idDoVideo}`);
+        if (!resposta.ok) {
+            mostrarToast("Não foi possível carregar este vídeo.");
+            return;
+        }
+        const dadosDoVideo = await resposta.json();
+        renderizarVideoPrincipal(dadosDoVideo);
+        mostrarView("assistir");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        
+        inicializarPlayerPrincipal(typeof dadosDoVideo !== "undefined" && (dadosDoVideo.duracao === "Ao vivo" || dadosDoVideo.duracao === "0:00"));
+        inicializarEventosDeComentario(dadosDoVideo.id);
+        finalizarCarregamento();
+        
+        adicionarAoHistorico(dadosDoVideo);
+        verificarEstadoDoVideo(dadosDoVideo.id, dadosDoVideo.canal.id);
+
+        fetch(`${URL_DO_BACKEND}/api/comentarios/${idDoVideo}`)
+            .then(res => res.json())
+            .then(comentarios => {
+                const lista = document.getElementById("lista-de-comentarios");
+                const contador = document.getElementById("contador-comentarios");
+                if (lista && contador) {
+                    if (comentarios.erro || !Array.isArray(comentarios)) {
+                        contador.textContent = "Comentários desativados";
+                        lista.innerHTML = "";
+                        return;
+                    }
+                    contador.textContent = `${comentarios.length} Comentários`;
+                    lista.innerHTML = comentarios.map(c => `
+                        <div class="comentario-item">
+                            <div class="comentario-item__avatar" style="background-image: url('${c.avatar}')"></div>
+                            <div class="comentario-item__conteudo">
+                                <div class="comentario-item__cabecalho">
+                                    <span class="comentario-item__autor">${c.autor.startsWith('@') ? c.autor : '@' + c.autor}</span>
+                                    <span class="comentario-item__tempo">${c.tempoPublicacao}</span>
+                                </div>
+                                <div class="comentario-item__texto">${c.texto}</div>
+                                <div class="comentario-item__acoes">
+                                    <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> ${c.curtidas > 0 ? c.curtidas : ''}</button>
+                                    <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
+                                    <span class="btn-responder-comentario" data-comment-id="${c.id}" style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(err => {
+                const contador = document.getElementById("contador-comentarios");
+                if(contador) contador.textContent = "Erro ao carregar comentários";
+            });
+
+        // Busca vídeos parecidos com o título para popular os recomendados.
+        const primeiraPalavra = dadosDoVideo.titulo.split(" ").slice(0, 3).join(" ");
+        const respostaDosRecomendados = await fetch(
+            `${URL_DO_BACKEND}/api/buscar?q=${encodeURIComponent(primeiraPalavra)}`
+        );
+        if (respostaDosRecomendados.ok) {
+            const recomendados = await respostaDosRecomendados.json();
+            renderizarVideosRecomendados(recomendados.filter((v) => v.id !== idDoVideo));
+        }
+    } catch (erro) {
+        avisarSobreErroDeConexao(erro);
+    }
+}
+
+/**
+ * Busca no backend uma lista de vídeos reais pelo termo digitado e
+ * mostra como grade de resultados (esconde as chips de categoria, já
+ * que no YouTube real a busca por texto não usa as mesmas categorias
+ * da Home), a menos que seja uma busca de Shorts.
+ *
+ * @param {string} termoDeBusca - Texto digitado na barra de pesquisa.
+ * @param {string} [filtroDeDuracao] - "short" para a seção de Shorts;
+ *   deixe vazio para busca normal.
+ */
+async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
+    iniciarCarregamento();
+    try {
+        const parametroDeDuracao = filtroDeDuracao ? `&duracao=${filtroDeDuracao}` : "";
+        const resposta = await fetch(
+            `${URL_DO_BACKEND}/api/buscar?q=${encodeURIComponent(termoDeBusca)}${parametroDeDuracao}`
+        );
+
+        if (!resposta.ok) {
+            finalizarCarregamento();
+            mostrarToast("Não foi possível buscar vídeos agora.");
+            return;
+        }
+        const videosEncontrados = await resposta.json();
+
+        if (filtroDeDuracao === "short") {
+            renderizarShorts(videosEncontrados);
+        } else {
+            renderizarResultados(videosEncontrados, false, "lista");
+        }
+        finalizarCarregamento();
+    } catch (erro) {
+        finalizarCarregamento();
+        avisarSobreErroDeConexao(erro);
+    }
+}
+
+/**
+ * Busca os vídeos em alta no Brasil (Home real do YouTube não é uma
+ * busca por termo, e sim uma lista de vídeos populares) e os exibe na
+ * grade, com as chips de categoria visíveis.
+ *
+ * @param {string} [idDaCategoria] - ID numérico de categoria da YouTube
+ *   Data API (ex: "10" para Música). Vazio traz todas as categorias.
+ */
+async function buscarPopulares(idDaCategoria = "") {
+    iniciarCarregamento();
+    try {
+        const parametroDeCategoria = idDaCategoria ? `?categoria=${idDaCategoria}` : "";
+        const resposta = await fetch(`${URL_DO_BACKEND}/api/populares${parametroDeCategoria}`);
+
+        if (!resposta.ok) {
+            finalizarCarregamento();
+            mostrarToast("Não foi possível carregar os vídeos em alta agora.");
+            return;
+        }
+        const videosEncontrados = await resposta.json();
+        renderizarResultados(videosEncontrados, true, "grid");
+        finalizarCarregamento();
+    } catch (erro) {
+        finalizarCarregamento();
+        avisarSobreErroDeConexao(erro);
+    }
+}
+
+/**
+ * Centraliza o aviso de falha de conexão com o backend, deixando claro
+ * para quem está estudando que o servidor Node precisa estar rodando.
+ *
+ * @param {Error} erro - Erro capturado no fetch.
+ */
+function avisarSobreErroDeConexao(erro) {
+    console.error("Erro ao conectar com o backend:", erro);
+    mostrarToast("Servidor offline. Rode \"npm start\" na pasta backend e recarregue a página.");
+}
+
+/**
+ * Marca visualmente qual item da sidebar está ativo no momento.
+ *
+ * @param {HTMLElement} itemClicado - Elemento <a> da sidebar que foi clicado.
+ */
+function marcarItemAtivoNaSidebar(itemClicado) {
+    document.querySelectorAll(".sidebar-item.ativo").forEach((item) => item.classList.remove("ativo"));
+    itemClicado.classList.add("ativo");
+}
+
+/**
+ * Liga o formulário de busca do cabeçalho à função buscarVideos, o
+ * clique em qualquer card de resultado ou de vídeo recomendado para
+ * abri-lo, e a navegação da sidebar (Início, Shorts, Música, Filmes e
+ * os demais itens, que mostram um toast explicativo por dependerem de
+ * login).
+ */
+function configurarBuscaEClique() {
+
+    // Robusto clique para sidebar items (Assistir mais tarde e Gostei)
+    document.body.addEventListener("click", (evento) => {
+        const item = evento.target.closest(".sidebar-item[data-secao]");
+        if (item) {
+            const secao = item.getAttribute("data-secao");
+            if (secao === "assistir_mais_tarde") {
+                evento.preventDefault();
+                marcarItemAtivoNaSidebar(item);
+                document.getElementById("search-input").value = "";
+                mostrarView("assistir_mais_tarde");
+            } else if (secao === "curtidos") {
+                evento.preventDefault();
+                marcarItemAtivoNaSidebar(item);
+                document.getElementById("search-input").value = "";
+                mostrarView("curtidos");
+            }
+        }
+    });
+
+    const formularioDeBusca = document.getElementById("formulario-de-busca");
+    if (formularioDeBusca) {
+        formularioDeBusca.addEventListener("submit", (evento) => {
+            evento.preventDefault();
+            const termoDigitado = document.getElementById("search-input").value.trim();
+            if (termoDigitado) {
+                marcarItemAtivoNaSidebar(document.querySelector('[data-secao="inicio"]'));
+                buscarVideos(termoDigitado);
+            }
+        });
+    }
+
+    // Clique em um card da grade de resultados abre o vídeo (view "assistir").
+    document.body.addEventListener("click", (evento) => {
+        const card = evento.target.closest("[data-id-do-video]");
+        if (card) {
+            abrirVideo(card.dataset.idDoVideo);
+        }
+    });
+
+    // Clique em um vídeo recomendado, dentro da view "assistir", abre outro vídeo.
+    document.getElementById("recomendacoes").addEventListener("click", (evento) => {
+        // Ignora o clique se foi no botão de menu (⋮), que já tem sua própria ação.
+        if (evento.target.closest(".video-recomendado__menu")) return;
+
+        const card = evento.target.closest("[data-id-do-video]");
+        if (card) {
+            abrirVideo(card.dataset.idDoVideo);
+        }
+    });
+    
+    // Clique na logo volta para a Home
+    const logo = document.querySelector('.logotipo');
+    if (logo) {
+        logo.addEventListener('click', (evento) => {
+            evento.preventDefault();
+            document.querySelector('.sidebar-item[data-secao="inicio"]').click();
+        });
+        logo.style.cursor = 'pointer';
+    }
+
+    // Clique no menu hamburger para recolher a sidebar
+    const menuHamburger = document.querySelector('.fa-bars');
+    if (menuHamburger) {
+        menuHamburger.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('recolhida');
+        });
+        menuHamburger.style.cursor = 'pointer';
+    }
+
+    // Clique em uma chip de categoria filtra a Home por aquela categoria.
+    document.getElementById("chipsCategorias").addEventListener("click", (evento) => {
+        const chip = evento.target.closest(".chip");
+        if (!chip) return;
+
+        document.querySelectorAll(".chip.ativo").forEach((c) => c.classList.remove("ativo"));
+        chip.classList.add("ativo");
+        buscarPopulares(chip.dataset.categoria);
+    });
+
+    document.querySelectorAll(".sidebar-item[data-secao]").forEach((item) => {
+        item.addEventListener("click", (evento) => {
+            evento.preventDefault();
+            marcarItemAtivoNaSidebar(item);
+
+            const secao = item.dataset.secao;
+            document.getElementById("search-input").value = "";
+
+            if (secao === "inicio") {
+                document.querySelectorAll(".chip.ativo").forEach((c) => c.classList.remove("ativo"));
+                document.querySelector('.chip[data-categoria=""]').classList.add("ativo");
+                buscarPopulares();
+            } else if (secao === "shorts") {
+                buscarVideos("shorts", "short");
+            } else if (secao === "busca") {
+                buscarVideos(item.dataset.termo);
+            } else if (secao === "inscricoes") {
+                abrirInscricoesReais();
+            } else if (secao === "historico") {
+                renderizarHistorico();
+                mostrarView("historico");
+            } else if (secao === "voce") {
+                const logado = localStorage.getItem('usuarioLogadoComGoogle');
+                if (!logado) {
+                    mostrarToast("Faça login para acessar seu canal.");
+                } else {
+                    carregarCanalDoUsuario();
+                    mostrarView("voce");
+                }
+            } else if (secao === "playlists") {
+                mostrarView("playlists");
+            }
+        });
+    });
+}
+
+configurarBuscaEClique();
+
+// Carrega a Home com vídeos em alta reais, igual à Home de verdade do YouTube.
+
+/**
+ * Decodifica a parte "payload" de um token JWT (usado pelo Google
+ * Identity Services) sem precisar de nenhuma biblioteca externa.
+ *
+ * @param {string} tokenJwt - Token no formato "cabecalho.payload.assinatura".
+ * @returns {Object} Dados do usuário (nome, e-mail, foto, etc.).
+ */
+function decodificarTokenJwt(tokenJwt) {
+    const payloadBase64 = tokenJwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(payloadBase64));
+}
+
+/**
+ * Atualiza a interface para o estado "logado": mostra o avatar no
+ * cabeçalho, esconde os botões de login e guarda os dados no
+ * localStorage para persistir entre recarregamentos da página.
+ *
+ * @param {Object} dadosDoUsuario - Payload decodificado do token do Google.
+ */
+function aplicarUsuarioLogado(dadosDoUsuario) {
+    localStorage.setItem("usuarioLogadoComGoogle", JSON.stringify(dadosDoUsuario));
+
+    document.getElementById("containerLoginGoogle").style.display = "none";
+    document.getElementById("sidebarLogin").style.display = "none";
+    const sidebarVoce = document.getElementById("sidebarVoceGroup");
+    if(sidebarVoce) sidebarVoce.style.display = "block";
+    const sidebarVoceDivisor = document.getElementById("sidebarVoceDivisor");
+    if(sidebarVoceDivisor) sidebarVoceDivisor.style.display = "block";
+    document.getElementById("sidebarInscricoesGroup").style.display = "block";
+    document.getElementById("sidebarInscricoesDivisor").style.display = "block";
+    // Defer to avoid TDZ - tokenDeAcessoDoYoutube is declared later in the file
+    setTimeout(() => {
+        if (typeof carregarInscricoesSidebar === 'function') {
+            carregarInscricoesSidebar();
+        }
+    }, 100);
+    const containerDoUsuario = document.getElementById("containerUsuarioLogado");
+    containerDoUsuario.style.display = "flex";
+
+    const imagemDoAvatar = document.getElementById("avatarDoUsuario");
+    const avatarAlternativo = document.getElementById("avatarDoUsuarioFallback");
+
+    const iconeVoce = document.getElementById('icone-sidebar-voce');
+    if (iconeVoce) {
+        const novoAvatar = document.createElement('img');
+        novoAvatar.src = dadosDoUsuario.picture;
+        novoAvatar.className = "sidebar-avatar";
+        novoAvatar.id = "icone-sidebar-voce";
+        iconeVoce.parentNode.replaceChild(novoAvatar, iconeVoce);
+    }
+
+    avatarAlternativo.textContent = (dadosDoUsuario.given_name || dadosDoUsuario.name || "?").charAt(0).toUpperCase();
+
+    // Algumas fotos do Google falham ao carregar (política de referrer);
+    // nesse caso, mostra um avatar com a inicial do nome no lugar.
+    imagemDoAvatar.style.display = "block";
+    avatarAlternativo.style.display = "none";
+    imagemDoAvatar.onerror = () => {
+        imagemDoAvatar.style.display = "none";
+        avatarAlternativo.style.display = "flex";
+    };
+    imagemDoAvatar.src = dadosDoUsuario.picture;
+
+    document.getElementById("nomeDoUsuario").textContent = dadosDoUsuario.name;
+    document.getElementById("emailDoUsuario").textContent = dadosDoUsuario.email;
+    const avatarMenu = document.getElementById("menuAvatar");
+    if(avatarMenu) avatarMenu.src = dadosDoUsuario.picture;
+}
+
+/**
+ * Reverte a interface para o estado "deslogado": some com o avatar e
+ * volta a mostrar os botões de login (cabeçalho e sidebar).
+ */
+function aplicarUsuarioDeslogado() {
+    localStorage.removeItem("usuarioLogadoComGoogle");
+    localStorage.removeItem("youtube_access_token");
+    localStorage.removeItem("youtube_token_expires_at");
+    tokenDeAcessoDoYoutube = null;
+
+    document.getElementById("containerLoginGoogle").style.display = "block";
+    document.getElementById("sidebarLogin").style.display = "block";
+    const sidebarVoce = document.getElementById("sidebarVoceGroup");
+    if(sidebarVoce) sidebarVoce.style.display = "none";
+    const sidebarVoceDivisor = document.getElementById("sidebarVoceDivisor");
+    if(sidebarVoceDivisor) sidebarVoceDivisor.style.display = "none";
+    document.getElementById("sidebarInscricoesGroup").style.display = "none";
+    document.getElementById("sidebarInscricoesDivisor").style.display = "none";
+    document.getElementById("containerUsuarioLogado").style.display = "none";
+    document.getElementById("containerUsuarioLogado").classList.remove("aberto");
+}
+
+/**
+ * Callback chamado pelo Google Identity Services quando o login é
+ * concluído com sucesso.
+ *
+ * @param {Object} respostaDoGoogle - Objeto com o campo "credential" (JWT).
+ */
+function fazerLoginCompleto() {
+    if (GOOGLE_CLIENT_ID.startsWith("COLE_AQUI")) {
+        alert("Configure o GOOGLE_CLIENT_ID no index.html primeiro!");
+        return;
+    }
+    
+    // Usa a mesma função que já pede o token pro YouTube,
+    // mas como o escopo agora tem userinfo, vamos pegar o perfil também!
+    obterTokenDeAcessoDoYoutube().then(token => {
+        // Agora que temos o token unificado (permissões + identidade)
+        // Vamos buscar quem é o usuário
+        return fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+    })
+    .then(res => res.json())
+    .then(dadosDoUsuario => {
+        if (dadosDoUsuario.error) {
+            console.error("Erro ao buscar perfil:", dadosDoUsuario.error);
+            return;
+        }
+        
+        aplicarUsuarioLogado(dadosDoUsuario);
+        mostrarToast(`Login realizado como ${dadosDoUsuario.given_name || dadosDoUsuario.name}.`);
+    })
+    .catch(err => {
+        console.error("Erro no login completo:", err);
+    });
+}
+
+// Se já existir um login salvo no localStorage (de uma visita anterior), aplica direto
+const loginSalvo = localStorage.getItem("usuarioLogadoComGoogle");
+if (loginSalvo) {
+    aplicarUsuarioLogado(JSON.parse(loginSalvo));
+    // Auto-load subscriptions when restoring session
+    setTimeout(() => {
+        if (typeof carregarInscricoesSidebar === 'function') {
+            carregarInscricoesSidebar();
+        }
+    }, 500);
+}
+
+// ===== Ações reais na conta do YouTube (curtir, inscrever, inscrições) =====
+// Usam um token OAuth separado do login (que só identifica quem é a
+// pessoa). Esse token só é pedido na hora em que a pessoa realmente
+// tenta curtir/inscrever, e o Google mostra uma tela de permissão.
+const ESCOPOS_DO_YOUTUBE = "https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
+let clienteDeTokenDoYoutube = null;
+let tokenDeAcessoDoYoutube = null;
+const CHAVE_TOKEN_YT = "youtube_access_token";
+const CHAVE_EXPIRACAO_YT = "youtube_token_expires_at";
+
+/**
+ * Garante que exista um token de acesso válido para chamar a YouTube
+ * Data API em nome da pessoa logada (curtir, inscrever, listar
+ * inscrições). Pede permissão pelo popup do Google na primeira vez;
+ * chamadas seguintes reaproveitam o token enquanto ele durar.
+ *
+ * @returns {Promise<string>} O token de acesso.
+ */
+function obterTokenDeAcessoDoYoutube() {
+    return new Promise((resolver, rejeitar) => {
+        if (tokenDeAcessoDoYoutube) {
+            resolver(tokenDeAcessoDoYoutube);
+            return;
+        }
+
+        const tokenSalvo = localStorage.getItem(CHAVE_TOKEN_YT);
+        const expiracaoSalva = localStorage.getItem(CHAVE_EXPIRACAO_YT);
+        if (tokenSalvo && expiracaoSalva && Date.now() < parseInt(expiracaoSalva)) {
+            tokenDeAcessoDoYoutube = tokenSalvo;
+            const tempoRestante = parseInt(expiracaoSalva) - Date.now();
+            setTimeout(() => { 
+                tokenDeAcessoDoYoutube = null; 
+                localStorage.removeItem(CHAVE_TOKEN_YT);
+                localStorage.removeItem(CHAVE_EXPIRACAO_YT);
+            }, Math.max(0, tempoRestante - 60000));
+            resolver(tokenDeAcessoDoYoutube);
+            return;
+        }
+
+        if (GOOGLE_CLIENT_ID.startsWith("COLE_AQUI")) {
+            rejeitar(new Error("Client ID do Google não configurado."));
+            return;
+        }
+
+        if (!clienteDeTokenDoYoutube) {
+            clienteDeTokenDoYoutube = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: ESCOPOS_DO_YOUTUBE,
+                callback: (resposta) => {
+                    if (resposta.error) {
+                        rejeitar(new Error(resposta.error));
+                        return;
+                    }
+                    tokenDeAcessoDoYoutube = resposta.access_token;
+                    localStorage.setItem(CHAVE_TOKEN_YT, tokenDeAcessoDoYoutube);
+                    localStorage.setItem(CHAVE_EXPIRACAO_YT, Date.now() + (resposta.expires_in * 1000));
+                    
+                    setTimeout(() => { 
+                        tokenDeAcessoDoYoutube = null; 
+                        localStorage.removeItem(CHAVE_TOKEN_YT);
+                        localStorage.removeItem(CHAVE_EXPIRACAO_YT);
+                    }, (resposta.expires_in - 60) * 1000);
+                    resolver(tokenDeAcessoDoYoutube);
+                }
+            });
+        }
+
+        clienteDeTokenDoYoutube.requestAccessToken();
+    });
+}
+
+function possuiTokenSalvoValido() {
+    if (tokenDeAcessoDoYoutube) return true;
+    const tokenSalvo = localStorage.getItem(CHAVE_TOKEN_YT);
+    const expiracaoSalva = localStorage.getItem(CHAVE_EXPIRACAO_YT);
+    if (tokenSalvo && expiracaoSalva && Date.now() < parseInt(expiracaoSalva)) {
+        return true;
+    }
+    return false;
+}
+
+async function verificarEstadoDoVideo(idDoVideo, idDoCanal) {
+    if (!possuiTokenSalvoValido()) return;
+    
+    // Pega o token silenciosamente
+    const token = tokenDeAcessoDoYoutube || localStorage.getItem(CHAVE_TOKEN_YT);
+
+    try {
+        // Verificar curtida
+        if (idDoVideo) {
+            const resp = await fetch(`https://www.googleapis.com/youtube/v3/videos/getRating?id=${idDoVideo}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const dados = await resp.json();
+                if (dados.items && dados.items[0].rating === 'like') {
+                    const btn = document.querySelector(`[data-acao="curtir"][data-video-id="${idDoVideo}"]`);
+                    if (btn) {
+                        btn.classList.add('curtido');
+                        const icone = btn.querySelector('i');
+                        if (icone) {
+                            icone.classList.remove('fa-regular');
+                            icone.classList.add('fa-solid');
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Verificar inscrição
+        if (idDoCanal) {
+            const resp = await fetch(`https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&forChannelId=${idDoCanal}&mine=true`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const dados = await resp.json();
+                if (dados.items && dados.items.length > 0) {
+                    const btn = document.querySelector(`[data-acao="inscrever"][data-canal-id="${idDoCanal}"]`);
+                    if (btn) {
+                        btn.textContent = "Inscrito";
+                        btn.classList.add("inscrito");
+                    }
+                }
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao verificar estado:", erro);
+    }
+}
+
+/**
+ * Inscreve de verdade a pessoa logada no canal informado, usando a
+ * YouTube Data API (subscriptions.insert). Ao dar certo, o botão muda
+ * de "Inscrever-se" (branco) para "Inscrito" (cinza) com uma pequena
+ * animação, igual ao YouTube real.
+ *
+ * @param {string} idDoCanal - ID do canal do YouTube a se inscrever.
+ * @param {HTMLElement} [botao] - Botão clicado, para atualizar o visual.
+ */
+async function inscreverNoCanal(idDoCanal, botao) {
+    if (!idDoCanal) {
+        mostrarToast("Não foi possível identificar o canal deste vídeo.");
+        return;
+    }
+
+    if (botao && botao.classList.contains("inscrito")) {
+        mostrarToast("Você já está inscrito neste canal.");
+        return;
+    }
+
+    try {
+        const token = await obterTokenDeAcessoDoYoutube();
+        const resposta = await fetch("https://www.googleapis.com/youtube/v3/subscriptions?part=snippet", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ snippet: { resourceId: { kind: "youtube#channel", channelId: idDoCanal } } })
+        });
+
+        if (resposta.ok) {
+            mostrarToast("Inscrito no canal com sucesso!");
+            if (botao) {
+                botao.textContent = "Inscrito";
+                botao.classList.add("inscrito", "animacao-inscrever");
+                setTimeout(() => botao.classList.remove("animacao-inscrever"), 300);
+            }
+        } else {
+            const erro = await resposta.json();
+            if (erro.error?.errors?.[0]?.reason === "subscriptionDuplicate") {
+                mostrarToast("Você já está inscrito neste canal.");
+                if (botao) {
+                    botao.textContent = "Inscrito";
+                    botao.classList.add("inscrito");
+                }
+            } else {
+                mostrarToast("Não foi possível se inscrever agora.");
+                console.error("Erro ao se inscrever:", erro);
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao se inscrever:", erro);
+        mostrarToast("Login com permissão do YouTube necessário para se inscrever.");
+    }
+}
+
+/**
+ * Dá ou remove "like" de verdade no vídeo informado, usando a YouTube
+ * Data API (videos.rate). Clicar de novo em um vídeo já curtido remove
+ * a curtida (alterna, como no YouTube real). O ícone faz uma pequena
+ * animação de "pulso" a cada clique.
+ *
+ * @param {string} idDoVideo - ID do vídeo a curtir.
+ * @param {HTMLElement} [botao] - Botão clicado, para atualizar o visual.
+ */
+async function curtirVideo(idDoVideo, botao) {
+    const jaEstavaCurtido = botao ? botao.classList.contains("curtido") : false;
+    const novaAvaliacao = jaEstavaCurtido ? "none" : "like";
+
+    try {
+        const token = await obterTokenDeAcessoDoYoutube();
+        const resposta = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos/rate?id=${idDoVideo}&rating=${novaAvaliacao}`,
+            { method: "POST", headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (resposta.ok) {
+            if (botao) {
+                botao.classList.toggle("curtido", !jaEstavaCurtido);
+                
+                const icone = botao.querySelector('i');
+                if (icone) {
+                    if (!jaEstavaCurtido) {
+                        icone.classList.remove('fa-regular');
+                        icone.classList.add('fa-solid');
+                    } else {
+                        icone.classList.remove('fa-solid');
+                        icone.classList.add('fa-regular');
+                    }
+                }
+                
+                botao.classList.add("animacao-curtir");
+                setTimeout(() => botao.classList.remove("animacao-curtir"), 350);
+            }
+            mostrarToast(jaEstavaCurtido ? "Curtida removida." : "Você curtiu este vídeo (curtida real na sua conta).");
+        } else {
+            mostrarToast("Não foi possível curtir agora.");
+        }
+    } catch (erro) {
+        console.error("Erro ao curtir:", erro);
+        mostrarToast("Login com permissão do YouTube necessário para curtir.");
+    }
+}
+
+/**
+ * Busca a lista real de canais inscritos da pessoa logada e mostra na
+ * área de resultados, cada um com um botão para ver os vídeos
+ * recentes daquele canal.
+ */
+async function abrirInscricoesReais() {
+    try {
+        const token = await obterTokenDeAcessoDoYoutube();
+        const resposta = await fetch(
+            "https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50",
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!resposta.ok) {
+            mostrarToast("Não foi possível carregar suas inscrições.");
+            return;
+        }
+
+        const dados = await resposta.json();
+        const areaDeResultados = document.getElementById("areaResultados");
+        document.getElementById("chipsCategorias").style.display = "none";
+        document.getElementById("areaResultados").classList.remove("lista");
+
+        if (!dados.items.length) {
+            areaDeResultados.innerHTML = `<p class="mensagem-vazia">Você ainda não está inscrito em nenhum canal.</p>`;
+        } else {
+            areaDeResultados.innerHTML = dados.items.map((item) => `
+                <div class="card-resultado" data-id-do-canal="${item.snippet.resourceId.channelId}">
+                    <div class="card-resultado__miniatura-wrapper">
+                        <img class="card-resultado__miniatura" src="${item.snippet.thumbnails.high.url}" alt="${item.snippet.title}">
+                    </div>
+                    <div class="card-resultado__corpo">
+                        <div class="card-resultado__informacoes">
+                            <span class="card-resultado__titulo">${item.snippet.title}</span>
+                            <span class="card-resultado__canal">Clique para ver os vídeos recentes</span>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        mostrarView("inicio");
+    } catch (erro) {
+        console.error("Erro ao buscar inscrições:", erro);
+        mostrarToast("Login com permissão do YouTube necessário para ver suas inscrições.");
+    }
+}
+
+// Clique em um canal inscrito abre os vídeos recentes dele.
+document.body.addEventListener("click", (evento) => {
+    const cardDeCanal = evento.target.closest("[data-id-do-canal]");
+    if (cardDeCanal) {
+        buscarPorCanal(cardDeCanal.dataset.idDoCanal);
+    }
+});
+
+/**
+ * Busca os vídeos recentes de um canal específico (usado ao clicar em
+ * um canal inscrito) e mostra em formato de lista.
+ *
+ * @param {string} idDoCanal - ID do canal do YouTube.
+ */
+async function buscarPorCanal(idDoCanal) {
+    try {
+        const resposta = await fetch(`${URL_DO_BACKEND}/api/buscar?canalId=${idDoCanal}`);
+        if (!resposta.ok) {
+            mostrarToast("Não foi possível carregar os vídeos deste canal.");
+            return;
+        }
+        const videos = await resposta.json();
+        renderizarResultados(videos, false, "lista");
+    } catch (erro) {
+        avisarSobreErroDeConexao(erro);
+    }
+}
+
+// Clique em qualquer lugar fora do menu o fecha.
+document.getElementById("avatarDoUsuario").addEventListener("click", (evento) => {
+    evento.stopPropagation();
+    document.getElementById("containerUsuarioLogado").classList.toggle("aberto");
+});
+
+document.getElementById("avatarDoUsuarioFallback").addEventListener("click", (evento) => {
+    evento.stopPropagation();
+    document.getElementById("containerUsuarioLogado").classList.toggle("aberto");
+});
+
+// Clique em qualquer lugar fora do menu o fecha e reseta pro painel principal
+document.addEventListener("click", () => {
+    document.getElementById("containerUsuarioLogado").classList.remove("aberto");
+    if (typeof abrirPainel === 'function') {
+        abrirPainel('painel-principal');
+    }
+});
+
+document.getElementById("botaoSair").addEventListener("click", (evento) => {
+    evento.stopPropagation();
+    aplicarUsuarioDeslogado();
+    mostrarToast("Você saiu da sua conta.");
+});
+
+
+/**
+ * Exibe uma mensagem curta de feedback no rodapé da tela (toast),
+ * adaptado do projeto cloneYou, para dar retorno visual em ações
+ * que ainda não têm efeito real (inscrever-se, compartilhar, etc.).
+ *
+ * @param {string} mensagem - Texto a ser exibido no toast.
+ */
+let temporizadorDoToast;
+function mostrarToast(mensagem) {
+    const elementoDoToast = document.getElementById("toast");
+    if (!elementoDoToast) return;
+
+    elementoDoToast.textContent = mensagem;
+    elementoDoToast.classList.add("is-visible");
+
+    clearTimeout(temporizadorDoToast);
+    temporizadorDoToast = setTimeout(() => {
+        elementoDoToast.classList.remove("is-visible");
+    }, 2600);
+}
+
+/**
+ * Liga o toast aos botões de ação do vídeo principal (inscrever-se,
+ * curtir, compartilhar, baixar) e ao menu dos vídeos recomendados.
+ * Usa delegação de eventos porque esses elementos são criados
+ * dinamicamente pelo JavaScript.
+ */
+function configurarFeedbackDeAcoes() {
+    document.addEventListener("click", (evento) => {
+        const gatilhoDeAcaoReal = evento.target.closest("[data-acao]");
+        if (gatilhoDeAcaoReal) {
+            const acao = gatilhoDeAcaoReal.dataset.acao;
+            if (acao === "inscrever") {
+                inscreverNoCanal(gatilhoDeAcaoReal.dataset.canalId, gatilhoDeAcaoReal);
+            } else if (acao === "curtir") {
+                curtirVideo(gatilhoDeAcaoReal.dataset.videoId, gatilhoDeAcaoReal);
+            }
+            return;
+        }
+
+        const gatilhoDeToast = evento.target.closest("[data-toast]");
+        if (gatilhoDeToast) {
+            mostrarToast(gatilhoDeToast.dataset.toast);
+        }
+    });
+}
+
+configurarFeedbackDeAcoes();
+
+function inicializarEventosDeComentario(videoId) {
+    const input = document.getElementById('comentario-input-box');
+    const acoes = document.getElementById('comentario-acoes');
+    const btnCancelar = document.getElementById('btn-cancelar-comentario');
+    const btnEnviar = document.getElementById('btn-enviar-comentario');
+
+    if (!input || !acoes || !btnCancelar || !btnEnviar) return;
+
+    input.addEventListener('focus', () => {
+        acoes.style.display = 'flex';
+    });
+
+    input.addEventListener('input', () => {
+        if (input.value.trim().length > 0) {
+            btnEnviar.disabled = false;
+            btnEnviar.style.backgroundColor = '#3ea6ff';
+            btnEnviar.style.color = '#000';
+            btnEnviar.style.cursor = 'pointer';
+        } else {
+            btnEnviar.disabled = true;
+            btnEnviar.style.backgroundColor = '#272727';
+            btnEnviar.style.color = '#717171';
+            btnEnviar.style.cursor = 'default';
+        }
+    });
+
+    btnCancelar.addEventListener('click', () => {
+        input.value = '';
+        acoes.style.display = 'none';
+        btnEnviar.disabled = true;
+        btnEnviar.style.backgroundColor = '#272727';
+        btnEnviar.style.color = '#717171';
+        btnEnviar.style.cursor = 'default';
+    });
+
+    btnEnviar.addEventListener('click', () => {
+        const texto = input.value.trim();
+        if (texto.length > 0) {
+            enviarComentarioReal(videoId, texto);
+        }
+    });
+}
+
+function enviarComentarioReal(videoId, texto) {
+    const btnEnviar = document.getElementById('btn-enviar-comentario');
+    btnEnviar.disabled = true;
+    btnEnviar.innerText = 'Autenticando...';
+
+    obterTokenDeAcessoDoYoutube()
+        .then(token => {
+            btnEnviar.innerText = 'Enviando...';
+            return fetch('https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    snippet: {
+                        videoId: videoId,
+                        topLevelComment: {
+                            snippet: { textOriginal: texto }
+                        }
+                    }
+                })
+            });
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Erro ao postar comentario:', data.error);
+                let motivo = data.error.message || 'Erro desconhecido';
+                if (data.error.errors && data.error.errors.length > 0) {
+                    motivo = data.error.errors[0].reason;
+                }
+                
+                if (motivo === 'youtubeSignupRequired') {
+                    alert('Sua conta do Google não tem um canal no YouTube! Crie um canal no YouTube.com primeiro para poder comentar.');
+                } else if (motivo === 'commentsDisabled') {
+                    alert('Os comentários estão desativados para este vídeo.');
+                } else {
+                    alert('Falha ao enviar comentario. Motivo: ' + motivo);
+                }
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = 'Comentar';
+                return;
+            }
+
+            const btnCancelar = document.getElementById('btn-cancelar-comentario');
+            if (btnCancelar) btnCancelar.click();
+            btnEnviar.innerText = 'Comentar';
+
+            const listaDeComentarios = document.getElementById('lista-de-comentarios');
+            if (listaDeComentarios) {
+                const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
+                let nomeUsuario = 'Você';
+                let fotoUsuario = '';
+                if (loginSalvo) {
+                    try { 
+                        const parsed = JSON.parse(loginSalvo);
+                        nomeUsuario = parsed.name || 'Você';
+                        fotoUsuario = parsed.picture || '';
+                    } catch(e){}
+                }
+
+                const novoComentarioHTML = `
+                    <div class="comentario-item">
+                        ${fotoUsuario ? `<img class="comentario-avatar" src="${fotoUsuario}">` : `<div class="comentario-item__avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`}
+                        <div class="comentario-item__conteudo">
+                            <div class="comentario-item__cabecalho">
+                                <span class="comentario-item__autor">@${nomeUsuario}</span>
+                                <span class="comentario-item__tempo">agora mesmo</span>
+                            </div>
+                            <div class="comentario-item__texto">
+                                ${texto.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                            </div>
+                            <div class="comentario-item__acoes">
+                                <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-up"></i> 0</button>
+                                <button class="comentario-item__acao"><i class="fa-regular fa-thumbs-down"></i></button>
+                                <span class="btn-responder-comentario" data-comment-id="${data.id}" style="font-weight: 500; cursor: pointer; color: #fff; font-size: 13px; margin-left: 12px;">Responder</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listaDeComentarios.insertAdjacentHTML('afterbegin', novoComentarioHTML);
+            }
+        })
+        .catch(err => {
+            console.error('Erro rede ao postar:', err);
+            btnEnviar.disabled = false;
+            btnEnviar.innerText = 'Comentar';
+        });
+}
+
+function iniciarCarregamento() {
+    const barra = document.getElementById('barra-progresso');
+    if (!barra) return;
+    barra.style.opacity = '1';
+    barra.style.width = '30%';
+    setTimeout(() => { if (barra.style.opacity === '1') barra.style.width = '60%'; }, 500);
+}
+
+function finalizarCarregamento() {
+    const barra = document.getElementById('barra-progresso');
+    if (!barra) return;
+    barra.style.width = '100%';
+    setTimeout(() => {
+        barra.style.opacity = '0';
+        setTimeout(() => { barra.style.width = '0%'; }, 300);
+    }, 400);
+}
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('btn-responder-comentario')) {
+        const parentId = e.target.getAttribute('data-comment-id');
+        const commentItem = e.target.closest('.comentario-item');
+        
+        // Remove caixas antigas se houver
+        const antigas = document.querySelectorAll('.caixa-resposta-temp');
+        antigas.forEach(a => a.remove());
+
+        const formResposta = document.createElement('div');
+        formResposta.className = 'comentario-input-container caixa-resposta-temp';
+        formResposta.style.flex = '1';
+        formResposta.style.marginTop = '12px';
+        formResposta.innerHTML = `
+            <input type="text" placeholder="Adicione uma resposta..." class="comentario-input" id="input-resposta-${parentId}">
+            <div class="comentario-acoes" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                <button class="comentario-btn-cancelar" onclick="this.closest('.caixa-resposta-temp').remove()" style="background: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                <button class="comentario-btn-enviar" onclick="enviarRespostaReal('${parentId}', this)" style="background-color: #3ea6ff; color: #000; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">Responder</button>
+            </div>
+        `;
+        
+        commentItem.querySelector('.comentario-item__conteudo').appendChild(formResposta);
+        setTimeout(() => document.getElementById('input-resposta-' + parentId).focus(), 50);
+    }
+});
+
+function enviarRespostaReal(parentId, btnElement) {
+    const input = document.getElementById('input-resposta-' + parentId);
+    if (!input) return;
+    const texto = input.value.trim();
+    if (texto.length === 0) return;
+
+    btnElement.disabled = true;
+    btnElement.innerText = 'Autenticando...';
+    iniciarCarregamento();
+
+    obterTokenDeAcessoDoYoutube()
+        .then(token => {
+            btnElement.innerText = 'Enviando...';
+            return fetch('https://youtube.googleapis.com/youtube/v3/comments?part=snippet', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    snippet: {
+                        parentId: parentId,
+                        textOriginal: texto
+                    }
+                })
+            });
+        })
+        .then(res => res.json())
+        .then(data => {
+            finalizarCarregamento();
+            if (data.error) {
+                console.error('Erro ao postar resposta:', data.error);
+                let motivo = data.error.message || 'Erro desconhecido';
+                if (data.error.errors && data.error.errors.length > 0) {
+                    motivo = data.error.errors[0].reason;
+                }
+                alert('Falha ao enviar resposta. Motivo: ' + motivo);
+                btnElement.disabled = false;
+                btnElement.innerText = 'Responder';
+                return;
+            }
+
+            const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
+            let nomeUsuario = 'Você';
+            let fotoUsuario = '';
+            if (loginSalvo) {
+                try { 
+                    const parsed = JSON.parse(loginSalvo);
+                    nomeUsuario = parsed.name || 'Você';
+                    fotoUsuario = parsed.picture || '';
+                } catch(e){}
+            }
+
+            const novaRespostaHTML = `
+                <div class="comentario-item" style="margin-top: 16px; margin-left: 24px;">
+                    ${fotoUsuario ? `<img class="comentario-avatar" style="width:24px;height:24px;" src="${fotoUsuario}">` : `<div class="comentario-item__avatar" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;font-size:12px;"></i></div>`}
+                    <div class="comentario-item__conteudo">
+                        <div class="comentario-item__cabecalho">
+                            <span class="comentario-item__autor">@${nomeUsuario}</span>
+                            <span class="comentario-item__tempo">agora mesmo</span>
+                        </div>
+                        <div class="comentario-item__texto">
+                            ${texto.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const container = btnElement.closest('.comentario-item__conteudo');
+            btnElement.closest('.caixa-resposta-temp').remove();
+            container.insertAdjacentHTML('beforeend', novaRespostaHTML);
+        })
+        .catch(err => {
+            finalizarCarregamento();
+            console.error('Erro de rede ao responder:', err);
+            btnElement.disabled = false;
+            btnElement.innerText = 'Responder';
+        });
+}
+
+// --- SISTEMA DE ROTAS (HISTORY API) ---
+const originalAbrirVideo = abrirVideo;
+window.abrirVideo = async function(idDoVideo, fromHistory = false) {
+    if (!fromHistory) {
+        window.history.pushState({ view: 'assistir', id: idDoVideo }, "", "?v=" + idDoVideo);
+    }
+    return originalAbrirVideo(idDoVideo);
+};
+
+const originalMostrarView = mostrarView;
+window.mostrarView = function(nomeDaView, fromHistory = false) {
+    if (!fromHistory && nomeDaView === 'inicio') {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('v')) {
+            window.history.pushState({ view: 'inicio' }, "", window.location.pathname);
+        }
+    }
+    return originalMostrarView(nomeDaView);
+};
+
+
+
 // --- SISTEMA DE HISTORICO E CANAL ---
+
 function adicionarAoHistorico(video) {
     let historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
     historico = historico.filter(v => v.id !== video.id);
