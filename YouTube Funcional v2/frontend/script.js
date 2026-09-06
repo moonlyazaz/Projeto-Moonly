@@ -1,6 +1,6 @@
-Ôªø/**
- * Monta e insere na p√°gina todo o bloco do v√≠deo que est√° sendo assistido:
- * player, t√≠tulo, dados do canal, bot√µes de a√ß√£o e descri√ß√£o.
+/**
+ * Monta e insere na p·gina todo o bloco do vÌdeo que est· sendo assistido:
+ * player, tÌtulo, dados do canal, botıes de aÁ„o e descriÁ„o.
  *
  * Dados esperados (exemplo):
  * {
@@ -12,13 +12,13 @@
  *         "foto": "https://exemplo.com/canal.jpg",
  *         "inscritos": "1,2 mi de inscritos"
  *     },
- *     "visualizacoes": "342 mil visualiza√ß√µes",
- *     "dataPublicacao": "h√° 3 dias",
+ *     "visualizacoes": "342 mil visualizaÁıes",
+ *     "dataPublicacao": "h· 3 dias",
  *     "curtidas": "18 mil",
- *     "descricao": "Nesta aula constru√≠mos uma c√≥pia da interface do YouTube."
+ *     "descricao": "Nesta aula construÌmos uma cÛpia da interface do YouTube."
  * }
  *
- * @param {Object} dadosDoVideoPrincipal - Objeto com todas as informa√ß√µes do v√≠deo aberto.
+ * @param {Object} dadosDoVideoPrincipal - Objeto com todas as informaÁıes do vÌdeo aberto.
  */
 function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
     const elementoDaAreaDoPlayer = document.getElementById("areaPlayer");
@@ -87,15 +87,15 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                         <i class="fa-regular fa-thumbs-down"></i>
                     </button>
                 </div>
-                <button class="acao" data-toast="Link copiado para a √°rea de transfer√™ncia.">
+                <button class="acao" data-toast="Link copiado para a ·rea de transferÍncia.">
                     <i class="fa-solid fa-share"></i>
                     <span>Compartilhar</span>
                 </button>
-                <button class="acao" data-toast="O YouTube n√£o permite baixar v√≠deos por fora do app oficial.">
+                <button class="acao" data-toast="O YouTube n„o permite baixar vÌdeos por fora do app oficial.">
                     <i class="fa-solid fa-download"></i>
                     <span>Download</span>
                 </button>
-                <button class="acao" data-toast="Mais op√ß√µes em breve.">
+                <button class="acao" data-toast="Mais opÁıes em breve.">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
             </div>
@@ -103,23 +103,23 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
 
         <div class="descricao" data-toast="Mostrar mais (em breve)">
             <div class="descricao__estatisticas">
-                <span>${dadosDoVideoPrincipal.visualizacoes}</span> ‚Ä¢ <span>${dadosDoVideoPrincipal.dataPublicacao}</span>
+                <span>${dadosDoVideoPrincipal.visualizacoes}</span> ï <span>${dadosDoVideoPrincipal.dataPublicacao}</span>
             </div>
             <p class="descricao__texto">${dadosDoVideoPrincipal.descricao}</p>
         </div>
         
         <div class="comentarios-secao">
-            <h3 id="contador-comentarios">Carregando coment√°rios...</h3>
+            <h3 id="contador-comentarios">Carregando coment·rios...</h3>
             <div class="comentario-input-area">
                 ${fotoDoUsuario 
                     ? `<img class="comentario-avatar-img" src="${fotoDoUsuario}">` 
                     : `<div class="comentario-avatar" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;"></i></div>`
                 }
                 <div class="comentario-input-container" style="flex:1;">
-                    <input type="text" placeholder="Adicione um coment√°rio..." class="comentario-input" id="comentario-input-box">
+                    <input type="text" placeholder="Adicione um coment·rio..." class="comentario-input" id="comentario-input-box">
                     <div class="comentario-acoes" id="comentario-acoes" style="display: none; justify-content: flex-end; gap: 8px; margin-top: 8px;">
-                        <button class="come√ßound: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
-                        <button class="come√ßound-color 0.2s;">Comentar</button>
+                        <button class="comeÁound: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                        <button class="comeÁound-color 0.2s;">Comentar</button>
                     </div>
                 </div>
             </div>
@@ -130,20 +130,20 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
 }
 
 /**
- * Monta o HTML de um card de v√≠deo da barra lateral de recomenda√ß√µes.
+ * Monta o HTML de um card de vÌdeo da barra lateral de recomendaÁıes.
  *
  * Dados esperados (exemplo):
  * {
- *     "titulo": "Flexbox na pr√°tica",
+ *     "titulo": "Flexbox na pr·tica",
  *     "canal": "Front-end Descomplicado",
- *     "visualizacoes": "120 mil visualiza√ß√µes",
- *     "tempoPublicacao": "h√° 2 semanas",
+ *     "visualizacoes": "120 mil visualizaÁıes",
+ *     "tempoPublicacao": "h· 2 semanas",
  *     "duracao": "14:32",
  *     "miniatura": "https://exemplo.com/miniatura.jpg"
  * }
  *
- * @param {Object} dadosDoVideoRecomendado - Informa√ß√µes de um v√≠deo recomendado.
- * @returns {string} HTML do card pronto para ser inserido na p√°gina.
+ * @param {Object} dadosDoVideoRecomendado - InformaÁıes de um vÌdeo recomendado.
+ * @returns {string} HTML do card pronto para ser inserido na p·gina.
  */
 function montarVideoRecomendado(dadosDoVideoRecomendado) {
     return `
@@ -160,11 +160,11 @@ function montarVideoRecomendado(dadosDoVideoRecomendado) {
                     <span class="video-recomendado__canal">${dadosDoVideoRecomendado.canal}</span>
                     <span class="video-recomendado__dados">
                         <span>${dadosDoVideoRecomendado.visualizacoes}</span>
-                        <span>‚Ä¢</span>
+                        <span>ï</span>
                         <span>${dadosDoVideoRecomendado.tempoPublicacao}</span>
                     </span>
                 </div>
-                <button class="video-recomendado__menu" type="button" data-toast="Mais op√ß√µes para este v√≠deo em breve.">
+                <button class="video-recomendado__menu" type="button" data-toast="Mais opÁıes para este vÌdeo em breve.">
                     <i class="fa-solid fa-ellipsis-vertical"></i>
                 </button>
             </div>
@@ -173,10 +173,10 @@ function montarVideoRecomendado(dadosDoVideoRecomendado) {
 }
 
 /**
- * Percorre o array de v√≠deos recomendados e escreve todos os cards dentro do
+ * Percorre o array de vÌdeos recomendados e escreve todos os cards dentro do
  * elemento de id "recomendacoes" do index.html.
  *
- * @param {Array} listaDeVideosRecomendados - Array de objetos de v√≠deo.
+ * @param {Array} listaDeVideosRecomendados - Array de objetos de vÌdeo.
  */
 function renderizarVideosRecomendados(listaDeVideosRecomendados) {
     const elementoDasRecomendacoes = document.getElementById("recomendacoes");
@@ -190,9 +190,9 @@ function renderizarVideosRecomendados(listaDeVideosRecomendados) {
 }
 
 /**
- * Alterna qual √°rea principal fica vis√≠vel: grade de resultados (In√≠cio
- * e pesquisa), tela de assistir (player + recome√ßou Shorts.
- * Apenas uma fica vis√≠vel por vez.
+ * Alterna qual ·rea principal fica visÌvel: grade de resultados (InÌcio
+ * e pesquisa), tela de assistir (player + recomeÁou Shorts.
+ * Apenas uma fica visÌvel por vez.
  *
  * @param {"resultados"|"assistir"|"shorts"} nomeDaView - View a ser exibida.
  */
@@ -255,7 +255,7 @@ function montarCardDeResultado(video) {
                 <div class="card-resultado__informacoes">
                     <span class="card-resultado__titulo">${video.titulo}</span>
                     <span class="card-resultado__canal" data-canal-id="${video.canalId || ''}" onclick="event.stopPropagation(); if(this.dataset.canalId) abrirCanal(this.dataset.canalId)">${video.canal}</span>
-                    <span class="card-resultado__dados">${video.visualizacoes} ‚Ä¢ ${video.tempoPublicacao}</span>
+                    <span class="card-resultado__dados">${video.visualizacoes} ï ${video.tempoPublicacao}</span>
                 </div>
             </div>
         </div>
@@ -263,14 +263,14 @@ function montarCardDeResultado(video) {
 }
 
 /**
- * Renderiza a grade (ou lista) de v√≠deos e muda para a view "In√≠cio".
+ * Renderiza a grade (ou lista) de vÌdeos e muda para a view "InÌcio".
  *
- * @param {Array} videos - Lista de v√≠deos a exibir.
+ * @param {Array} videos - Lista de vÌdeos a exibir.
  * @param {boolean} [mostrarChips=true] - Se falso, esconde a barra de
  *   categorias (usado durante uma busca por texto, que no YouTube real
- *   n√£o mostra as mesmas chips de categoria da Home).
+ *   n„o mostra as mesmas chips de categoria da Home).
  * @param {"grid"|"lista"} [modo="grid"] - "grid" para a grade de cards da
- *   Home; "lista" para os resultados de pesquisa (v√≠deos empilhados
+ *   Home; "lista" para os resultados de pesquisa (vÌdeos empilhados
  *   verticalmente, um embaixo do outro, igual ao YouTube real).
  */
 function renderizarResultados(videos, mostrarChips = true, modo = "grid") {
@@ -281,7 +281,7 @@ function renderizarResultados(videos, mostrarChips = true, modo = "grid") {
     areaDeResultados.classList.toggle("lista", modo === "lista");
 
     if (!videos.length) {
-        areaDeResultados.innerHTML = `<p class="mensagem-vazia">Nenhum v√≠deo encontrado para essa busca.</p>`;
+        areaDeResultados.innerHTML = `<p class="mensagem-vazia">Nenhum vÌdeo encontrado para essa busca.</p>`;
     } else {
         areaDeResultados.innerHTML = videos.map(montarCardDeResultado).join("");
     }
@@ -291,11 +291,11 @@ function renderizarResultados(videos, mostrarChips = true, modo = "grid") {
 
 /**
  * Monta o HTML de um item de Shorts: player em formato vertical (9:16)
- * com autoplay e loop, mais a barra lateral de a√ß√µes (curtir, n√£o
- * curtir, come√ßouTube
+ * com autoplay e loop, mais a barra lateral de aÁıes (curtir, n„o
+ * curtir, comeÁouTube
  * Shorts.
  *
- * @param {Object} video - Objeto de v√≠deo retornado por /api/buscar.
+ * @param {Object} video - Objeto de vÌdeo retornado por /api/buscar.
  */
 function montarShort(video) {
     const inicialDoCanal = video.canal ? video.canal.charAt(0).toUpperCase() : "?";
@@ -333,9 +333,9 @@ function montarShort(video) {
                 </button>
                 <button type="button" class="short-item__acao" data-toast="Obrigado pelo feedback.">
                     <i class="fa-solid fa-thumbs-down"></i>
-                    <span>N√£o curtir</span>
+                    <span>N„o curtir</span>
                 </button>
-                <button type="button" class="short-item__acao" data-toast="Coment√°rios em breve.">
+                <button type="button" class="short-item__acao" data-toast="Coment·rios em breve.">
                     <i class="fa-solid fa-comment"></i>
                     <span>Comentar</span>
                 </button>
@@ -343,7 +343,7 @@ function montarShort(video) {
                     <i class="fa-solid fa-share"></i>
                     <span>Compartilhar</span>
                 </button>
-                <button type="button" class="short-item__acao" data-toast="Mais op√ß√µes em breve.">
+                <button type="button" class="short-item__acao" data-toast="Mais opÁıes em breve.">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
             </div>
@@ -352,10 +352,10 @@ function montarShort(video) {
 }
 
 /**
- * Rola a lista de Shorts para o pr√≥ximo (ou anterior) item, imitando a
- * navega√ß√£o por swipe/scroll do YouTube Shorts real.
+ * Rola a lista de Shorts para o prÛximo (ou anterior) item, imitando a
+ * navegaÁ„o por swipe/scroll do YouTube Shorts real.
  *
- * @param {1|-1} direcao - 1 para o pr√≥ximo Short, -1 para o anterior.
+ * @param {1|-1} direcao - 1 para o prÛximo Short, -1 para o anterior.
  */
 function navegarShorts(direcao) {
     const lista = document.querySelector(".shorts-lista");
@@ -435,7 +435,7 @@ function inicializarPlayersDeShorts(videos) {
  * Renderiza a lista vertical de Shorts (rolagem com "encaixe" tipo
  * TikTok/Shorts real) e muda para essa view.
  *
- * @param {Array} videos - Lista de v√≠deos curtos retornados por /api/buscar.
+ * @param {Array} videos - Lista de vÌdeos curtos retornados por /api/buscar.
  */
 function renderizarShorts(videos) {
     const areaDeShorts = document.getElementById("areaShorts");
@@ -449,7 +449,7 @@ function renderizarShorts(videos) {
                     <i class="fa-solid fa-chevron-up"></i>
                 </button>
                 <div class="shorts-lista">${videos.map(montarShort).join("")}</div>
-                <button type="button" class="shorts-navegacao__botao" id="botaoShortProximo" title="Pr√≥ximo Short">
+                <button type="button" class="shorts-navegacao__botao" id="botaoShortProximo" title="PrÛximo Short">
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
             </div>
@@ -614,17 +614,17 @@ function inicializarPlayerPrincipal(ehAoVivo = false) {
 }
 
 /**
- * Busca no backend os detalhes de um v√≠deo espec√≠fico e o exibe na
+ * Busca no backend os detalhes de um vÌdeo especÌfico e o exibe na
  * view de "assistir" (player principal + recomendados).
  *
- * @param {string} idDoVideo - ID do v√≠deo no YouTube (ex: "dQw4w9WgXcQ").
+ * @param {string} idDoVideo - ID do vÌdeo no YouTube (ex: "dQw4w9WgXcQ").
  */
 async function abrirVideo(idDoVideo) {
     iniciarCarregamento();
     try {
         const resposta = await fetch(`${URL_DO_BACKEND}/api/video/${idDoVideo}`);
         if (!resposta.ok) {
-            mostrarToast("N√£o foi poss√≠vel carregar este v√≠deo.");
+            mostrarToast("N„o foi possÌvel carregar este vÌdeo.");
             return;
         }
         const dadosDoVideo = await resposta.json();
@@ -646,14 +646,14 @@ async function abrirVideo(idDoVideo) {
                 const contador = document.getElementById("contador-comentarios");
                 if (lista && contador) {
                     if (comentarios.erro || !Array.isArray(comentarios)) {
-                        contador.textContent = "Coment√°rios desativados";
+                        contador.textContent = "Coment·rios desativados";
                         lista.innerHTML = "";
                         return;
                     }
-                    contador.textContent = `${comentarios.length} Coment√°rios`;
+                    contador.textContent = `${comentarios.length} Coment·rios`;
                     lista.innerHTML = comentarios.map(c => `
                         <div class="comentario-item">
-                            <div class="come√ßound-image: url('${c.avatar}')"></div>
+                            <div class="comeÁound-image: url('${c.avatar}')"></div>
                             <div class="comentario-item__conteudo">
                                 <div class="comentario-item__cabecalho">
                                     <span class="comentario-item__autor">${c.autor.startsWith('@') ? c.autor : '@' + c.autor}</span>
@@ -672,10 +672,10 @@ async function abrirVideo(idDoVideo) {
             })
             .catch(err => {
                 const contador = document.getElementById("contador-comentarios");
-                if(contador) contador.textContent = "Erro ao carregar coment√°rios";
+                if(contador) contador.textContent = "Erro ao carregar coment·rios";
             });
 
-        // Busca v√≠deos parecidos com o t√≠tulo para popular os recomendados.
+        // Busca vÌdeos parecidos com o tÌtulo para popular os recomendados.
         const primeiraPalavra = dadosDoVideo.titulo.split(" ").slice(0, 3).join(" ");
         const respostaDosRecomendados = await fetch(
             `${URL_DO_BACKEND}/api/buscar?q=${encodeURIComponent(primeiraPalavra)}`
@@ -690,13 +690,13 @@ async function abrirVideo(idDoVideo) {
 }
 
 /**
- * Busca no backend uma lista de v√≠deos reais pelo termo digitado e
- * mostra como grade de resultados (esconde as chips de categoria, j√°
- * que no YouTube real a busca por texto n√£o usa as mesmas categorias
+ * Busca no backend uma lista de vÌdeos reais pelo termo digitado e
+ * mostra como grade de resultados (esconde as chips de categoria, j·
+ * que no YouTube real a busca por texto n„o usa as mesmas categorias
  * da Home), a menos que seja uma busca de Shorts.
  *
  * @param {string} termoDeBusca - Texto digitado na barra de pesquisa.
- * @param {string} [filtroDeDuracao] - "short" para a se√ß√£o de Shorts;
+ * @param {string} [filtroDeDuracao] - "short" para a seÁ„o de Shorts;
  *   deixe vazio para busca normal.
  */
 async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
@@ -709,7 +709,7 @@ async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
 
         if (!resposta.ok) {
             finalizarCarregamento();
-            mostrarToast("N√£o foi poss√≠vel buscar v√≠deos agora.");
+            mostrarToast("N„o foi possÌvel buscar vÌdeos agora.");
             return;
         }
         const videosEncontrados = await resposta.json();
@@ -727,12 +727,12 @@ async function buscarVideos(termoDeBusca, filtroDeDuracao = "") {
 }
 
 /**
- * Busca os v√≠deos em alta no Brasil (Home real do YouTube n√£o √© uma
- * busca por termo, e sim uma lista de v√≠deos populares) e os exibe na
- * grade, com as chips de categoria vis√≠veis.
+ * Busca os vÌdeos em alta no Brasil (Home real do YouTube n„o È uma
+ * busca por termo, e sim uma lista de vÌdeos populares) e os exibe na
+ * grade, com as chips de categoria visÌveis.
  *
- * @param {string} [idDaCategoria] - ID num√©rico de categoria da YouTube
- *   Data API (ex: "10" para M√∫sica). Vazio traz todas as categorias.
+ * @param {string} [idDaCategoria] - ID numÈrico de categoria da YouTube
+ *   Data API (ex: "10" para M˙sica). Vazio traz todas as categorias.
  */
 async function buscarPopulares(idDaCategoria = "") {
     iniciarCarregamento();
@@ -742,7 +742,7 @@ async function buscarPopulares(idDaCategoria = "") {
 
         if (!resposta.ok) {
             finalizarCarregamento();
-            mostrarToast("N√£o foi poss√≠vel carregar os v√≠deos em alta agora.");
+            mostrarToast("N„o foi possÌvel carregar os vÌdeos em alta agora.");
             return;
         }
         const videosEncontrados = await resposta.json();
@@ -755,18 +755,18 @@ async function buscarPopulares(idDaCategoria = "") {
 }
 
 /**
- * Centraliza o aviso de falha de conex√£o com o backend, deixando claro
- * para quem est√° estudando que o servidor Node precisa estar rodando.
+ * Centraliza o aviso de falha de conex„o com o backend, deixando claro
+ * para quem est· estudando que o servidor Node precisa estar rodando.
  *
  * @param {Error} erro - Erro capturado no fetch.
  */
 function avisarSobreErroDeConexao(erro) {
     console.error("Erro ao conectar com o backend:", erro);
-    mostrarToast("Servidor offline. Rode \"npm start\" na pasta backend e recarregue a p√°gina.");
+    mostrarToast("Servidor offline. Rode \"npm start\" na pasta backend e recarregue a p·gina.");
 }
 
 /**
- * Marca visualmente qual item da sidebar est√° ativo no momento.
+ * Marca visualmente qual item da sidebar est· ativo no momento.
  *
  * @param {HTMLElement} itemClicado - Elemento <a> da sidebar que foi clicado.
  */
@@ -776,9 +776,9 @@ function marcarItemAtivoNaSidebar(itemClicado) {
 }
 
 /**
- * Liga o formul√°rio de busca do cabe√ßalho √† fun√ß√£o buscarVideos, o
- * clique em qualquer card de resultado ou de v√≠deo recomendado para
- * abri-lo, e a navega√ß√£o da sidebar (In√≠cio, Shorts, M√∫sica, Filmes e
+ * Liga o formul·rio de busca do cabeÁalho ‡ funÁ„o buscarVideos, o
+ * clique em qualquer card de resultado ou de vÌdeo recomendado para
+ * abri-lo, e a navegaÁ„o da sidebar (InÌcio, Shorts, M˙sica, Filmes e
  * os demais itens, que mostram um toast explicativo por dependerem de
  * login).
  */
@@ -815,7 +815,7 @@ function configurarBuscaEClique() {
         });
     }
 
-    // Clique em um card da grade de resultados abre o v√≠deo (view "assistir").
+    // Clique em um card da grade de resultados abre o vÌdeo (view "assistir").
     document.body.addEventListener("click", (evento) => {
         const card = evento.target.closest("[data-id-do-video]");
         if (card) {
@@ -823,9 +823,9 @@ function configurarBuscaEClique() {
         }
     });
 
-    // Clique em um v√≠deo recome√ßoutro v√≠deo.
+    // Clique em um vÌdeo recomeÁoutro vÌdeo.
     document.getElementById("recomendacoes").addEventListener("click", (evento) => {
-        // Ignora o clique se foi no bot√£o de menu (‚ãÆ), que j√° tem sua pr√≥pria a√ß√£o.
+        // Ignora o clique se foi no bot„o de menu (?), que j· tem sua prÛpria aÁ„o.
         if (evento.target.closest(".video-recomendado__menu")) return;
 
         const card = evento.target.closest("[data-id-do-video]");
@@ -887,12 +887,12 @@ function configurarBuscaEClique() {
             } else if (secao === "voce") {
                 const logado = localStorage.getItem('usuarioLogadoComGoogle');
                 if (!logado) {
-                    // No mobile o bot√£o de login do cabe√ßalho fica escondido
-                    // (fica s√≥ nesta aba), ent√£o aqui j√° dispara o login de verdade.
+                    // No mobile o bot„o de login do cabeÁalho fica escondido
+                    // (fica sÛ nesta aba), ent„o aqui j· dispara o login de verdade.
                     if (typeof fazerLoginCompleto === "function") {
                         fazerLoginCompleto();
                     } else {
-                        mostrarToast("Fa√ßa login para acessar seu canal.");
+                        mostrarToast("FaÁa login para acessar seu canal.");
                     }
                 } else {
                     carregarCanalDoUsuario();
@@ -907,14 +907,14 @@ function configurarBuscaEClique() {
 
 configurarBuscaEClique();
 
-// Carrega a Home com v√≠deos em alta reais, igual √† Home de verdade do YouTube.
+// Carrega a Home com vÌdeos em alta reais, igual ‡ Home de verdade do YouTube.
 
 /**
  * Decodifica a parte "payload" de um token JWT (usado pelo Google
  * Identity Services) sem precisar de nenhuma biblioteca externa.
  *
  * @param {string} tokenJwt - Token no formato "cabecalho.payload.assinatura".
- * @returns {Object} Dados do usu√°rio (nome, e-mail, foto, etc.).
+ * @returns {Object} Dados do usu·rio (nome, e-mail, foto, etc.).
  */
 function decodificarTokenJwt(tokenJwt) {
     const payloadBase64 = tokenJwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
@@ -923,8 +923,8 @@ function decodificarTokenJwt(tokenJwt) {
 
 /**
  * Atualiza a interface para o estado "logado": mostra o avatar no
- * cabe√ßalho, esconde os bot√µes de login e guarda os dados no
- * localStorage para persistir entre recarregamentos da p√°gina.
+ * cabeÁalho, esconde os botıes de login e guarda os dados no
+ * localStorage para persistir entre recarregamentos da p·gina.
  *
  * @param {Object} dadosDoUsuario - Payload decodificado do token do Google.
  */
@@ -962,12 +962,12 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
 
     const iconeBottomNavVoce = document.getElementById('iconeBottomNavVoce');
     if (iconeBottomNavVoce) {
-        iconeBottomNavVoce.innerHTML = `<img src="${dadosDoUsuario.picture}" referrerpolicy="no-referrer" alt="Voc√™">`;
+        iconeBottomNavVoce.innerHTML = `<img src="${dadosDoUsuario.picture}" referrerpolicy="no-referrer" alt="VocÍ">`;
     }
 
     avatarAlternativo.textContent = (dadosDoUsuario.given_name || dadosDoUsuario.name || "?").charAt(0).toUpperCase();
 
-    // Algumas fotos do Google falham ao carregar (pol√≠tica de referrer);
+    // Algumas fotos do Google falham ao carregar (polÌtica de referrer);
     // nesse caso, mostra um avatar com a inicial do nome no lugar.
     imagemDoAvatar.style.display = "block";
     avatarAlternativo.style.display = "none";
@@ -985,7 +985,7 @@ function aplicarUsuarioLogado(dadosDoUsuario) {
 
 /**
  * Reverte a interface para o estado "deslogado": some com o avatar e
- * volta a mostrar os bot√µes de login (cabe√ßalho e sidebar).
+ * volta a mostrar os botıes de login (cabeÁalho e sidebar).
  */
 function aplicarUsuarioDeslogado() {
     localStorage.removeItem("usuarioLogadoComGoogle");
@@ -1011,8 +1011,8 @@ function aplicarUsuarioDeslogado() {
 }
 
 /**
- * Callback chamado pelo Google Identity Services quando o login √©
- * conclu√≠do com sucesso.
+ * Callback chamado pelo Google Identity Services quando o login È
+ * concluÌdo com sucesso.
  *
  * @param {Object} respostaDoGoogle - Objeto com o campo "credential" (JWT).
  */
@@ -1022,11 +1022,11 @@ function fazerLoginCompleto() {
         return;
     }
     
-    // Usa a mesma fun√ß√£o que j√° pede o token pro YouTube,
-    // mas como o escopo agora tem userinfo, vamos pegar o perfil tamb√©m!
+    // Usa a mesma funÁ„o que j· pede o token pro YouTube,
+    // mas como o escopo agora tem userinfo, vamos pegar o perfil tambÈm!
     obterTokenDeAcessoDoYoutube().then(token => {
-        // Agora que temos o token unificado (permiss√µes + identidade)
-        // Vamos buscar quem √© o usu√°rio
+        // Agora que temos o token unificado (permissıes + identidade)
+        // Vamos buscar quem È o usu·rio
         return fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
             headers: {
                 "Authorization": "Bearer " + token
@@ -1048,7 +1048,7 @@ function fazerLoginCompleto() {
     });
 }
 
-// Se j√° existir um login salvo no localStorage (de uma visita anterior), aplica direto
+// Se j· existir um login salvo no localStorage (de uma visita anterior), aplica direto
 const loginSalvo = localStorage.getItem("usuarioLogadoComGoogle");
 if (loginSalvo) {
     aplicarUsuarioLogado(JSON.parse(loginSalvo));
@@ -1060,10 +1060,10 @@ if (loginSalvo) {
     }, 500);
 }
 
-// ===== A√ß√µes reais na conta do YouTube (curtir, inscrever, inscri√ß√µes) =====
-// Usam um token OAuth separado do login (que s√≥ identifica quem √© a
-// pessoa). Esse token s√≥ √© pedido na hora em que a pessoa realmente
-// tenta curtir/inscrever, e o Google mostra uma tela de permiss√£o.
+// ===== AÁıes reais na conta do YouTube (curtir, inscrever, inscriÁıes) =====
+// Usam um token OAuth separado do login (que sÛ identifica quem È a
+// pessoa). Esse token sÛ È pedido na hora em que a pessoa realmente
+// tenta curtir/inscrever, e o Google mostra uma tela de permiss„o.
 const ESCOPOS_DO_YOUTUBE = "https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
 let clienteDeTokenDoYoutube = null;
 let tokenDeAcessoDoYoutube = null;
@@ -1071,9 +1071,9 @@ const CHAVE_TOKEN_YT = "youtube_access_token";
 const CHAVE_EXPIRACAO_YT = "youtube_token_expires_at";
 
 /**
- * Garante que exista um token de acesso v√°lido para chamar a YouTube
+ * Garante que exista um token de acesso v·lido para chamar a YouTube
  * Data API em nome da pessoa logada (curtir, inscrever, listar
- * inscri√ß√µes). Pede permiss√£o pelo popup do Google na primeira vez;
+ * inscriÁıes). Pede permiss„o pelo popup do Google na primeira vez;
  * chamadas seguintes reaproveitam o token enquanto ele durar.
  *
  * @returns {Promise<string>} O token de acesso.
@@ -1100,7 +1100,7 @@ function obterTokenDeAcessoDoYoutube() {
         }
 
         if (GOOGLE_CLIENT_ID.startsWith("COLE_AQUI")) {
-            rejeitar(new Error("Client ID do Google n√£o configurado."));
+            rejeitar(new Error("Client ID do Google n„o configurado."));
             return;
         }
 
@@ -1169,7 +1169,7 @@ async function verificarEstadoDoVideo(idDoVideo, idDoCanal) {
             }
         }
         
-        // Verificar inscri√ß√£o
+        // Verificar inscriÁ„o
         if (idDoCanal) {
             const resp = await fetch(`https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&forChannelId=${idDoCanal}&mine=true`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -1192,21 +1192,21 @@ async function verificarEstadoDoVideo(idDoVideo, idDoCanal) {
 
 /**
  * Inscreve de verdade a pessoa logada no canal informado, usando a
- * YouTube Data API (subscriptions.insert). Ao dar certo, o bot√£o muda
+ * YouTube Data API (subscriptions.insert). Ao dar certo, o bot„o muda
  * de "Inscrever-se" (branco) para "Inscrito" (cinza) com uma pequena
- * anima√ß√£o, igual ao YouTube real.
+ * animaÁ„o, igual ao YouTube real.
  *
  * @param {string} idDoCanal - ID do canal do YouTube a se inscrever.
- * @param {HTMLElement} [botao] - Bot√£o clicado, para atualizar o visual.
+ * @param {HTMLElement} [botao] - Bot„o clicado, para atualizar o visual.
  */
 async function inscreverNoCanal(idDoCanal, botao) {
     if (!idDoCanal) {
-        mostrarToast("N√£o foi poss√≠vel identificar o canal deste v√≠deo.");
+        mostrarToast("N„o foi possÌvel identificar o canal deste vÌdeo.");
         return;
     }
 
     if (botao && botao.classList.contains("inscrito")) {
-        mostrarToast("Voc√™ j√° est√° inscrito neste canal.");
+        mostrarToast("VocÍ j· est· inscrito neste canal.");
         return;
     }
 
@@ -1231,30 +1231,30 @@ async function inscreverNoCanal(idDoCanal, botao) {
         } else {
             const erro = await resposta.json();
             if (erro.error?.errors?.[0]?.reason === "subscriptionDuplicate") {
-                mostrarToast("Voc√™ j√° est√° inscrito neste canal.");
+                mostrarToast("VocÍ j· est· inscrito neste canal.");
                 if (botao) {
                     botao.textContent = "Inscrito";
                     botao.classList.add("inscrito");
                 }
             } else {
-                mostrarToast("N√£o foi poss√≠vel se inscrever agora.");
+                mostrarToast("N„o foi possÌvel se inscrever agora.");
                 console.error("Erro ao se inscrever:", erro);
             }
         }
     } catch (erro) {
         console.error("Erro ao se inscrever:", erro);
-        mostrarToast("Login com permiss√£o do YouTube necess√°rio para se inscrever.");
+        mostrarToast("Login com permiss„o do YouTube necess·rio para se inscrever.");
     }
 }
 
 /**
- * D√° ou remove "like" de verdade no v√≠deo informado, usando a YouTube
- * Data API (videos.rate). Clicar de novo em um v√≠deo j√° curtido remove
- * a curtida (alterna, como no YouTube real). O √≠cone faz uma pequena
- * anima√ß√£o de "pulso" a cada clique.
+ * D· ou remove "like" de verdade no vÌdeo informado, usando a YouTube
+ * Data API (videos.rate). Clicar de novo em um vÌdeo j· curtido remove
+ * a curtida (alterna, como no YouTube real). O Ìcone faz uma pequena
+ * animaÁ„o de "pulso" a cada clique.
  *
- * @param {string} idDoVideo - ID do v√≠deo a curtir.
- * @param {HTMLElement} [botao] - Bot√£o clicado, para atualizar o visual.
+ * @param {string} idDoVideo - ID do vÌdeo a curtir.
+ * @param {HTMLElement} [botao] - Bot„o clicado, para atualizar o visual.
  */
 async function curtirVideo(idDoVideo, botao) {
     const jaEstavaCurtido = botao ? botao.classList.contains("curtido") : false;
@@ -1285,19 +1285,19 @@ async function curtirVideo(idDoVideo, botao) {
                 botao.classList.add("animacao-curtir");
                 setTimeout(() => botao.classList.remove("animacao-curtir"), 350);
             }
-            mostrarToast(jaEstavaCurtido ? "Curtida removida." : "Voc√™ curtiu este v√≠deo (curtida real na sua conta).");
+            mostrarToast(jaEstavaCurtido ? "Curtida removida." : "VocÍ curtiu este vÌdeo (curtida real na sua conta).");
         } else {
-            mostrarToast("N√£o foi poss√≠vel curtir agora.");
+            mostrarToast("N„o foi possÌvel curtir agora.");
         }
     } catch (erro) {
         console.error("Erro ao curtir:", erro);
-        mostrarToast("Login com permiss√£o do YouTube necess√°rio para curtir.");
+        mostrarToast("Login com permiss„o do YouTube necess·rio para curtir.");
     }
 }
 
 /**
  * Busca a lista real de canais inscritos da pessoa logada e mostra na
- * √°rea de resultados, cada um com um bot√£o para ver os v√≠deos
+ * ·rea de resultados, cada um com um bot„o para ver os vÌdeos
  * recentes daquele canal.
  */
 async function abrirInscricoesReais() {
@@ -1309,7 +1309,7 @@ async function abrirInscricoesReais() {
         );
 
         if (!resposta.ok) {
-            mostrarToast("N√£o foi poss√≠vel carregar suas inscri√ß√µes.");
+            mostrarToast("N„o foi possÌvel carregar suas inscriÁıes.");
             return;
         }
 
@@ -1319,7 +1319,7 @@ async function abrirInscricoesReais() {
         document.getElementById("areaResultados").classList.remove("lista");
 
         if (!dados.items.length) {
-            areaDeResultados.innerHTML = `<p class="mensagem-vazia">Voc√™ ainda n√£o est√° inscrito em nenhum canal.</p>`;
+            areaDeResultados.innerHTML = `<p class="mensagem-vazia">VocÍ ainda n„o est· inscrito em nenhum canal.</p>`;
         } else {
             areaDeResultados.innerHTML = dados.items.map((item) => `
                 <div class="card-resultado" data-id-do-canal="${item.snippet.resourceId.channelId}">
@@ -1329,7 +1329,7 @@ async function abrirInscricoesReais() {
                     <div class="card-resultado__corpo">
                         <div class="card-resultado__informacoes">
                             <span class="card-resultado__titulo">${item.snippet.title}</span>
-                            <span class="card-resultado__canal">Clique para ver os v√≠deos recentes</span>
+                            <span class="card-resultado__canal">Clique para ver os vÌdeos recentes</span>
                         </div>
                     </div>
                 </div>
@@ -1338,12 +1338,12 @@ async function abrirInscricoesReais() {
 
         mostrarView("inicio");
     } catch (erro) {
-        console.error("Erro ao buscar inscri√ß√µes:", erro);
-        mostrarToast("Login com permiss√£o do YouTube necess√°rio para ver suas inscri√ß√µes.");
+        console.error("Erro ao buscar inscriÁıes:", erro);
+        mostrarToast("Login com permiss„o do YouTube necess·rio para ver suas inscriÁıes.");
     }
 }
 
-// Clique em um canal inscrito abre os v√≠deos recentes dele.
+// Clique em um canal inscrito abre os vÌdeos recentes dele.
 document.body.addEventListener("click", (evento) => {
     const cardDeCanal = evento.target.closest("[data-id-do-canal]");
     if (cardDeCanal) {
@@ -1352,7 +1352,7 @@ document.body.addEventListener("click", (evento) => {
 });
 
 /**
- * Busca os v√≠deos recentes de um canal espec√≠fico (usado ao clicar em
+ * Busca os vÌdeos recentes de um canal especÌfico (usado ao clicar em
  * um canal inscrito) e mostra em formato de lista.
  *
  * @param {string} idDoCanal - ID do canal do YouTube.
@@ -1361,7 +1361,7 @@ async function buscarPorCanal(idDoCanal) {
     try {
         const resposta = await fetch(`${URL_DO_BACKEND}/api/buscar?canalId=${idDoCanal}`);
         if (!resposta.ok) {
-            mostrarToast("N√£o foi poss√≠vel carregar os v√≠deos deste canal.");
+            mostrarToast("N„o foi possÌvel carregar os vÌdeos deste canal.");
             return;
         }
         const videos = await resposta.json();
@@ -1393,14 +1393,14 @@ document.addEventListener("click", () => {
 document.getElementById("botaoSair").addEventListener("click", (evento) => {
     evento.stopPropagation();
     aplicarUsuarioDeslogado();
-    mostrarToast("Voc√™ saiu da sua conta.");
+    mostrarToast("VocÍ saiu da sua conta.");
 });
 
 
 /**
- * Exibe uma mensagem curta de feedback no rodap√© da tela (toast),
- * adaptado do projeto cloneYou, para dar retorno visual em a√ß√µes
- * que ainda n√£o t√™m efeito real (inscrever-se, compartilhar, etc.).
+ * Exibe uma mensagem curta de feedback no rodapÈ da tela (toast),
+ * adaptado do projeto cloneYou, para dar retorno visual em aÁıes
+ * que ainda n„o tÍm efeito real (inscrever-se, compartilhar, etc.).
  *
  * @param {string} mensagem - Texto a ser exibido no toast.
  */
@@ -1419,9 +1419,9 @@ function mostrarToast(mensagem) {
 }
 
 /**
- * Liga o toast aos bot√µes de a√ß√£o do v√≠deo principal (inscrever-se,
- * curtir, compartilhar, baixar) e ao menu dos v√≠deos recomendados.
- * Usa delega√ß√£o de eventos porque esses elementos s√£o criados
+ * Liga o toast aos botıes de aÁ„o do vÌdeo principal (inscrever-se,
+ * curtir, compartilhar, baixar) e ao menu dos vÌdeos recomendados.
+ * Usa delegaÁ„o de eventos porque esses elementos s„o criados
  * dinamicamente pelo JavaScript.
  */
 function configurarFeedbackDeAcoes() {
@@ -1523,9 +1523,9 @@ function enviarComentarioReal(videoId, texto) {
                 }
                 
                 if (motivo === 'youtubeSignupRequired') {
-                    alert('Sua conta do Google n√£o tem um canal no YouTube! Crie um canal no YouTube.com primeiro para poder comentar.');
+                    alert('Sua conta do Google n„o tem um canal no YouTube! Crie um canal no YouTube.com primeiro para poder comentar.');
                 } else if (motivo === 'commentsDisabled') {
-                    alert('Os coment√°rios est√£o desativados para este v√≠deo.');
+                    alert('Os coment·rios est„o desativados para este vÌdeo.');
                 } else {
                     alert('Falha ao enviar comentario. Motivo: ' + motivo);
                 }
@@ -1541,12 +1541,12 @@ function enviarComentarioReal(videoId, texto) {
             const listaDeComentarios = document.getElementById('lista-de-comentarios');
             if (listaDeComentarios) {
                 const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
-                let nomeUsuario = 'Voc√™';
+                let nomeUsuario = 'VocÍ';
                 let fotoUsuario = '';
                 if (loginSalvo) {
                     try { 
                         const parsed = JSON.parse(loginSalvo);
-                        nomeUsuario = parsed.name || 'Voc√™';
+                        nomeUsuario = parsed.name || 'VocÍ';
                         fotoUsuario = parsed.picture || '';
                     } catch(e){}
                 }
@@ -1614,8 +1614,8 @@ document.addEventListener('click', (e) => {
         formResposta.innerHTML = `
             <input type="text" placeholder="Adicione uma resposta..." class="comentario-input" id="input-resposta-${parentId}">
             <div class="comentario-acoes" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
-                <button class="come√ßound: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
-                <button class="come√ßound-color 0.2s;">Responder</button>
+                <button class="comeÁound: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                <button class="comeÁound-color 0.2s;">Responder</button>
             </div>
         `;
         
@@ -1667,12 +1667,12 @@ function enviarRespostaReal(parentId, btnElement) {
             }
 
             const loginSalvo = localStorage.getItem('usuarioLogadoComGoogle');
-            let nomeUsuario = 'Voc√™';
+            let nomeUsuario = 'VocÍ';
             let fotoUsuario = '';
             if (loginSalvo) {
                 try { 
                     const parsed = JSON.parse(loginSalvo);
-                    nomeUsuario = parsed.name || 'Voc√™';
+                    nomeUsuario = parsed.name || 'VocÍ';
                     fotoUsuario = parsed.picture || '';
                 } catch(e){}
             }
@@ -1732,7 +1732,7 @@ function adicionarAoHistorico(video) {
     let historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
     historico = historico.filter(v => v.id !== video.id);
     
-    // Normalizar o objeto de v√≠deo para o formato esperado por montarCardDeResultado
+    // Normalizar o objeto de vÌdeo para o formato esperado por montarCardDeResultado
     const videoNormalizado = {
         id: video.id,
         titulo: video.titulo,
@@ -1755,12 +1755,12 @@ function renderizarHistorico() {
     if (!grade) return;
     
     let historico = JSON.parse(localStorage.getItem('historicoYoutube') || '[]');
-    // Limpar hist√≥rico corrompido de vers√µes anteriores
+    // Limpar histÛrico corrompido de versıes anteriores
     historico = historico.filter(v => typeof v.canal === 'string');
     localStorage.setItem('historicoYoutube', JSON.stringify(historico));
 
     if (historico.length === 0) {
-        grade.innerHTML = '<p style="color:#aaa;">Voc√™ ainda n√£o assistiu a nenhum v√≠deo neste navegador.</p>';
+        grade.innerHTML = '<p style="color:#aaa;">VocÍ ainda n„o assistiu a nenhum vÌdeo neste navegador.</p>';
     } else {
         grade.innerHTML = historico.map(montarCardDeResultado).join('');
     }
@@ -1780,7 +1780,7 @@ async function carregarCanalDoUsuario() {
         const data = await res.json();
         
         if (data.error || !data.items || data.items.length === 0) {
-            container.innerHTML = '<p style="color: #aaa;">Voc√™ precisa criar um canal no YouTube primeiro para ter uma p√°gina "Voc√™".</p>';
+            container.innerHTML = '<p style="color: #aaa;">VocÍ precisa criar um canal no YouTube primeiro para ter uma p·gina "VocÍ".</p>';
         } else {
             const canal = data.items[0];
             const urlImagem = canal.snippet.thumbnails?.high?.url || canal.snippet.thumbnails?.default?.url || '';
@@ -1793,16 +1793,16 @@ async function carregarCanalDoUsuario() {
                     <div>
                         <h1 style="font-size: 32px; font-weight: 500; margin:0 0 8px 0;">${canal.snippet.title}</h1>
                         <p style="color: #aaa; margin:0;">
-                            ${arrobaNome} ‚Ä¢ 
-                            ${canal.statistics.subscriberCount} inscritos ‚Ä¢ 
-                            ${canal.statistics.videoCount} v√≠deos
+                            ${arrobaNome} ï 
+                            ${canal.statistics.subscriberCount} inscritos ï 
+                            ${canal.statistics.videoCount} vÌdeos
                         </p>
-                        <p style="color: #ddd; margin-top: 12px; font-size: 14px;">${canal.snippet.description || 'Nenhuma descri√ß√£o fornecida.'}</p>
+                        <p style="color: #ddd; margin-top: 12px; font-size: 14px;">${canal.snippet.description || 'Nenhuma descriÁ„o fornecida.'}</p>
                     </div>
                 </div>
                 <hr style="border-color: #383838; margin-bottom: 24px;">
-                <h3 style="font-size: 20px; font-weight: 500;">V√≠deos recentes</h3>
-                <p style="color:#aaa; font-size: 14px; margin-top:8px;">(Apenas visualiza√ß√£o das estat√≠sticas do canal via API oficial)</p>
+                <h3 style="font-size: 20px; font-weight: 500;">VÌdeos recentes</h3>
+                <p style="color:#aaa; font-size: 14px; margin-top:8px;">(Apenas visualizaÁ„o das estatÌsticas do canal via API oficial)</p>
             `;
         }
     } catch (e) {
@@ -1861,11 +1861,11 @@ document.querySelectorAll('.menu-tema-opcao').forEach(btn => {
         if (tema === 'light') {
             document.body.setAttribute('data-theme', 'light');
             localStorage.setItem('youtubeTheme', 'light');
-            document.getElementById('texto-menu-tema').innerText = 'Apar√™ncia: tema claro';
+            document.getElementById('texto-menu-tema').innerText = 'AparÍncia: tema claro';
         } else {
             document.body.removeAttribute('data-theme');
             localStorage.setItem('youtubeTheme', 'dark');
-            document.getElementById('texto-menu-tema').innerText = 'Apar√™ncia: tema escuro';
+            document.getElementById('texto-menu-tema').innerText = 'AparÍncia: tema escuro';
         }
     });
 });
@@ -1876,9 +1876,9 @@ const themeSalvo = localStorage.getItem('youtubeTheme');
 if (themeSalvo === 'light') {
     document.body.setAttribute('data-theme', 'light');
     const spanTema = document.getElementById('texto-menu-tema');
-    if (spanTema) spanTema.innerText = 'Apar√™ncia: tema claro';
+    if (spanTema) spanTema.innerText = 'AparÍncia: tema claro';
     
-    // Atualiza √≠cones de check
+    // Atualiza Ìcones de check
     const checkClaro = document.querySelector('#opcao-tema-claro .icone-check');
     const checkEscuro = document.querySelector('#opcao-tema-escuro .icone-check');
     if (checkClaro) checkClaro.style.opacity = '1';
@@ -1888,7 +1888,7 @@ if (themeSalvo === 'light') {
     if (checkEscuro) checkEscuro.style.opacity = '1';
 }
 
-// ===== INSCRI√á√ïES REAIS DA YOUTUBE DATA API =====
+// ===== INSCRI«’ES REAIS DA YOUTUBE DATA API =====
 
 const MAX_INSCRICOES_SIDEBAR = 7;
 let todasInscricoes = [];
@@ -1911,12 +1911,12 @@ async function carregarInscricoesSidebar() {
 
         if (data.error) {
             console.error('API error:', data.error);
-            // If 403, token doesn't have subscriptions scope ‚Äî clear and retry
+            // If 403, token doesn't have subscriptions scope ó clear and retry
             if (data.error.code === 403 || data.error.code === 401) {
                 tokenDeAcessoDoYoutube = null;
                 localStorage.removeItem(CHAVE_TOKEN_YT);
                 localStorage.removeItem(CHAVE_EXPIRACAO_YT);
-                lista.innerHTML = '<a class="sidebar-item" style="height:auto;padding:12px 16px;"><span style="color:#aaa;font-size:13px;">Autorize o acesso √†s inscri√ß√µes:</span><br><button onclick="carregarInscricoesSidebar()" style="margin-top:8px;background:#ff0000;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">Autorizar</button></a>';
+                lista.innerHTML = '<a class="sidebar-item" style="height:auto;padding:12px 16px;"><span style="color:#aaa;font-size:13px;">Autorize o acesso ‡s inscriÁıes:</span><br><button onclick="carregarInscricoesSidebar()" style="margin-top:8px;background:#ff0000;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px;">Autorizar</button></a>';
                 return;
             }
             lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Erro: ' + (data.error.message || 'desconhecido') + '</span></a>';
@@ -1924,7 +1924,7 @@ async function carregarInscricoesSidebar() {
         }
 
         if (!data.items || data.items.length === 0) {
-            lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Nenhuma inscri√ß√£o encontrada.</span></a>';
+            lista.innerHTML = '<a class="sidebar-item"><span style="color:#aaa;font-size:13px;">Nenhuma inscriÁ„o encontrada.</span></a>';
             return;
         }
 
@@ -1932,9 +1932,9 @@ async function carregarInscricoesSidebar() {
         renderizarInscricoesSidebar(false);
 
     } catch (err) {
-        console.error('Erro ao carregar inscri√ß√µes:', err);
-        lista.innerHTML = '<a class="sidebar-item" style="flex-direction:column;align-items:flex-start;height:auto;padding:12px 16px;"><span style="color:#aaa;font-size:13px;">Inscri√ß√µes n√£o carregadas.</span><span style="color:#3ea6ff;font-size:12px;margin-top:4px;cursor:pointer;" onclick="carregarInscricoesSidebar()">Tentar novamente</span></a>';
-        mostrarToast('Clique "Tentar novamente" nas Inscri√ß√µes para autorizar.');
+        console.error('Erro ao carregar inscriÁıes:', err);
+        lista.innerHTML = '<a class="sidebar-item" style="flex-direction:column;align-items:flex-start;height:auto;padding:12px 16px;"><span style="color:#aaa;font-size:13px;">InscriÁıes n„o carregadas.</span><span style="color:#3ea6ff;font-size:12px;margin-top:4px;cursor:pointer;" onclick="carregarInscricoesSidebar()">Tentar novamente</span></a>';
+        mostrarToast('Clique "Tentar novamente" nas InscriÁıes para autorizar.');
     }
 }
 
@@ -2014,7 +2014,7 @@ if (searchInput && searchSuggestions) {
                     searchSuggestions.style.display = 'none';
                 }
             } catch (err) {
-                console.error("Erro ao buscar sugest√µes:", err);
+                console.error("Erro ao buscar sugestıes:", err);
             }
         }, 300); // 300ms debounce
     });
@@ -2044,7 +2044,7 @@ function adicionarAssistirMaisTarde(e, id, titulo, miniatura, canal, visualizaco
         localStorage.setItem('assistirMaisTarde', JSON.stringify(lista));
         mostrarToast('Adicionado a Assistir mais tarde');
     } else {
-        mostrarToast('V√≠deo j√° est√° na lista');
+        mostrarToast('VÌdeo j· est· na lista');
     }
 }
 
@@ -2053,12 +2053,12 @@ function adicionarGostei(id, titulo, miniatura, canal, visualizacoes) {
     if (!lista.find(v => v.id === id)) {
         lista.unshift({id, titulo, miniatura, canal, visualizacoes});
         localStorage.setItem('videosCurtidos', JSON.stringify(lista));
-        mostrarToast('Adicionado aos v√≠deos que gostei');
+        mostrarToast('Adicionado aos vÌdeos que gostei');
     } else {
         // Remove if already liked
         lista = lista.filter(v => v.id !== id);
         localStorage.setItem('videosCurtidos', JSON.stringify(lista));
-        mostrarToast('Removido dos v√≠deos que gostei');
+        mostrarToast('Removido dos vÌdeos que gostei');
     }
 }
 
@@ -2074,7 +2074,7 @@ function carregarListaSalva(chave, containerId) {
     if (!container) return;
     
     if (lista.length === 0) {
-        container.innerHTML = '<p style="color:#aaa;">Nenhum v√≠deo salvo ainda.</p>';
+        container.innerHTML = '<p style="color:#aaa;">Nenhum vÌdeo salvo ainda.</p>';
         return;
     }
     
@@ -2104,7 +2104,7 @@ function carregarListaSalva(chave, containerId) {
 
 
 // ==================== SISTEMA DE ROTEAMENTO (Fase 5) ====================
-// Monkey patch das func√µes originais para injetar rotas URL
+// Monkey patch das funcıes originais para injetar rotas URL
 
 const originalAbrirVideoRouter = window.abrirVideo || abrirVideo;
 window.abrirVideo = async function(idDoVideo, fromHistory = false) {
@@ -2113,7 +2113,7 @@ window.abrirVideo = async function(idDoVideo, fromHistory = false) {
     }
     return originalAbrirVideoRouter(idDoVideo);
 };
-// Garantir que a chamadas internas tamb√©m usem o hook global (se poss√≠vel, mas como script j√° carregou, fun√ß√µes globais podem ser chamadas diretamente. No JavaScript, a reatribui√ß√£o de var global sem const altera a func)
+// Garantir que a chamadas internas tambÈm usem o hook global (se possÌvel, mas como script j· carregou, funÁıes globais podem ser chamadas diretamente. No JavaScript, a reatribuiÁ„o de var global sem const altera a func)
 abrirVideo = window.abrirVideo;
 
 const originalMostrarViewRouter = window.mostrarView || mostrarView;
@@ -2144,7 +2144,7 @@ window.buscarVideos = async function(termoDeBusca, filtroDeDuracao = "", fromHis
 };
 buscarVideos = window.buscarVideos;
 
-// Ouvinte do botƒÉo voltar/avancar do navegador
+// Ouvinte do botao voltar/avancar do navegador
 window.addEventListener('popstate', (e) => {
     const state = e.state;
     if (state) {
@@ -2164,7 +2164,7 @@ window.addEventListener('popstate', (e) => {
             window.mostrarView(state.view, true);
         }
     } else {
-        // Se nƒÉo houver estado salvo (pressionou Voltar pro inicio inicial)
+        // Se nao houver estado salvo (pressionou Voltar pro inicio inicial)
         carregarEstadoInicialDaUrl(true);
     }
 });
@@ -2216,7 +2216,7 @@ setTimeout(() => {
 
     if (!cabecalhoFinal || !inputBusca) return;
 
-    // Cria bot√£o de busca para mobile
+    // Cria bot„o de busca para mobile
     const btnBuscaMobile = document.createElement('button');
     btnBuscaMobile.className = 'icon-button busca-mobile-btn';
     btnBuscaMobile.setAttribute('aria-label', 'Buscar');
@@ -2226,8 +2226,8 @@ setTimeout(() => {
     // Inserir antes do primeiro filho
     cabecalhoFinal.insertBefore(btnBuscaMobile, cabecalhoFinal.firstChild);
 
-    // Bot√£o de fechar busca mobile ‚Äî fica DENTRO da barra de busca
-    // expandida (n√£o como irm√£o solto no cabe√ßalho), sen√£o a barra fixa
+    // Bot„o de fechar busca mobile ó fica DENTRO da barra de busca
+    // expandida (n„o como irm„o solto no cabeÁalho), sen„o a barra fixa
     // que aparece por cima acaba cobrindo a seta.
     const cabecalhoCentro = document.querySelector('.cabecalho-centro');
     const btnFecharBusca = document.createElement('button');
@@ -2249,7 +2249,7 @@ setTimeout(() => {
         if (window.innerWidth <= 768) btnBuscaMobile.style.display = 'flex';
     });
 
-    // Mostra/esconde bot√£o de busca mobile conforme largura
+    // Mostra/esconde bot„o de busca mobile conforme largura
     function verificarTamanho() {
         if (window.innerWidth <= 768) {
             btnBuscaMobile.style.display = 'flex';
@@ -2274,7 +2274,7 @@ function configurarPesquisaPorVoz() {
     if (!btnMic || !inputBusca) return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return; // Navegador nƒÉo suporta
+    if (!SpeechRecognition) return; // Navegador nao suporta
 
     // Remove the data-toast so it doesn't conflict
     btnMic.removeAttribute('data-toast');
@@ -2308,7 +2308,7 @@ function configurarPesquisaPorVoz() {
     recognition.addEventListener('result', (e) => {
         const transcricao = e.results[0][0].transcript;
         inputBusca.value = transcricao;
-        mostrarToast(`Voc√™ disse: "${transcricao}"`);
+        mostrarToast(`VocÍ disse: "${transcricao}"`);
         
         // Simular envio de busca
         document.querySelector('.sidebar-item[data-secao="inicio"]').click();
@@ -2324,7 +2324,7 @@ function configurarPesquisaPorVoz() {
         estaOuvindo = false;
         btnMic.classList.remove('mic-ouvindo');
         if (e.error !== 'aborted') {
-            mostrarToast("Erro na grava√ß√£o. Tente novamente.");
+            mostrarToast("Erro na gravaÁ„o. Tente novamente.");
         }
     });
 }
@@ -2362,13 +2362,13 @@ window.abrirCanal = async function(idDoCanal, fromHistory = false) {
     
     try {
         const res = await fetch(`${URL_DO_BACKEND}/api/canal/${idDoCanal}`);
-        if (!res.ok) throw new Error("Canal nƒÉo encontrado");
+        if (!res.ok) throw new Error("Canal nao encontrado");
         const canal = await res.json();
         
         if (canal.banner) banner.style.backgroundImage = `url('${canal.banner}')`;
         avatar.src = canal.foto;
         nome.textContent = canal.nome;
-        stats.textContent = `${canal.inscritos} inscritos ‚Ä¢ ${canal.videos} v√≠deos`;
+        stats.textContent = `${canal.inscritos} inscritos ï ${canal.videos} vÌdeos`;
         desc.textContent = canal.descricao;
         
         // Verificar inscricao
@@ -2399,11 +2399,11 @@ window.toggleMiniplayer = function() {
         window.estadoMiniplayer = true;
         box.classList.add('miniplayer-ativo');
         
-        // Mover para o body para nƒÉo ser escondido pelo display:none do areaAssistir
+        // Mover para o body para nao ser escondido pelo display:none do areaAssistir
         document.body.appendChild(box);
         
         // Voltar para a home ou manter a view atual? 
-        // O padrƒÉo do YouTube √© voltar pra de onde veio, vamos apenas ir para o In√≠cio
+        // O padrao do YouTube È voltar pra de onde veio, vamos apenas ir para o InÌcio
         document.querySelector('.sidebar-item[data-secao="inicio"]').click();
         
     } else {
@@ -2427,7 +2427,7 @@ window.toggleMiniplayer = function() {
     }
 };
 
-// Se abrir um v√≠deo novo e o miniplayer estiver ativo, tem que restaurar o box pro lugar certo
+// Se abrir um vÌdeo novo e o miniplayer estiver ativo, tem que restaurar o box pro lugar certo
 const originalAbrirVideoMini = window.abrirVideo;
 window.abrirVideo = async function(idDoVideo, fromHistory = false) {
     if (window.estadoMiniplayer) {
@@ -2485,7 +2485,7 @@ window.carregarPlaylistNoPainel = async function(idDaPlaylist, idDoVideoAtual) {
                 const ativo = (i === index) ? 'background: rgba(255,255,255,0.1);' : '';
                 html += `
                     <div class="playlist-item" style="display:flex; gap:12px; padding:8px 16px; cursor:pointer; align-items:center; ${ativo}" onclick="abrirVideoDaPlaylist('${vid.id}', '${p.id}')">
-                        <span style="font-size:12px; color:#aaa; min-width:12px;">${i === index ? '‚ñ∂' : i + 1}</span>
+                        <span style="font-size:12px; color:#aaa; min-width:12px;">${i === index ? '?' : i + 1}</span>
                         <img src="${vid.miniatura}" style="width:100px; height:56px; border-radius:8px; object-fit:cover;">
                         <div style="display:flex; flex-direction:column; overflow:hidden;">
                             <span style="font-size:14px; font-weight:500; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${vid.titulo}</span>
@@ -2496,9 +2496,9 @@ window.carregarPlaylistNoPainel = async function(idDaPlaylist, idDoVideoAtual) {
             });
             html += `</div></div>`;
             
-            // Coloca a playlist no topo e as recomendacoes normais embaixo (mas n√£o vamos recarregar recomendacoes aqui senao apaga)
+            // Coloca a playlist no topo e as recomendacoes normais embaixo (mas n„o vamos recarregar recomendacoes aqui senao apaga)
             // Na verdade, o `abrirVideo` original desenha recomendacoes e apaga tudo. 
-            // Precisamos que a playlist apare√ßa no topo das recomenda√ß√µes!
+            // Precisamos que a playlist apareÁa no topo das recomendaÁıes!
             const painelExistente = recomendacoes.querySelector('.playlist-painel');
             if (painelExistente) painelExistente.remove();
             recomendacoes.insertAdjacentHTML('afterbegin', html);
@@ -2515,7 +2515,7 @@ window.abrirVideoDaPlaylist = function(idVideo, idPlaylist) {
 };
 
 // Precisamos injetar suporte a playlist no final de `originalAbrirVideo` ou logo apos `renderizarRecomendacoes`
-// Como nƒÉo podemos alterar facilmente `abrirVideo` original, vamos criar um hook p√≥s-carregamento.
+// Como nao podemos alterar facilmente `abrirVideo` original, vamos criar um hook pÛs-carregamento.
 const superOriginalAbrirVideo = window.abrirVideo;
 window.abrirVideo = async function(idDoVideo, fromHistory = false, playlistId = null) {
     if (!fromHistory) {
@@ -2566,7 +2566,7 @@ window.carregarMinhasPlaylists = async function() {
                         <div class="card-resultado__miniatura-wrapper">
                             <img class="card-resultado__miniatura" src="${img}" alt="${pl.snippet.title}">
                             <div style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); padding:4px 8px; border-radius:4px; font-size:12px;">
-                                <i class="fa-solid fa-list"></i> ${pl.contentDetails.itemCount} v√≠deos
+                                <i class="fa-solid fa-list"></i> ${pl.contentDetails.itemCount} vÌdeos
                             </div>
                         </div>
                         <div class="card-resultado__corpo">
@@ -2585,7 +2585,7 @@ window.carregarMinhasPlaylists = async function() {
         }
     } catch (erro) {
         console.error(erro);
-        grade.innerHTML = '<p style="color:#aaa;">Precisa de permissƒÉo do YouTube para ver suas playlists.</p>';
+        grade.innerHTML = '<p style="color:#aaa;">Precisa de permissao do YouTube para ver suas playlists.</p>';
     }
 };
 
@@ -2629,7 +2629,7 @@ window.ignoreNextAction = false;
 
 window.iniciarWatchParty = function() {
     if (window.partyRoomId) {
-        mostrarToast("Voc√™ j√° est√° em uma sala: " + window.partyRoomId);
+        mostrarToast("VocÍ j· est· em uma sala: " + window.partyRoomId);
         return;
     }
     const salaId = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -2648,7 +2648,7 @@ window.iniciarWatchParty = function() {
 
 window.conectarWatchParty = function(salaId) {
     if (typeof io === 'undefined') {
-        mostrarToast("Servidor Socket.IO nƒÉo disponivel.");
+        mostrarToast("Servidor Socket.IO nao disponivel.");
         return;
     }
     
@@ -2683,11 +2683,11 @@ window.conectarWatchParty = function(salaId) {
 function mostrarIndicadorParty(salaId) {
     const indic = document.createElement('div');
     indic.style = "position:fixed; top:80px; right:20px; background:#e52d27; color:#fff; padding:8px 16px; border-radius:20px; z-index:9999; font-weight:bold;";
-    indic.innerText = "üî• Watch Party: " + salaId;
+    indic.innerText = "?? Watch Party: " + salaId;
     document.body.appendChild(indic);
 }
 
-// ==================== LETRAS DE M√öSICA ====================
+// ==================== LETRAS DE M⁄SICA ====================
 window.abrirLetras = async function(tituloEncode, canalEncode) {
     const titulo = decodeURIComponent(tituloEncode);
     const canal = decodeURIComponent(canalEncode);
@@ -2713,7 +2713,7 @@ window.abrirLetras = async function(tituloEncode, canalEncode) {
                 </div>
             `;
         } else {
-            recomendacoes.innerHTML = '<div style="padding:20px; color:#aaa;">Letra n√£o encontrada na base p√∫blica.</div>';
+            recomendacoes.innerHTML = '<div style="padding:20px; color:#aaa;">Letra n„o encontrada na base p˙blica.</div>';
         }
     } catch(e) {
         recomendacoes.innerHTML = '<div style="padding:20px; color:#aaa;">Erro ao buscar letra.</div>';
@@ -2781,7 +2781,7 @@ function iniciarJogoCobrinha() {
         
         ctx.fillStyle = "white";
         ctx.font = "24px Arial";
-        ctx.fillText("üêç USE AS SETAS PARA JOGAR", 20, 30);
+        ctx.fillText("?? USE AS SETAS PARA JOGAR", 20, 30);
         
         for( let i = 0; i < snake.length ; i++){
             ctx.fillStyle = ( i == 0 ) ? "#4CAF50" : "white";
@@ -2820,7 +2820,7 @@ function iniciarJogoCobrinha() {
     }
 }
 
-// ==================== TEMAS E CONFIGURAÔøΩÔøΩES ====================
+// ==================== TEMAS E CONFIGURA??ES ====================
 function carregarTema() {
     const temaSalvo = localStorage.getItem('moonly_theme');
     if (temaSalvo) {
@@ -2828,11 +2828,11 @@ function carregarTema() {
     }
 }
 
-window.abrirModalConfigura√ß√µes = function() {
+window.abrirModalConfiguraÁıes = function() {
     document.getElementById('modal-configuracoes').style.display = 'flex';
 };
 
-window.fecharModalConfigura√ß√µes = function() {
+window.fecharModalConfiguraÁıes = function() {
     document.getElementById('modal-configuracoes').style.display = 'none';
 };
 
@@ -2840,7 +2840,7 @@ window.mudarTema = function(corHex) {
     document.documentElement.style.setProperty('--moonly-primary', corHex);
     localStorage.setItem('moonly_theme', corHex);
     mostrarToast("Tema atualizado!");
-    fecharModalConfigura√ß√µes();
+    fecharModalConfiguraÁıes();
 };
 
 // ==================== MODAL DOWNLOAD (TURBINADO) ====================
@@ -2866,7 +2866,7 @@ window.iniciarDownloadModal = function(formato) {
     document.getElementById('progresso-download').style.display = 'block';
     document.getElementById('btn-fechar-download').style.display = 'none';
     
-    // Anima√ß√£o
+    // AnimaÁ„o
     let progresso = 0;
     const barra = document.getElementById('barra-download-animada');
     const texto = document.getElementById('status-download-texto');
@@ -2875,10 +2875,10 @@ window.iniciarDownloadModal = function(formato) {
     
     const intervalo = setInterval(() => {
         progresso += Math.random() * 15;
-        if (progresso > 90) progresso = 90; // Trava em 90% atÔøΩ o servidor mandar o arquivo
+        if (progresso > 90) progresso = 90; // Trava em 90% at? o servidor mandar o arquivo
         barra.style.width = progresso + '%';
         
-        if (progresso > 30) texto.innerText = "Extraindo " + (formato === 'mp3' ? 'ÔøΩ√°√°udio' : 'vÔøΩdeo') + "...";
+        if (progresso > 30) texto.innerText = "Extraindo " + (formato === 'mp3' ? '?··udio' : 'v?deo') + "...";
         if (progresso > 60) texto.innerText = "Preparando link seguro...";
     }, 800);
     
@@ -2891,12 +2891,13 @@ window.iniciarDownloadModal = function(formato) {
         document.getElementById('btn-fechar-download').innerText = 'Fechar';
         
         window.open(URL_DO_BACKEND + '/api/download?id=' + window.idVideoParaDownload + '&format=' + formato, '_blank');
-        mostrarToast("O download come√ßou no seu navegador!");
+        mostrarToast("O download comeÁou no seu navegador!");
     }, 3500);
 };
 
 // Iniciar o tema ao carregar
 document.addEventListener('DOMContentLoaded', carregarTema);
+
 
 
 
