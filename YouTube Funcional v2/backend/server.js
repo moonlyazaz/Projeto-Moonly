@@ -15,7 +15,7 @@ const { Server } = require('socket.io');
  // Necessário no Node 16, que não tem fetch() nativo.
 
 const app = express();
-const PORTA = process.env.PORTA || 3000;
+const PORT = process.env.PORT || 3000;
 const CHAVE_DA_API_DO_YOUTUBE = process.env.YOUTUBE_API_KEY;
 const URL_BASE_DA_API = "https://www.googleapis.com/youtube/v3";
 app.use(cors());
@@ -498,4 +498,6 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORTA, () => { console.log("Servidor rodando na porta " + PORTA); });
+server.listen(PORT, () => {
+    console.log("Servidor rodando na porta " + PORT);
+});
