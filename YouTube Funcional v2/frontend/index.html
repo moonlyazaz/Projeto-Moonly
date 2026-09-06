@@ -460,12 +460,13 @@
         const GOOGLE_CLIENT_ID = "706045740692-s3dligdlr7ogmf2e8mf9hqr6j1ghuh89.apps.googleusercontent.com";
     </script>
     <script>
-        // Carrega o socket.io a partir do MESMO backend configurado
-        // acima (local ou no Render), em vez de localhost fixo.
-        document.write('<script src="' + URL_DO_BACKEND + '/socket.io/socket.io.js"><\/script>');
+        // Carrega o socket.io dinamicamente para evitar bloqueios do navegador
+        const socketScript = document.createElement('script');
+        socketScript.src = URL_DO_BACKEND + '/socket.io/socket.io.js';
+        socketScript.async = true;
+        document.body.appendChild(socketScript);
     </script>
     <script src="script.js"></script>
-
 </body>
 </html>
 

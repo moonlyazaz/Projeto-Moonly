@@ -1985,7 +1985,7 @@ if (searchInput && searchSuggestions) {
         clearTimeout(suggestionTimeout);
         suggestionTimeout = setTimeout(async () => {
             try {
-                const res = await fetch('/api/sugestoes?q=' + encodeURIComponent(query));
+                const res = await fetch(URL_DO_BACKEND + '/api/sugestoes?q=' + encodeURIComponent(query));
                 const terms = await res.json();
                 
                 if (terms && terms.length > 0) {
