@@ -2826,3 +2826,82 @@ function iniciarJogoCobrinha() {
         snake.unshift(newHead);
     }
 }
+
+// ==================== TEMAS E CONFIGURAÇÕES ====================
+function carregarTema() {
+    const temaSalvo = localStorage.getItem('moonly_theme');
+    if (temaSalvo) {
+        document.documentElement.style.setProperty('--moonly-primary', temaSalvo);
+    }
+}
+
+window.abrirModalConfiguracoes = function() {
+    document.getElementById('modal-configuracoes').style.display = 'flex';
+};
+
+window.fecharModalConfiguracoes = function() {
+    document.getElementById('modal-configuracoes').style.display = 'none';
+};
+
+window.mudarTema = function(corHex) {
+    document.documentElement.style.setProperty('--moonly-primary', corHex);
+    localStorage.setItem('moonly_theme', corHex);
+    mostrarToast("Tema atualizado!");
+    fecharModalConfiguracoes();
+};
+
+// ==================== MODAL DOWNLOAD (TURBINADO) ====================
+window.idVideoParaDownload = null;
+
+window.abrirModalDownload = function(videoId) {
+    window.idVideoParaDownload = videoId;
+    document.getElementById('opcoes-download').style.display = 'block';
+    document.getElementById('progresso-download').style.display = 'none';
+    document.getElementById('barra-download-animada').style.width = '0%';
+    document.getElementById('btn-fechar-download').style.display = 'block';
+    document.getElementById('btn-fechar-download').innerText = 'Cancelar';
+    
+    document.getElementById('modal-download').style.display = 'flex';
+};
+
+window.fecharModalDownload = function() {
+    document.getElementById('modal-download').style.display = 'none';
+};
+
+window.iniciarDownloadModal = function(formato) {
+    document.getElementById('opcoes-download').style.display = 'none';
+    document.getElementById('progresso-download').style.display = 'block';
+    document.getElementById('btn-fechar-download').style.display = 'none';
+    
+    // Animação falsa de progresso para dar feedback visual de que o servidor está processando
+    let progresso = 0;
+    const barra = document.getElementById('barra-download-animada');
+    const texto = document.getElementById('status-download-texto');
+    
+    texto.innerText = "Conectando ao servidor...";
+    
+    const intervalo = setInterval(() => {
+        progresso += Math.random() * 15;
+        if (progresso > 90) progresso = 90; // Trava em 90% até o servidor mandar o arquivo
+        barra.style.width = progresso + '%';
+        
+        if (progresso > 30) texto.innerText = "Extraindo " + (formato === 'mp3' ? 'áudio' : 'vídeo') + "...";
+        if (progresso > 60) texto.innerText = "Preparando link seguro...";
+    }, 800);
+    
+    // Dispara o download real (O navegador assume a partir daqui)
+    setTimeout(() => {
+        clearInterval(intervalo);
+        barra.style.width = '100%';
+        texto.innerText = "Download iniciado!";
+        document.getElementById('btn-fechar-download').style.display = 'block';
+        document.getElementById('btn-fechar-download').innerText = 'Fechar';
+        
+        window.open(${URL_DO_BACKEND}/api/download?id=&format=, '_blank');
+        mostrarToast("O download começou no seu navegador!");
+    }, 3500);
+};
+
+// Iniciar o tema ao carregar
+document.addEventListener('DOMContentLoaded', carregarTema);
+

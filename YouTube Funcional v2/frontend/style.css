@@ -238,7 +238,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #ff0000;
+    background-color: var(--moonly-primary);
     color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
@@ -726,7 +726,7 @@ body {
 .short-item__progress-bar {
     width: 0%;
     height: 100%;
-    background-color: #ff0000;
+    background-color: var(--moonly-primary);
     transition: width 0.1s linear;
 }
 
@@ -764,7 +764,7 @@ body {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background-color: #ff0000;
+    background-color: var(--moonly-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1570,7 +1570,7 @@ body {
     top: 0;
     left: 0;
     height: 2px;
-    background-color: #ff0000;
+    background-color: var(--moonly-primary);
     width: 0%;
     z-index: 99999;
     transition: width 0.3s ease, opacity 0.3s ease;
@@ -1720,7 +1720,7 @@ a.card-video { cursor: pointer; }
 
 /* Animação do Microfone Gravando */
 .mic-ouvindo {
-    background-color: #ff0000 !important;
+    background-color: var(--moonly-primary) !important;
     color: white !important;
     animation: pulsoVermelho 1.5s infinite;
 }
@@ -2205,4 +2205,21 @@ a.card-video { cursor: pointer; }
     .area-principal {
         padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     }
+}
+:root {
+  --moonly-primary: var(--moonly-primary);
+}
+.tema-bolinha {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
+}
+.tema-bolinha:hover {
+  transform: scale(1.1);
+}
+.tema-bolinha.ativo {
+  border: 2px solid #fff;
 }
