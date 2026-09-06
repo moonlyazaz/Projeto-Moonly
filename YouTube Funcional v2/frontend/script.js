@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Monta e insere na página todo o bloco do vídeo que está sendo assistido:
  * player, título, dados do canal, botões de ação e descrição.
  *
@@ -118,8 +118,8 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
                 <div class="comentario-input-container" style="flex:1;">
                     <input type="text" placeholder="Adicione um comentário..." class="comentario-input" id="comentario-input-box">
                     <div class="comentario-acoes" id="comentario-acoes" style="display: none; justify-content: flex-end; gap: 8px; margin-top: 8px;">
-                        <button class="comentario-btn-cancelar" id="btn-cancelar-comentario" style="background: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
-                        <button class="comentario-btn-enviar" id="btn-enviar-comentario" disabled style="background-color: #272727; color: #717171; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: default; transition: background-color 0.2s;">Comentar</button>
+                        <button class="começound: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                        <button class="começound-color 0.2s;">Comentar</button>
                     </div>
                 </div>
             </div>
@@ -191,7 +191,7 @@ function renderizarVideosRecomendados(listaDeVideosRecomendados) {
 
 /**
  * Alterna qual área principal fica visível: grade de resultados (Início
- * e pesquisa), tela de assistir (player + recomendados) ou Shorts.
+ * e pesquisa), tela de assistir (player + recomeçou Shorts.
  * Apenas uma fica visível por vez.
  *
  * @param {"resultados"|"assistir"|"shorts"} nomeDaView - View a ser exibida.
@@ -292,7 +292,7 @@ function renderizarResultados(videos, mostrarChips = true, modo = "grid") {
 /**
  * Monta o HTML de um item de Shorts: player em formato vertical (9:16)
  * com autoplay e loop, mais a barra lateral de ações (curtir, não
- * curtir, comentar, compartilhar) igual à interface real do YouTube
+ * curtir, começouTube
  * Shorts.
  *
  * @param {Object} video - Objeto de vídeo retornado por /api/buscar.
@@ -653,7 +653,7 @@ async function abrirVideo(idDoVideo) {
                     contador.textContent = `${comentarios.length} Comentários`;
                     lista.innerHTML = comentarios.map(c => `
                         <div class="comentario-item">
-                            <div class="comentario-item__avatar" style="background-image: url('${c.avatar}')"></div>
+                            <div class="começound-image: url('${c.avatar}')"></div>
                             <div class="comentario-item__conteudo">
                                 <div class="comentario-item__cabecalho">
                                     <span class="comentario-item__autor">${c.autor.startsWith('@') ? c.autor : '@' + c.autor}</span>
@@ -823,7 +823,7 @@ function configurarBuscaEClique() {
         }
     });
 
-    // Clique em um vídeo recomendado, dentro da view "assistir", abre outro vídeo.
+    // Clique em um vídeo recomeçoutro vídeo.
     document.getElementById("recomendacoes").addEventListener("click", (evento) => {
         // Ignora o clique se foi no botão de menu (⋮), que já tem sua própria ação.
         if (evento.target.closest(".video-recomendado__menu")) return;
@@ -1614,8 +1614,8 @@ document.addEventListener('click', (e) => {
         formResposta.innerHTML = `
             <input type="text" placeholder="Adicione uma resposta..." class="comentario-input" id="input-resposta-${parentId}">
             <div class="comentario-acoes" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
-                <button class="comentario-btn-cancelar" onclick="this.closest('.caixa-resposta-temp').remove()" style="background: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
-                <button class="comentario-btn-enviar" onclick="enviarRespostaReal('${parentId}', this)" style="background-color: #3ea6ff; color: #000; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">Responder</button>
+                <button class="começound: none; border: none; color: #fff; padding: 8px 16px; border-radius: 18px; cursor: pointer; font-weight: 500;">Cancelar</button>
+                <button class="começound-color 0.2s;">Responder</button>
             </div>
         `;
         
@@ -2820,7 +2820,7 @@ function iniciarJogoCobrinha() {
     }
 }
 
-// ==================== TEMAS E CONFIGURA��ES ====================
+// ==================== TEMAS E CONFIGURA��ES ====================
 function carregarTema() {
     const temaSalvo = localStorage.getItem('moonly_theme');
     if (temaSalvo) {
@@ -2828,11 +2828,11 @@ function carregarTema() {
     }
 }
 
-window.abrirModalConfiguracoes = function() {
+window.abrirModalConfigurações = function() {
     document.getElementById('modal-configuracoes').style.display = 'flex';
 };
 
-window.fecharModalConfiguracoes = function() {
+window.fecharModalConfigurações = function() {
     document.getElementById('modal-configuracoes').style.display = 'none';
 };
 
@@ -2840,7 +2840,7 @@ window.mudarTema = function(corHex) {
     document.documentElement.style.setProperty('--moonly-primary', corHex);
     localStorage.setItem('moonly_theme', corHex);
     mostrarToast("Tema atualizado!");
-    fecharModalConfiguracoes();
+    fecharModalConfigurações();
 };
 
 // ==================== MODAL DOWNLOAD (TURBINADO) ====================
@@ -2866,7 +2866,7 @@ window.iniciarDownloadModal = function(formato) {
     document.getElementById('progresso-download').style.display = 'block';
     document.getElementById('btn-fechar-download').style.display = 'none';
     
-    // Anima��o falsa de progresso para dar feedback visual de que o servidor est� processando
+    // Animação
     let progresso = 0;
     const barra = document.getElementById('barra-download-animada');
     const texto = document.getElementById('status-download-texto');
@@ -2875,10 +2875,10 @@ window.iniciarDownloadModal = function(formato) {
     
     const intervalo = setInterval(() => {
         progresso += Math.random() * 15;
-        if (progresso > 90) progresso = 90; // Trava em 90% at� o servidor mandar o arquivo
+        if (progresso > 90) progresso = 90; // Trava em 90% at� o servidor mandar o arquivo
         barra.style.width = progresso + '%';
         
-        if (progresso > 30) texto.innerText = "Extraindo " + (formato === 'mp3' ? '�udio' : 'v�deo') + "...";
+        if (progresso > 30) texto.innerText = "Extraindo " + (formato === 'mp3' ? '�ááudio' : 'v�deo') + "...";
         if (progresso > 60) texto.innerText = "Preparando link seguro...";
     }, 800);
     
@@ -2891,12 +2891,14 @@ window.iniciarDownloadModal = function(formato) {
         document.getElementById('btn-fechar-download').innerText = 'Fechar';
         
         window.open(URL_DO_BACKEND + '/api/download?id=' + window.idVideoParaDownload + '&format=' + formato, '_blank');
-        mostrarToast("O download come�ou no seu navegador!");
+        mostrarToast("O download começou no seu navegador!");
     }, 3500);
 };
 
 // Iniciar o tema ao carregar
 document.addEventListener('DOMContentLoaded', carregarTema);
+
+
 
 
 
