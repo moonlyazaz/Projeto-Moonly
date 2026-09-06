@@ -7,7 +7,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fetch = require("node-fetch");
+let fetch = require("node-fetch");
 
 const play = require('play-dl');
 const http = require('http');
@@ -16,16 +16,64 @@ const { Server } = require('socket.io');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const CHAVE_DA_API_DO_YOUTUBE = process.env.YOUTUBE_API_KEY;
+const CHAVES_DA_API = process.env.YOUTUBE_API_KEY ? process.env.YOUTUBE_API_KEY.split(',').map(k => k.trim()).filter(k => k) : [];
+const CHAVE_DA_API_DO_YOUTUBE = CHAVES_DA_API[0] || "";
 const URL_BASE_DA_API = "https://www.googleapis.com/youtube/v3";
+
+let indiceChave = 0;
+
+// Interceptador para rotacionar a chave da API automaticamente caso uma dê erro de cota
+const fetchOriginal = fetch;
+const fetchComRotacao = async (url, options) => {
+    if (typeof url === 'string' && url.includes('googleapis.com/youtube/v3')) {
+        if (CHAVES_DA_API.length > 0) {
+            let urlBase = url.replace(/&key=[^&]*/g, '');
+            let tentativas = 0;
+            
+            while (tentativas < CHAVES_DA_API.length) {
+                const chaveAtual = CHAVES_DA_API[indiceChave];
+                const urlCompleta = urlBase + (urlBase.includes('?') ? '&' : '?') + 'key=' + chaveAtual;
+                
+                const res = await fetchOriginal(urlCompleta, options);
+                
+                // Clona a resposta para poder checar o erro de cota sem esvaziar o body original
+                const resClone = res.clone();
+                const data = await resClone.json().catch(() => ({}));
+                
+                const isError = res.status === 403 || res.status === 400;
+                const isQuotaError = data.error && (
+                    JSON.stringify(data.error).includes('quota') || 
+                    JSON.stringify(data.error).includes('API_KEY_INVALID') || 
+                    JSON.stringify(data.error).includes('RATE_LIMIT_EXCEEDED')
+                );
+
+                if (isError && isQuotaError) {
+                    console.warn(`[AVISO] Chave ${chaveAtual.substring(0, 5)}... falhou ou estourou cota. Tentando próxima...`);
+                    indiceChave = (indiceChave + 1) % CHAVES_DA_API.length;
+                    tentativas++;
+                    continue; // Tenta a próxima chave do array
+                }
+                
+                return res; // Deu certo (ou é um erro normal tipo 404)
+            }
+        }
+    }
+    return fetchOriginal(url, options);
+};
+
+// Substitui a funcão fetch pela nossa função com rotatividade
+fetch = fetchComRotacao;
+
 app.use(cors());
 app.use(express.json());
 
-if (!CHAVE_DA_API_DO_YOUTUBE) {
+if (CHAVES_DA_API.length === 0) {
     console.warn(
-        "[AVISO] Variável YOUTUBE_API_KEY não encontrada. Crie um arquivo .env " +
+        "[AVISO] Nenhuma variável YOUTUBE_API_KEY encontrada. Crie um arquivo .env " +
         "com YOUTUBE_API_KEY=sua_chave_aqui (veja o .env.example)."
     );
+} else if (CHAVES_DA_API.length > 1) {
+    console.log(`[SISTEMA] Sistema iniciado com ${CHAVES_DA_API.length} chaves de API (Rotatividade Ativada).`);
 }
 
 /**
