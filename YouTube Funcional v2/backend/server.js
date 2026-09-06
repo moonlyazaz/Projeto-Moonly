@@ -36,25 +36,28 @@ const fetchComRotacao = async (url, options) => {
                 
                 const res = await fetchOriginal(urlCompleta, options);
                 
-                // Clona a resposta para poder checar o erro de cota sem esvaziar o body original
-                const resClone = res.clone();
-                const data = await resClone.json().catch(() => ({}));
-                
-                const isError = res.status === 403 || res.status === 400;
-                const isQuotaError = data.error && (
-                    JSON.stringify(data.error).includes('quota') || 
-                    JSON.stringify(data.error).includes('API_KEY_INVALID') || 
-                    JSON.stringify(data.error).includes('RATE_LIMIT_EXCEEDED')
-                );
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    
+                    const isQuotaError = data.error && (
+                        JSON.stringify(data.error).includes('quota') || 
+                        JSON.stringify(data.error).includes('API_KEY_INVALID') || 
+                        JSON.stringify(data.error).includes('RATE_LIMIT_EXCEEDED') ||
+                        res.status === 429 || res.status === 403
+                    );
 
-                if (isError && isQuotaError) {
-                    console.warn(`[AVISO] Chave ${chaveAtual.substring(0, 5)}... falhou ou estourou cota. Tentando próxima...`);
-                    indiceChave = (indiceChave + 1) % CHAVES_DA_API.length;
-                    tentativas++;
-                    continue; // Tenta a próxima chave do array
+                    if (isQuotaError) {
+                        console.warn(`[AVISO] Chave ${chaveAtual.substring(0, 5)}... falhou ou estourou cota. Tentando próxima...`);
+                        indiceChave = (indiceChave + 1) % CHAVES_DA_API.length;
+                        tentativas++;
+                        continue;
+                    }
+                    
+                    // Retorna um mock do response já que consumimos o body no erro
+                    return { ok: res.ok, status: res.status, json: async () => data };
                 }
                 
-                return res; // Deu certo (ou é um erro normal tipo 404)
+                return res; // Sucesso (200 OK), body intocado
             }
         }
     }
