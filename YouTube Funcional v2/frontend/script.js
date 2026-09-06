@@ -2617,14 +2617,7 @@ window.abrirVideoDaPlaylist = async function(idVideo, idPlaylist) {
 
 
 
-// ==================== DOWNLOAD ====================
-window.abrirModalDownload = function(videoId) {
-    const p = prompt("Digite 'mp3' para Audio ou 'mp4' para Video:");
-    if (p === 'mp3' || p === 'mp4') {
-        mostrarToast("Iniciando download... Pode demorar alguns instantes.");
-        window.open(`${URL_DO_BACKEND}/api/download?id=${videoId}&format=${p}`, '_blank');
-    }
-};
+
 
 // ==================== WATCH PARTY (SOCKET.IO) ====================
 window.socket = null;
@@ -2897,11 +2890,13 @@ window.iniciarDownloadModal = function(formato) {
         document.getElementById('btn-fechar-download').style.display = 'block';
         document.getElementById('btn-fechar-download').innerText = 'Fechar';
         
-        window.open(${URL_DO_BACKEND}/api/download?id=&format=, '_blank');
+        window.open(URL_DO_BACKEND + '/api/download?id=' + window.idVideoParaDownload + '&format=' + formato, '_blank');
         mostrarToast("O download começou no seu navegador!");
     }, 3500);
 };
 
 // Iniciar o tema ao carregar
 document.addEventListener('DOMContentLoaded', carregarTema);
+
+
 
