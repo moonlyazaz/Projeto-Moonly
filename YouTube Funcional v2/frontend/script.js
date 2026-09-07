@@ -2828,11 +2828,11 @@ function carregarTema() {
     }
 }
 
-window.abrirModalConfigura��es = function() {
+window.abrirModalConfiguracoes = function() {
     document.getElementById('modal-configuracoes').style.display = 'flex';
 };
 
-window.fecharModalConfigura��es = function() {
+window.fecharModalConfiguracoes = function() {
     document.getElementById('modal-configuracoes').style.display = 'none';
 };
 
@@ -2840,7 +2840,7 @@ window.mudarTema = function(corHex) {
     document.documentElement.style.setProperty('--moonly-primary', corHex);
     localStorage.setItem('moonly_theme', corHex);
     mostrarToast("Tema atualizado!");
-    fecharModalConfigura��es();
+    fecharModalConfiguracoes();
 };
 
 // ==================== MODAL DOWNLOAD (TURBINADO) ====================
