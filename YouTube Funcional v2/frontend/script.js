@@ -31,13 +31,15 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
 
     elementoDaAreaDoPlayer.innerHTML = `
         <div class="media-view-box" id="main-player-container">
-            <iframe
-                id="main-video-iframe"
+            <video
+                id="main-video-element"
                 class="media-view-box__video"
-                src="https://www.youtube.com/embed/${dadosDoVideoPrincipal.id}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-            ></iframe>
+                data-video-id="${dadosDoVideoPrincipal.id}"
+                autoplay
+                playsinline
+                webkit-playsinline
+                preload="metadata"
+            ></video>
             <div class="media-view-box__overlay" id="main-video-overlay"></div>
             <div class="media-view-box__controls">
                 <div class="media-view-box__progress-container" id="main-progress-container">
@@ -504,112 +506,211 @@ function formatarTempo(segundos) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
-function inicializarPlayerPrincipal(ehAoVivo = false) {
-    if (intervaloDeProgressoPrincipal) clearInterval(intervaloDeProgressoPrincipal);
-    
-    const iniciarControles = () => {
-        playerPrincipal = new YT.Player('main-video-iframe', {
-            events: {
-                'onReady': (e) => { e.target.playVideo(); }, 
-                'onStateChange': (e) => {
-                    const icone = document.getElementById('main-play-icon');
-                    if (e.data === 1) { // PLAYING
-                        if(icone) { icone.classList.remove('fa-play'); icone.classList.add('fa-pause'); }
+/**
+ * Recria na memória uma interface parecida com a do antigo YT.Player só para
+ * não quebrar o restante do código (Watch Party, jogo da cobrinha etc.) que
+ * ainda chama métodos como playVideo/pauseVideo/seekTo/getCurrentTime.
+ */
+function criarFacadeDeVideo(video) {
+    const facade = {
+        playVideo() {
+            const promessa = video.play();
+            if (promessa && promessa.catch) promessa.catch(() => {});
+        },
+        pauseVideo() { video.pause(); },
+        seekTo(segundos) { if (isFinite(segundos)) video.currentTime = segundos; },
+        getCurrentTime() { return video.currentTime || 0; },
+        getDuration() { return isFinite(video.duration) ? video.duration : 0; },
+        // 1 = tocando, 2 = pausado (compatível com quem espera um número)
+        getPlayerState() { return (video.paused || video.ended) ? 2 : 1; },
+        isMuted() { return video.muted; },
+        mute() { video.muted = true; },
+        unMute() { video.muted = false; }
+    };
+    return facade;
+}
 
-                    if (!window.ignoreNextAction && window.partyRoomId && window.socket) {
-                        if (e.data === 1) { // PLAY
-                            window.socket.emit('player-action', { roomId: window.partyRoomId, action: 'play', time: e.target.getCurrentTime() });
-                        } else if (e.data === 2) { // PAUSE
-                            window.socket.emit('player-action', { roomId: window.partyRoomId, action: 'pause', time: e.target.getCurrentTime() });
-                        }
-                    }
+// Instâncias públicas de Invidious usadas como fallback para obter o .mp4.
+const INSTANCIAS_INVIDIOUS = ['https://inv.nadeko.net', 'https://invidious.nerdvpn.de', 'https://yewtu.be'];
 
-                    } else {
-                        if(icone) { icone.classList.remove('fa-pause'); icone.classList.add('fa-play'); }
-                    }
-                }
-            }
-        });
+async function obterUrlStreamInvidious(idDoVideo) {
+    for (const base of INSTANCIAS_INVIDIOUS) {
+        try {
+            const resposta = await fetch(
+                `${base}/api/v1/videos/${encodeURIComponent(idDoVideo)}?fields=formatStreams`,
+                { signal: AbortSignal.timeout(6000) }
+            );
+            if (!resposta.ok) continue;
+            const dados = await resposta.json();
+            const itens = (dados.formatStreams || [])
+                .filter((f) => f.url && f.type && f.type.toLowerCase().includes('video/mp4'))
+                .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0) || (b.size || '').localeCompare(a.size || ''));
+            if (itens.length) return itens[0].url;
+        } catch (_) { continue; }
+    }
+    return null;
+}
 
-        const alternarPlay = () => {
-            if (!playerPrincipal || !playerPrincipal.getPlayerState) return;
-            const estado = playerPrincipal.getPlayerState();
-            if (estado === 1) playerPrincipal.pauseVideo();
-            else playerPrincipal.playVideo();
+// Tenta atribuir uma fonte ao <video> e espera o navegador conseguir ler os metadados.
+function tentarFonteDeVideo(video, url) {
+    return new Promise((resolver) => {
+        let terminou = false;
+        const terminar = (ok) => {
+            if (terminou) return;
+            terminou = true;
+            clearTimeout(temporizador);
+            video.removeEventListener('loadedmetadata', aoMetadados);
+            video.removeEventListener('error', aoErro);
+            resolver(ok);
         };
+        const aoMetadados = () => terminar(true);
+        const aoErro = () => terminar(false);
+        const temporizador = setTimeout(() => terminar(false), 15000);
+        video.addEventListener('loadedmetadata', aoMetadados);
+        video.addEventListener('error', aoErro);
+        video.src = url;
+        video.load();
+    });
+}
 
-        const btnPlay = document.getElementById('main-play-btn');
-        if (btnPlay) btnPlay.addEventListener('click', alternarPlay);
-        
-        const overlay = document.getElementById('main-video-overlay');
-        if (overlay) overlay.addEventListener('click', alternarPlay);
+// Descobre de onde vem o MP4 e coloca no <video>, tentando autoplay quando pronto.
+async function carregarStreamNoVideo(video) {
+    const id = video.dataset.videoId || window.idDoVideoEmReproducao;
+    if (!id) return;
+    window.idDoVideoEmReproducao = id;
 
-        const btnMute = document.getElementById('main-mute-btn');
-        if (btnMute) btnMute.addEventListener('click', () => {
-            if (!playerPrincipal || !playerPrincipal.isMuted) return;
-            const icon = document.getElementById('main-mute-icon');
-            if (playerPrincipal.isMuted()) {
-                playerPrincipal.unMute();
-                if(icon) { icon.classList.remove('fa-volume-xmark'); icon.classList.add('fa-volume-high'); }
-            } else {
-                playerPrincipal.mute();
-                if(icon) { icon.classList.remove('fa-volume-high'); icon.classList.add('fa-volume-xmark'); }
-            }
-        });
-
-        const btnFullscreen = document.getElementById('main-fullscreen-btn');
-        if (btnFullscreen) btnFullscreen.addEventListener('click', () => {
-            const container = document.getElementById('main-player-container');
-            if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => {});
-            } else {
-                document.exitFullscreen();
-            }
-        });
-
-        const progressContainer = document.getElementById('main-progress-container');
-        if (progressContainer) progressContainer.addEventListener('click', (e) => {
-            if (!playerPrincipal || !playerPrincipal.getDuration) return;
-            const rect = progressContainer.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            playerPrincipal.seekTo(pos * playerPrincipal.getDuration());
-        });
-
-        intervaloDeProgressoPrincipal = setInterval(() => {
-            if (playerPrincipal && typeof playerPrincipal.getCurrentTime === 'function' && typeof playerPrincipal.getDuration === 'function') {
-                const tempo = playerPrincipal.getCurrentTime();
-                const duracao = playerPrincipal.getDuration();
-                if (duracao > 0) {
-                    const porcentagem = (tempo / duracao) * 100;
-                    const barra = document.getElementById('main-progress-bar');
-                    if (barra) barra.style.width = `${porcentagem}%`;
-                    
-                    const display = document.getElementById('main-time-display');
-                    if (display) {
-                        if (ehAoVivo) {
-                            display.textContent = 'Ao vivo';
-                            display.style.color = '#ff0000';
-                            display.style.fontWeight = 'bold';
-                        } else {
-                            display.textContent = `${formatarTempo(tempo)} / ${formatarTempo(duracao)}`;
-                            display.style.color = 'inherit';
-                            display.style.fontWeight = 'normal';
-                        }
-                    }
+    // Tenta reproduzir a partir de uma lista, na ordem. Retorna true se alguma funcionou.
+    const tentarFontes = (lista) => lista.reduce((promessaAnterior, fonte) =>
+        promessaAnterior.then((jaDeuCerto) => {
+            if (jaDeuCerto) return true;
+            return tentarFonteDeVideo(video, fonte).then((ok) => {
+                if (ok) {
+                    const tentarPlay = () => video.play().catch(() => {});
+                    video.addEventListener('canplay', tentarPlay, { once: true });
+                    tentarPlay();
                 }
-            }
-        }, 100);
+                return ok;
+            });
+        })
+    , Promise.resolve(false));
+
+    // 1) Fonte preferida: proxy do nosso backend (yt-dlp / Invidious servido por nós),
+    //    que resolve CORS e entrega o arquivo pronto para o player HTML5.
+    const fonteDoBackend = `${URL_DO_BACKEND}/api/stream/${encodeURIComponent(id)}`;
+    const deuComBackend = await tentarFontes([fonteDoBackend]);
+    if (deuComBackend) return;
+
+    // 2) Fallback: instância pública de Invidious, só se o backend falhar.
+    //    Assim dá para testar o player no front mesmo antes do endpoint existir.
+    const urlDoInvidious = await obterUrlStreamInvidious(id);
+    if (urlDoInvidious) {
+        const deuComInvidious = await tentarFontes([urlDoInvidious]);
+        if (deuComInvidious) return;
+    }
+
+    const display = document.getElementById('main-time-display');
+    if (display) display.textContent = 'Não foi possível reproduzir o vídeo';
+}
+
+/**
+ * Converte o player principal de iframe do YouTube para uma tag <video> HTML5.
+ * Como a tag <video> não recebe controles nativos (controls=0 é impossível),
+ * ligamos os botões customizados já existentes (play/pause/mudo/progresso/
+ * fullscreen) diretamente aos eventos da mídia.
+ */
+function inicializarPlayerPrincipal(ehAoVivo = false) {
+    if (intervaloDeProgressoPrincipal) { clearInterval(intervaloDeProgressoPrincipal); intervaloDeProgressoPrincipal = null; }
+
+    const video = document.getElementById('main-video-element');
+    if (!video) return;
+
+    playerPrincipal = criarFacadeDeVideo(video);
+
+    const atualizarIconePlay = () => {
+        const icone = document.getElementById('main-play-icon');
+        if (!icone) return;
+        const tocando = !video.paused && !video.ended;
+        if (tocando) { icone.classList.remove('fa-play'); icone.classList.add('fa-pause'); }
+        else { icone.classList.remove('fa-pause'); icone.classList.add('fa-play'); }
     };
 
-    if (window.YT && window.YT.Player) {
-        iniciarControles();
-    } else {
-        const oldCallback = window.onYouTubeIframeAPIReady;
-        window.onYouTubeIframeAPIReady = () => {
-            if (oldCallback) oldCallback();
-            iniciarControles();
-        };
+    const alternarPlay = () => {
+        if (video.paused || video.ended) video.play().catch(() => {});
+        else video.pause();
+    };
+
+    // Dispara quando a reprodução muda (usado também pelo Watch Party).
+    const emitirAcaoParty = (acao) => {
+        if (!window.ignoreNextAction && window.partyRoomId && window.socket) {
+            window.socket.emit('player-action', { roomId: window.partyRoomId, action: acao, time: video.currentTime });
+        }
+    };
+    video.addEventListener('play', () => { atualizarIconePlay(); emitirAcaoParty('play'); });
+    video.addEventListener('playing', () => { atualizarIconePlay(); emitirAcaoParty('play'); });
+    video.addEventListener('pause', () => { atualizarIconePlay(); emitirAcaoParty('pause'); });
+    video.addEventListener('ended', atualizarIconePlay);
+
+    const btnPlay = document.getElementById('main-play-btn');
+    if (btnPlay) btnPlay.addEventListener('click', alternarPlay);
+
+    const overlay = document.getElementById('main-video-overlay');
+    if (overlay) overlay.addEventListener('click', alternarPlay);
+
+    const btnMute = document.getElementById('main-mute-btn');
+    if (btnMute) btnMute.addEventListener('click', () => {
+        video.muted = !video.muted;
+        const icone = document.getElementById('main-mute-icon');
+        if (icone) {
+            if (video.muted) { icone.classList.remove('fa-volume-high'); icone.classList.add('fa-volume-xmark'); }
+            else { icone.classList.remove('fa-volume-xmark'); icone.classList.add('fa-volume-high'); }
+        }
+    });
+
+    const btnFullscreen = document.getElementById('main-fullscreen-btn');
+    if (btnFullscreen) btnFullscreen.addEventListener('click', () => {
+        const container = document.getElementById('main-player-container');
+        if (!container) return;
+        if (!document.fullscreenElement) container.requestFullscreen().catch(() => {});
+        else document.exitFullscreen();
+    });
+
+    const progressContainer = document.getElementById('main-progress-container');
+    if (progressContainer) {
+        progressContainer.addEventListener('click', (e) => {
+            if (!isFinite(video.duration) || video.duration <= 0) return;
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+            video.currentTime = pos * video.duration;
+        });
     }
+
+    const atualizarProgresso = () => {
+        const barra = document.getElementById('main-progress-bar');
+        const display = document.getElementById('main-time-display');
+        if (!barra && !display) return;
+        if (barra && isFinite(video.duration) && video.duration > 0) {
+            barra.style.width = `${((video.currentTime / video.duration) * 100)}%`;
+        }
+        if (display) {
+            if (ehAoVivo) {
+                display.textContent = 'Ao vivo';
+                display.style.color = '#ff0000';
+                display.style.fontWeight = 'bold';
+            } else {
+                display.textContent = `${formatarTempo(video.currentTime)} / ${formatarTempo(video.duration)}`;
+                display.style.color = 'inherit';
+                display.style.fontWeight = 'normal';
+            }
+        }
+    };
+    video.addEventListener('timeupdate', atualizarProgresso);
+    video.addEventListener('progress', atualizarProgresso);
+    video.addEventListener('loadedmetadata', atualizarProgresso);
+    video.addEventListener('durationchange', atualizarProgresso);
+    // Reforço periódico para quando o <video> demora muito a emitir "timeupdate".
+    intervaloDeProgressoPrincipal = setInterval(atualizarProgresso, 250);
+
+    carregarStreamNoVideo(video);
 }
 
 /**
@@ -630,7 +731,8 @@ async function abrirVideo(idDoVideo) {
         renderizarVideoPrincipal(dadosDoVideo);
         mostrarView("assistir");
         window.scrollTo({ top: 0, behavior: "smooth" });
-        
+
+        window.idDoVideoEmReproducao = idDoVideo;
         inicializarPlayerPrincipal(typeof dadosDoVideo !== "undefined" && (dadosDoVideo.duracao === "Ao vivo" || dadosDoVideo.duracao === "0:00"));
         inicializarEventosDeComentario(dadosDoVideo.id);
         finalizarCarregamento();
@@ -2445,11 +2547,11 @@ window.toggleMiniplayer = function() {
         }
         
         // Voltar para a tela de assistir pegando o ID atual
-        // Como saber o ID? O iframe tem a URL. Mas podemos usar o History.
-        // Ou simplesmente:
-        const videoIdMatch = box.querySelector('iframe').src.match(/embed\/([^?]+)/);
-        if (videoIdMatch) {
-            abrirVideo(videoIdMatch[1]);
+        // O ID agora fica no <video> nativo (atributo data-video-id).
+        const videoDoMiniplayer = box.querySelector('video[data-video-id]');
+        const idDoVideoAtual = videoDoMiniplayer ? videoDoMiniplayer.dataset.videoId : window.idDoVideoEmReproducao;
+        if (idDoVideoAtual) {
+            abrirVideo(idDoVideoAtual);
         }
     }
 };

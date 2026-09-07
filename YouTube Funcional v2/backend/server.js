@@ -408,6 +408,47 @@ app.get('/api/download', async (req, res) => {
     }
 });
 
+// ==================== STREAM (player <video> nativo) ====================
+// Entrega o MP4 do vídeo inline (Sem "Content-Disposition: attachment"),
+// para que a tag <video> do front consiga reproduzir direto no player HTML5.
+// Exemplo: GET /api/stream/dQw4w9WgXcQ
+app.get('/api/stream/:id', async (req, res) => {
+    const videoId = req.params.id;
+    if (!videoId) return res.status(400).send("ID nao fornecido");
+
+    try {
+        const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const streamInfo = await play.stream(videoUrl);
+
+        // play-dl devolve um fluxo já mesclado (áudio+vídeo) pronto p/ <video>.
+        const tipoMidia = typeof streamInfo.type === 'string'
+            ? (streamInfo.type.includes('video') ? 'video/mp4' : streamInfo.type)
+            : 'video/mp4';
+
+        res.setHeader('Content-Type', tipoMidia);
+        res.setHeader('Cache-Control', 'no-transform');
+
+        // Se o fluxo vier como array (caso raro), usa o fluxo de vídeo.
+        const fluxo = Array.isArray(streamInfo.stream)
+            ? streamInfo.stream.find((s) => s && s.type) || streamInfo.stream[0]
+            : streamInfo.stream;
+
+        fluxo.on('error', (err) => {
+            console.error("Erro no fluxo do stream:", err.message);
+            res.destroy();
+        });
+
+        fluxo.pipe(res);
+    } catch (e) {
+        console.error("Stream error:", e.message);
+        if (!res.headersSent) {
+            res.status(500).send(JSON.stringify({ erro: "Nao foi possivel gerar o stream." }));
+        } else {
+            res.end();
+        }
+    }
+});
+
 
 
 app.get('/', (req, res) => {
