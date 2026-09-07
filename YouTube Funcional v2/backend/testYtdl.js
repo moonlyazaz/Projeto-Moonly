@@ -1,4 +1,4 @@
-const ytdl = require('@distube/ytdl-core');
+﻿ï»¿Ã¯Â»Â¿const ytdl = require('@distube/ytdl-core');
 
 async function test() {
     try {

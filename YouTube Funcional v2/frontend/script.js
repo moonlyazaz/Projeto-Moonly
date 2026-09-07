@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Monta e insere na p�gina todo o bloco do v�deo que est� sendo assistido:
  * player, t�tulo, dados do canal, bot�es de a��o e descri��o.
  *
@@ -2828,11 +2828,11 @@ function carregarTema() {
     }
 }
 
-window.abrirModalConfiguracoes = function(e) { if(e) e.stopPropagation(); document.getElementById('modal-configuracoes').style.display = 'flex';
+window.abrirModalConfigura��es = function() {
     document.getElementById('modal-configuracoes').style.display = 'flex';
 };
 
-window.fecharModalConfiguracoes = function() {
+window.fecharModalConfigura��es = function() {
     document.getElementById('modal-configuracoes').style.display = 'none';
 };
 
@@ -2840,7 +2840,7 @@ window.mudarTema = function(corHex) {
     document.documentElement.style.setProperty('--moonly-primary', corHex);
     localStorage.setItem('moonly_theme', corHex);
     mostrarToast("Tema atualizado!");
-    fecharModalConfiguracoes();
+    fecharModalConfigura��es();
 };
 
 // ==================== MODAL DOWNLOAD (TURBINADO) ====================
@@ -2897,8 +2897,6 @@ window.iniciarDownloadModal = function(formato) {
 
 // Iniciar o tema ao carregar
 document.addEventListener('DOMContentLoaded', carregarTema);
-
-
 
 
 

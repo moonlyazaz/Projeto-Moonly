@@ -1,4 +1,4 @@
-const play = require('play-dl');
+﻿ï»¿Ã¯Â»Â¿const play = require('play-dl');
 
 async function test() {
     try {
