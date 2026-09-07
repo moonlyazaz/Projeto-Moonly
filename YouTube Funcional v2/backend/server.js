@@ -420,7 +420,9 @@ app.get("/api/sugestoes", async (req, res) => {
     try {
         const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${encodeURIComponent(q)}`;
         const response = await fetch(url);
-        const data = await response.json();
+        const buffer = await response.arrayBuffer();
+        const text = new TextDecoder('iso-8859-1').decode(buffer);
+        const data = JSON.parse(text);
         // Google's format for client=firefox is [ "query", ["sugg1", "sugg2", ...] ]
         res.json(data[1] || []);
     } catch (err) {
