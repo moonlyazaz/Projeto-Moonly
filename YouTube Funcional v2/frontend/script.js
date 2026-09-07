@@ -31,15 +31,11 @@ function renderizarVideoPrincipal(dadosDoVideoPrincipal) {
 
     elementoDaAreaDoPlayer.innerHTML = `
         <div class="media-view-box" id="main-player-container">
-            <video
+            <div
                 id="main-video-element"
                 class="media-view-box__video"
                 data-video-id="${dadosDoVideoPrincipal.id}"
-                autoplay
-                playsinline
-                webkit-playsinline
-                preload="metadata"
-            ></video>
+            ></div>
             <div class="media-view-box__overlay" id="main-video-overlay"></div>
             <div class="media-view-box__controls">
                 <div class="media-view-box__progress-container" id="main-progress-container">
@@ -613,104 +609,318 @@ async function carregarStreamNoVideo(video) {
 }
 
 /**
- * Converte o player principal de iframe do YouTube para uma tag <video> HTML5.
- * Como a tag <video> não recebe controles nativos (controls=0 é impossível),
- * ligamos os botões customizados já existentes (play/pause/mudo/progresso/
- * fullscreen) diretamente aos eventos da mídia.
+ * Player principal com fonte oficial do YouTube.
+ *
+ * Estratégia (validada e escolhida pelo usuário):
+ *  - O backend do Render roda em IP de datacenter e o YouTube o bloqueia com o
+ *    anti-bot ("Sign in to confirm you're not a bot"), então NÃO dá para servir
+ *    MP4 por /api/stream nem por Invidious público de forma confiável.
+ *  - Solução: reproduzir pelo embed OFICIAL do YouTube (YT.Player) que roda
+ *    dentro do navegador do usuário (IP residencial) e é imune a esse bloqueio.
+ *  - A interface exposta em `playerPrincipal` preserva o padrão antigo do
+ *    YT.Player (playVideo/pauseVideo/seekTo/getCurrentTime...) para não quebrar
+ *    Watch Party, miniplayer e jogo da cobrinha.
+ *  - Se o embed recusar o vídeo (conteúdo que não permite embed), caímos no
+ *    caminho nativo `/api/stream` + Invidious (útil quando o backend rodar em
+ *    casa / IP residencial).
  */
-function inicializarPlayerPrincipal(ehAoVivo = false) {
-    if (intervaloDeProgressoPrincipal) { clearInterval(intervaloDeProgressoPrincipal); intervaloDeProgressoPrincipal = null; }
 
-    const video = document.getElementById('main-video-element');
-    if (!video) return;
+// Guarda os callbacks que aguardam a API Iframe do YouTube carregar.
+window.__youtubeAPIListeners = window.__youtubeAPIListeners || [];
+window.__youtubeAPICarregada = window.__youtubeAPICarregada || false;
 
-    playerPrincipal = criarFacadeDeVideo(video);
+// O SDK do YouTube chama essa função assim que ele próprio termina de carregar.
+window.onYouTubeIframeAPIReady = function () {
+    window.__youtubeAPICarregada = true;
+    (window.__youtubeAPIListeners || []).forEach((fn) => { try { fn(); } catch (_) {} });
+    window.__youtubeAPIListeners = [];
+};
 
-    const atualizarIconePlay = () => {
-        const icone = document.getElementById('main-play-icon');
-        if (!icone) return;
-        const tocando = !video.paused && !video.ended;
-        if (tocando) { icone.classList.remove('fa-play'); icone.classList.add('fa-pause'); }
-        else { icone.classList.remove('fa-pause'); icone.classList.add('fa-play'); }
-    };
-
-    const alternarPlay = () => {
-        if (video.paused || video.ended) video.play().catch(() => {});
-        else video.pause();
-    };
-
-    // Dispara quando a reprodução muda (usado também pelo Watch Party).
-    const emitirAcaoParty = (acao) => {
-        if (!window.ignoreNextAction && window.partyRoomId && window.socket) {
-            window.socket.emit('player-action', { roomId: window.partyRoomId, action: acao, time: video.currentTime });
+// Garante que o <script> da Iframe API foi injetado e aguarda YT.Player ficar pronto.
+function carregarAPIDoYouTube() {
+    return new Promise((resolve) => {
+        if (window.YT && window.YT.Player) return resolve(true);
+        if (window.__youtubeAPICarregada) {
+            const checar = () => {
+                if (window.YT && window.YT.Player) return resolve(true);
+                setTimeout(checar, 200);
+            };
+            return checar();
         }
-    };
-    video.addEventListener('play', () => { atualizarIconePlay(); emitirAcaoParty('play'); });
-    video.addEventListener('playing', () => { atualizarIconePlay(); emitirAcaoParty('play'); });
-    video.addEventListener('pause', () => { atualizarIconePlay(); emitirAcaoParty('pause'); });
-    video.addEventListener('ended', atualizarIconePlay);
+        window.__youtubeAPIListeners.push(() => {
+            const checar = () => {
+                if (window.YT && window.YT.Player) return resolve(true);
+                setTimeout(checar, 200);
+            };
+            checar();
+        });
+        if (!document.getElementById('youtube-iframe-api')) {
+            const tag = document.createElement('script');
+            tag.id = 'youtube-iframe-api';
+            tag.src = 'https://www.youtube.com/iframe_api';
+            tag.async = true;
+            document.head.appendChild(tag);
+        }
+        // Timeout de segurança: se em 12s a API não aparecer, reporta falha.
+        setTimeout(() => resolve(!!(window.YT && window.YT.Player)), 12000);
+    });
+}
 
+
+function destruirPlayerEncaixado() {
+    // Se já existe um motor antigo (YT.Player ou <video>), remove e libera.
+    const alvoAntigo = window.__motorAtualDoPlayer || null;
+    if (alvoAntigo && typeof alvoAntigo.destroy === 'function') {
+        try { alvoAntigo.destroy(); } catch (_) {}
+    }
+    window.__motorAtualDoPlayer = null;
+    const container = document.getElementById('main-video-element');
+    if (container) container.innerHTML = '';
+}
+
+// Estado de reprodução resumido (1 = tocando, 2 = pausado).
+function estadoDoPlayerPrincipal() {
+    if (!playerPrincipal || typeof playerPrincipal.getPlayerState !== 'function') return 2;
+    const estado = playerPrincipal.getPlayerState(); // -1 unstarted | 0 ended | 1 play | 2 pause | 3 buffering | 5 cued
+    return (estado === 1 || estado === 3) ? 1 : 2;
+}
+
+function atualizarIconePlayPrincipal() {
+    const icone = document.getElementById('main-play-icon');
+    if (!icone) return;
+    const tocando = estadoDoPlayerPrincipal() === 1;
+    if (tocando) { icone.classList.remove('fa-play'); icone.classList.add('fa-pause'); }
+    else { icone.classList.remove('fa-pause'); icone.classList.add('fa-play'); }
+}
+
+function emitirAcaoPartyPrincipal(acao) {
+    if (!window.ignoreNextAction && window.partyRoomId && window.socket) {
+        const tempo = (playerPrincipal && typeof playerPrincipal.getCurrentTime === 'function')
+            ? playerPrincipal.getCurrentTime() : 0;
+        window.socket.emit('player-action', { roomId: window.partyRoomId, action: acao, time: tempo });
+    }
+}
+
+function alternarPlayPrincipal() {
+    if (!playerPrincipal) return;
+    if (estadoDoPlayerPrincipal() === 1) playerPrincipal.pauseVideo();
+    else playerPrincipal.playVideo();
+}
+
+function alternarMudoPrincipal() {
+    if (!playerPrincipal || typeof playerPrincipal.isMuted !== 'function') return;
+    if (playerPrincipal.isMuted()) playerPrincipal.unMute();
+    else playerPrincipal.mute();
+    sincronizarIconeSomPrincipal();
+}
+
+// Reflete no overlay o estado de áudio real do player comercial.
+function sincronizarIconeSomPrincipal() {
+    const icone = document.getElementById('main-mute-icon');
+    if (!icone || !playerPrincipal || typeof playerPrincipal.isMuted !== 'function') return;
+    if (playerPrincipal.isMuted()) {
+        icone.classList.remove('fa-volume-high');
+        icone.classList.add('fa-volume-xmark');
+    } else {
+        icone.classList.remove('fa-volume-xmark');
+        icone.classList.add('fa-volume-high');
+    }
+}
+
+function toggleTelaCheiaPrincipal() {
+    const container = document.getElementById('main-player-container');
+    if (!container) return;
+    if (!document.fullscreenElement) container.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
+}
+
+function atualizarProgressoPrincipal(ehAoVivo) {
+    const barra = document.getElementById('main-progress-bar');
+    const display = document.getElementById('main-time-display');
+    if (!barra && !display) return;
+    const duracao = (playerPrincipal && typeof playerPrincipal.getDuration === 'function') ? playerPrincipal.getDuration() : 0;
+    const tempo = (playerPrincipal && typeof playerPrincipal.getCurrentTime === 'function') ? playerPrincipal.getCurrentTime() : 0;
+    if (barra && isFinite(duracao) && duracao > 0) {
+        barra.style.width = `${Math.min(100, (tempo / duracao) * 100)}%`;
+    }
+    if (display) {
+        if (ehAoVivo) {
+            display.textContent = 'Ao vivo';
+            display.style.color = '#ff0000';
+            display.style.fontWeight = 'bold';
+        } else {
+            display.textContent = `${formatarTempo(tempo)} / ${formatarTempo(duracao)}`;
+            display.style.color = 'inherit';
+            display.style.fontWeight = 'normal';
+        }
+    }
+    atualizarIconePlayPrincipal();
+}
+
+function buscarNaBarraDeProgresso(e) {
+    const containerBarra = document.getElementById('main-progress-container');
+    if (!playerPrincipal || !containerBarra || typeof playerPrincipal.seekTo !== 'function') return;
+    const duracao = playerPrincipal.getDuration();
+    if (!isFinite(duracao) || duracao <= 0) return;
+    const rect = containerBarra.getBoundingClientRect();
+    const pos = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    playerPrincipal.seekTo(pos * duracao, true);
+}
+
+// Liga os botões/overlay customizados uma única vez. Os handlers conversam com
+// o `playerPrincipal` usando a interface padrão do YT.Player (comum ao embed
+// oficial e à facade de <video>), então não importa qual motor está ativo.
+function ligarControlesPrincipais(ehAoVivo) {
     const btnPlay = document.getElementById('main-play-btn');
-    if (btnPlay) btnPlay.addEventListener('click', alternarPlay);
+    if (btnPlay && !btnPlay.dataset.ligado) { btnPlay.dataset.ligado = '1'; btnPlay.addEventListener('click', alternarPlayPrincipal); }
 
     const overlay = document.getElementById('main-video-overlay');
-    if (overlay) overlay.addEventListener('click', alternarPlay);
+    if (overlay && !overlay.dataset.ligado) { overlay.dataset.ligado = '1'; overlay.addEventListener('click', alternarPlayPrincipal); }
 
     const btnMute = document.getElementById('main-mute-btn');
-    if (btnMute) btnMute.addEventListener('click', () => {
-        video.muted = !video.muted;
-        const icone = document.getElementById('main-mute-icon');
-        if (icone) {
-            if (video.muted) { icone.classList.remove('fa-volume-high'); icone.classList.add('fa-volume-xmark'); }
-            else { icone.classList.remove('fa-volume-xmark'); icone.classList.add('fa-volume-high'); }
-        }
-    });
+    if (btnMute && !btnMute.dataset.ligado) { btnMute.dataset.ligado = '1'; btnMute.addEventListener('click', alternarMudoPrincipal); }
 
     const btnFullscreen = document.getElementById('main-fullscreen-btn');
-    if (btnFullscreen) btnFullscreen.addEventListener('click', () => {
-        const container = document.getElementById('main-player-container');
-        if (!container) return;
-        if (!document.fullscreenElement) container.requestFullscreen().catch(() => {});
-        else document.exitFullscreen();
-    });
+    if (btnFullscreen && !btnFullscreen.dataset.ligado) { btnFullscreen.dataset.ligado = '1'; btnFullscreen.addEventListener('click', toggleTelaCheiaPrincipal); }
 
-    const progressContainer = document.getElementById('main-progress-container');
-    if (progressContainer) {
-        progressContainer.addEventListener('click', (e) => {
-            if (!isFinite(video.duration) || video.duration <= 0) return;
-            const rect = progressContainer.getBoundingClientRect();
-            const pos = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-            video.currentTime = pos * video.duration;
-        });
-    }
+    const progresso = document.getElementById('main-progress-container');
+    if (progresso && !progresso.dataset.ligado) { progresso.dataset.ligado = '1'; progresso.addEventListener('click', buscarNaBarraDeProgresso); }
 
-    const atualizarProgresso = () => {
-        const barra = document.getElementById('main-progress-bar');
-        const display = document.getElementById('main-time-display');
-        if (!barra && !display) return;
-        if (barra && isFinite(video.duration) && video.duration > 0) {
-            barra.style.width = `${((video.currentTime / video.duration) * 100)}%`;
-        }
-        if (display) {
-            if (ehAoVivo) {
-                display.textContent = 'Ao vivo';
-                display.style.color = '#ff0000';
-                display.style.fontWeight = 'bold';
-            } else {
-                display.textContent = `${formatarTempo(video.currentTime)} / ${formatarTempo(video.duration)}`;
-                display.style.color = 'inherit';
-                display.style.fontWeight = 'normal';
-            }
-        }
-    };
-    video.addEventListener('timeupdate', atualizarProgresso);
-    video.addEventListener('progress', atualizarProgresso);
-    video.addEventListener('loadedmetadata', atualizarProgresso);
-    video.addEventListener('durationchange', atualizarProgresso);
-    // Reforço periódico para quando o <video> demora muito a emitir "timeupdate".
-    intervaloDeProgressoPrincipal = setInterval(atualizarProgresso, 250);
+    if (intervaloDeProgressoPrincipal) { clearInterval(intervaloDeProgressoPrincipal); }
+    intervaloDeProgressoPrincipal = setInterval(() => atualizarProgressoPrincipal(!!ehAoVivo), 250);
+}
+
+// Constrói um <video> nativo (fallback MP4) e devolve sua facade como motor.
+function reproduzirEmVideoNativo(idDoVideo, ehAoVivo) {
+    const container = document.getElementById('main-video-element');
+    if (!container || !container.parentElement) return false;
+
+    const paiDoVideo = container.parentElement;
+
+    const video = document.createElement('video');
+    video.id = 'main-video-element';
+    video.className = 'media-view-box__video';
+    video.dataset.videoId = idDoVideo || '';
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.preload = 'metadata';
+
+    // Substitui o <div> (que serviria ao embed) pelo <video> nativo.
+    paiDoVideo.replaceChild(video, container);
+
+    const facade = criarFacadeDeVideo(video);
+    playerPrincipal = facade;
+    window.__motorAtualDoPlayer = facade;
+
+    const aoReproduzir = () => { atualizarIconePlayPrincipal(); emitirAcaoPartyPrincipal('play'); };
+    const aoPausar = () => { atualizarIconePlayPrincipal(); emitirAcaoPartyPrincipal('pause'); };
+    video.addEventListener('play', aoReproduzir);
+    video.addEventListener('playing', aoReproduzir);
+    video.addEventListener('pause', aoPausar);
+    video.addEventListener('ended', () => atualizarIconePlayPrincipal());
 
     carregarStreamNoVideo(video);
+    return true;
+}
+
+/**
+ * Inicializa o player principal com a fonte OFICIAL do YouTube (embed no
+ * navegador). Se a API não estiver disponível ou o vídeo não permitir embed,
+ * cai para o caminho nativo (MP4 via backend/Invidious).
+ */
+
+// Momento da última interação (clique) do usuário. É usado para decidir se o
+// autoplay do embed oficial pode tentar começar COM áudio: como o player é
+// montado dentro de um .then() após um fetch assíncrono, o "gesto" do clique
+// original não chega mais ao onReady — então guardamos aqui uma janela curta.
+function marcarInteracaoDeUsuario() { window.__interacaoUsuario = Date.now(); }
+document.addEventListener('click', () => marcarInteracaoDeUsuario(), true);
+
+/** true se o usuário interagiu há pouco → o embed pode tentar autoplay com som. */
+function houveGestoRecenteParaAutoplay() {
+    return (Date.now() - (window.__interacaoUsuario || 0)) < 4000;
+}
+
+function inicializarPlayerPrincipal(ehAoVivo = false) {
+    const container = document.getElementById('main-video-element');
+    if (!container) return;
+
+    const idDoVideo = container.dataset.videoId || window.idDoVideoEmReproducao;
+    if (!idDoVideo) return;
+    window.idDoVideoEmReproducao = idDoVideo;
+
+    destruirPlayerEncaixado();
+    ligarControlesPrincipais(ehAoVivo);
+
+    // display inicial enquanto o embed carrega
+    if (ehAoVivo) atualizarProgressoPrincipal(true);
+
+    carregarAPIDoYouTube().then((apiPronta) => {
+        if (!apiPronta) { reproduzirEmVideoNativo(idDoVideo, ehAoVivo); return; }
+
+        try {
+            const player = new YT.Player('main-video-element', {
+                videoId: idDoVideo,
+                width: '100%',
+                height: '100%',
+                playerVars: {
+                    // Autoplay ao abrir com o embed oficial. Iniciamos sempre
+                    // MUDO: é isso que garante ao navegador que o autoplay pode
+                    // rodar mesmo sem gesto direto (ex.: abrir via URL/voltar).
+                    // Se o usuário acabou de clicar (gesto recente), desmutamos
+                    // logo no onReady para o som voltar de forma natural.
+                    autoplay: 1,
+                    controls: 0,
+                    playsinline: 1,
+                    rel: 0,
+                    iv_load_policy: 3,
+                    modestbranding: 1,
+                    cc_load_policy: 1,
+                    enablejsapi: 1,
+                    disablekb: 1,
+                    mute: 1
+                },
+                events: {
+                    onReady: (e) => {
+                        // Expõe o player oficial ao restante do app (Watch Party,
+                        // miniplayer, cobrinha e controles customizados).
+                        window.__motorAtualDoPlayer = player;
+                        playerPrincipal = player;
+                        window.__usarPlayerYT = true;
+                        // Garante que toque mesmo se o onReady for disparado sem o
+                        // iframe ter gerenciado o autoplay por conta própria.
+                        if (houveGestoRecenteParaAutoplay()) {
+                            try { if (player.isMuted()) player.unMute(); } catch (_) {}
+                            if (typeof player.playVideo === 'function') player.playVideo();
+                        }
+                        sincronizarIconeSomPrincipal();
+                        atualizarIconePlayPrincipal();
+                        // Re-sincroniza o ícone do som um pouco depois: o estado de
+                        // mute do iframe pode demorar a refletir o unMute chamado acima.
+                        setTimeout(() => { sincronizarIconeSomPrincipal(); }, 600);
+                    },
+                    onStateChange: (evt) => {
+                        atualizarIconePlayPrincipal();
+                        sincronizarIconeSomPrincipal();
+                        if (evt.data === 1) emitirAcaoPartyPrincipal('play');
+                        else if (evt.data === 2) emitirAcaoPartyPrincipal('pause');
+                    },
+                    onError: (evt) => {
+                        // 2 = inválido, 5 = HTML5 error, 100/101/150 = embed não permitido
+                        const irreversivel = [2, 100, 101, 150].indexOf(evt.data) !== -1;
+                        if (irreversivel && !reproduzirEmVideoNativo(idDoVideo, ehAoVivo)) {
+                            const display = document.getElementById('main-time-display');
+                            if (display) display.textContent = 'Vídeo indisponível para reprodução';
+                        }
+                    }
+                }
+            });
+            window.__playerYTRef = player;
+        } catch (erro) {
+            reproduzirEmVideoNativo(idDoVideo, ehAoVivo);
+        }
+    });
 }
 
 /**
@@ -2547,8 +2757,8 @@ window.toggleMiniplayer = function() {
         }
         
         // Voltar para a tela de assistir pegando o ID atual
-        // O ID agora fica no <video> nativo (atributo data-video-id).
-        const videoDoMiniplayer = box.querySelector('video[data-video-id]');
+        // O ID fica no container do player (div do embed ou <video> nativo), atributo data-video-id.
+        const videoDoMiniplayer = box.querySelector('.media-view-box__video[data-video-id]');
         const idDoVideoAtual = videoDoMiniplayer ? videoDoMiniplayer.dataset.videoId : window.idDoVideoEmReproducao;
         if (idDoVideoAtual) {
             abrirVideo(idDoVideoAtual);
