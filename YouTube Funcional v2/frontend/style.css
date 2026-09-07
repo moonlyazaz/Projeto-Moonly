@@ -700,7 +700,8 @@ body {
     height: 100%;
     border: none;
     pointer-events: none; /* Block clicks to hide the YT title/controls */
-    
+    transform: scale(1.15);
+    transform-origin: center center;
 }
 
 .short-item__overlay {
@@ -843,7 +844,8 @@ body {
     height: 100%;
     border: none;
     pointer-events: none;
-    
+    transform: scale(1.15);
+    transform-origin: center center;
 }
 
 .media-view-box__overlay {
@@ -1017,6 +1019,42 @@ body {
 .comentario-input:focus {
     border-bottom: 2px solid var(--text-primary);
     padding-bottom: 3px;
+}
+
+.comentario-btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.2s;
+}
+
+.comentario-cancelar {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.comentario-cancelar:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.comentario-enviar {
+    background-color: #272727;
+    color: #717171;
+    cursor: default;
+}
+
+.comentario-enviar:disabled {
+    pointer-events: none;
+}
+
+.comentario-enviar:not(:disabled) {
+    background-color: #3ea6ff;
+    color: #000;
+    cursor: pointer;
 }
 
 .lista-de-comentarios {
