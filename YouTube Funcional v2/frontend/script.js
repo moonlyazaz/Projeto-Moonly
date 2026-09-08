@@ -977,6 +977,28 @@ function inicializarPlayerPrincipal(ehAoVivo = false) {
     });
 }
 
+function mostrarTelaDeFalhaNoVideo(idDoVideo, motivo) {
+    finalizarCarregamento();
+    mostrarView("assistir");
+    const area = document.getElementById("areaAssistir");
+    if (!area) return;
+    area.innerHTML = `
+        <div class="player-falha" style="min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-secondary, #aaa); padding: 24px; gap: 12px;">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 44px; color: var(--moonly-primary, #ff0033);"></i>
+            <p style="font-size: 18px; color: var(--text-primary, #fff); margin: 0;">${motivo}</p>
+            <p style="margin: 0;">Isso pode ter sido causado por um erro de rede ou por o vídeo não estar disponível.</p>
+            <button type="button" class="botao-inscrever" style="margin-top: 8px; cursor: pointer;" onclick="tentarAbrirVideoNovamente('${idDoVideo}')">Tentar novamente</button>
+        </div>`;
+}
+
+// Registra a função de abrir vídeo que o botão "Tentar novamente" usa,
+// sem duplicar o fetch se o mesmo id já estiver em tentativa.
+function tentarAbrirVideoNovamente(idDoVideo) {
+    if (window.idDoVideoSendoAberto === idDoVideo) return;
+    window.idDoVideoSendoAberto = idDoVideo;
+    abrirVideo(idDoVideo);
+}
+
 /**
  * Busca no backend os detalhes de um vídeo específico e o exibe na
  * view de "assistir" (player principal + recomendados).
@@ -984,14 +1006,21 @@ function inicializarPlayerPrincipal(ehAoVivo = false) {
  * @param {string} idDoVideo - ID do vídeo no YouTube (ex: "dQw4w9WgXcQ").
  */
 async function abrirVideo(idDoVideo) {
+    window.idDoVideoSendoAberto = idDoVideo;
     iniciarCarregamento();
     try {
         const resposta = await fetch(`${URL_DO_BACKEND}/api/video/${idDoVideo}`);
         if (!resposta.ok) {
-            mostrarToast("Não foi possível carregar este vídeo.");
+            finalizarCarregamento();
+            mostrarTelaDeFalhaNoVideo(idDoVideo, "Não foi possível carregar este vídeo.");
+            window.idDoVideoSendoAberto = null;
             return;
         }
+        window.idDoVideoSendoAberto = null;
         const dadosDoVideo = await resposta.json();
+        if (!dadosDoVideo || typeof dadosDoVideo !== "object" || !dadosDoVideo.id) {
+            throw new Error("Resposta inválida do servidor.");
+        }
         renderizarVideoPrincipal(dadosDoVideo);
         mostrarView("assistir");
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1051,6 +1080,8 @@ async function abrirVideo(idDoVideo) {
         }
     } catch (erro) {
         avisarSobreErroDeConexao(erro);
+        window.idDoVideoSendoAberto = null;
+        mostrarTelaDeFalhaNoVideo(idDoVideo, "Não foi possível carregar este vídeo.");
     }
 }
 
