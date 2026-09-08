@@ -16,3 +16,6 @@ node_modules/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Configuração e arquivos do editor (locais por máquina)
+.vscode
