@@ -84,7 +84,17 @@ async function fetchComRotacao(url, options) {
 global.fetch = fetchComRotacao;
 fetch = fetchComRotacao;
 
-app.use(cors());
+// Lista de origens (frontend) permitidas no CORS. Separe com vírgula e deixe
+// vazio para aceitar qualquer origem (útil em desenvolvimento local/Render).
+// Ex.: CORS_ORIGINS=https://meu-frontend.com,http://localhost:5500
+const origensPermitidas = (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map(o => o.trim())
+    .filter(Boolean);
+
+app.use(cors({
+    origin: origensPermitidas.length ? origensPermitidas : "*"
+}));
 app.use(express.json());
 
 if (CHAVES_DA_API.length === 0) {
@@ -581,6 +591,21 @@ app.get("/api/playlist/:id", async (req, res) => {
         console.error("Erro ao buscar playlist:", erro);
         res.status(500).json({ erro: "Falha ao buscar playlist." });
     }
+});
+
+// ====== Tratamento uniforme para rotas desconhecidas / erros ======
+// Qualquer /api/* não mapeado devolve JSON (em vez do HTML padrão do Express),
+// e erros inesperados viram respostas 500 limpas em vez de stack trace no body.
+app.use("/api", (req, res) => {
+    res.status(404).json({ erro: "Rota não encontrada." });
+});
+
+// Error-handling genérico (mantém o Express 404 "catch-all" abaixo, se houver,
+// funcionando para rotas não-API).
+app.use((erro, req, res, next) => {
+    console.error("[ERRO NÃO TRATADO]", erro);
+    if (res.headersSent) return next(erro);
+    res.status(erro.status || 500).json({ erro: "Erro interno do servidor." });
 });
 
 // ==================== WATCH PARTY (SOCKET.IO) ====================
