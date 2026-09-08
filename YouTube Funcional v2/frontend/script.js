@@ -1156,7 +1156,9 @@ function configurarBuscaEClique() {
     }
 
     // Clique no menu hamburger para recolher a sidebar
-    const menuHamburger = document.querySelector('.fa-bars');
+    // O controle agora é um <button aria-label="Abrir menu"> com
+    // data-toggle-sidebar (melhor para acessibilidade e teclado).
+    const menuHamburger = document.querySelector('.cabecalho-menu-btn, [data-toggle-sidebar]');
     if (menuHamburger) {
         menuHamburger.addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('recolhida');

@@ -74,6 +74,24 @@ body {
     font-size: 20px;
 }
 
+.cabecalho-menu-btn {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    cursor: pointer;
+    line-height: 1;
+    border-radius: 50%;
+}
+
+.cabecalho-menu-btn:hover {
+    background: var(--hover-fundo, rgba(128, 128, 128, 0.2));
+}
+
 .logotipo {
     display: flex;
     gap: 2px;

@@ -32,10 +32,12 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-    <div id="barra-progresso" class="barra-progresso"></div>
+    <div id="barra-progresso" class="barra-progresso" role="progressbar" aria-label="Carregamento da página" aria-hidden="true"></div>
        <header class="cabecalho">
          <div class="cabecalho-inicio">
+            <button type="button" class="cabecalho-menu-btn" aria-label="Abrir menu" data-toggle-sidebar>
             <i class="fa-solid fa-bars"></i>
+            </button>
 
             <div class="logotipo">
             <svg xmlns="http://www.w3.org/2000/svg" class="logotipo-svg" width="93" height="20" viewBox="0 0 93 20" focusable="false" aria-hidden="true">
@@ -60,16 +62,16 @@
           <div class="cabecalho-centro">
             <form class="search" id="formulario-de-busca">
                 <div class="search-input-wrapper" style="position: relative;">
-                    <input type="text" name="search" id="search-input" placeholder="Pesquisar" autocomplete="off">
+                    <input type="text" name="search" id="search-input" placeholder="Pesquisar" aria-label="Pesquisar" autocomplete="off">
                     <i class="fa-regular fa-keyboard search-keyboard-icon"></i>
                     <div class="search-suggestions" id="search-suggestions" style="display:none;"></div>
                 </div>
-               <button class="search-button" type="submit">
+               <button class="search-button" type="submit" aria-label="Pesquisar">
                    <i class="fa-solid fa-magnifying-glass"></i>
                </button>
             </form>
 
-           <button class="microphone" type="button" data-toast="Pesquisa por voz não é compatível com este navegador.">            
+           <button class="microphone" type="button" aria-label="Pesquisa por voz" data-toast="Pesquisa por voz não é compatível com este navegador.">            
                <i class="fa-solid fa-microphone"></i>
                </button>
         </div>
@@ -77,10 +79,10 @@
 
 
          <div class="cabecalho-final">
-           <button class="icon-button" title="Criar" data-toast="Criação de vídeos indisponível.">
+           <button class="icon-button" type="button" title="Criar" aria-label="Criar" data-toast="Criação de vídeos indisponível.">
              <i class="fa-solid fa-video"></i>
            </button>
-           <button class="icon-button" title="Notificações" data-toast="Nenhuma notificação nova.">
+           <button class="icon-button" type="button" title="Notificações" aria-label="Notificações" data-toast="Nenhuma notificação nova.">
              <i class="fa-regular fa-bell"></i>
            </button>
 
@@ -224,8 +226,8 @@
         </header>
 
         <div class="corpo">
-                  <aside class="sidebar" id="sidebar">
-              <nav class="sidebar-secao">
+                  <aside class="sidebar" id="sidebar" aria-label="Menu lateral">
+              <nav class="sidebar-secao" aria-label="Navegação principal">
                   <a  class="sidebar-item ativo" data-secao="inicio">
                       <i class="fa-solid fa-house"></i>
                       <span>Início</span>
