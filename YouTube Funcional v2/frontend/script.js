@@ -1,4 +1,31 @@
 ﻿/**
+ * ============================================================
+ *  MoonTube -- Logica do frontend (clone do YouTube)
+ * ============================================================
+ * Arquivo unico de JavaScript do player (nao-modular), carregado
+ * no final do <body> do index.html. Todas as funcoes ficam no
+ * escopo global porque parte da interface depende de handlers
+ * inline (onclick=...).
+ *
+ * Indice por secao (ancoras aproximadas de linha):
+ *   Player principal e recomendacao ............... ~50
+ *   Views, busca e resultados ..................... ~224
+ *   Shorts e feeds curtos ......................... ~324
+ *   Player <video> nativo + sources ................ ~525
+ *   Integracao com a API do YouTube (iframe) .......  ~667
+ *   Controles do player principal .................. ~709
+ *   Abertura de videos e busca ..................... ~959
+ *   Categorias e conteudo popular .................. ~1075
+ *   Autenticacao Google (OAuth/JWT) ............... ~1484
+ *   Interacoes (curtir/inscrever/assistir) ......... ~1542
+ *   Comentarios .................................. ~1832
+ *   Historico e listas salvas ..................... ~2099
+ *   Canal do usuario e menu ...................... ~2137
+ *   Estado inicial da URL e responsividade ........ ~2265
+ *   Extras (snake/party) e tema .................. ~3024+
+ */
+
+/**
  * Monta e insere na página todo o bloco do vídeo que está sendo assistido:
  * player, título, dados do canal, botões de ação e descrição.
  *
