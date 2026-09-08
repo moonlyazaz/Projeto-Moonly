@@ -215,11 +215,34 @@ function renderizarVideosRecomendados(listaDeVideosRecomendados) {
 }
 
 /**
- * Alterna qual área principal fica visível: grade de resultados (Início
- * e pesquisa), tela de assistir (player + recomendações) ou Shorts.
- * Apenas uma fica visível por vez.
+ * Atualiza o texto da aba do navegador conforme a seção ativa, melhorando a
+ * navegação (retorno/anotações) e o SEO não dependente de renderização.
  *
- * @param {"resultados"|"assistir"|"shorts"} nomeDaView - View a ser exibida.
+ * @param {string} nomeDaView - Nome da view recém-exibida.
+ */
+function atualizarTituloDaAba(nomeDaView) {
+    const titulos = {
+        'inicio': 'MoonTube — Início',
+        'busca': 'MoonTube — Pesquisa',
+        'inscricoes': 'MoonTube — Inscrições',
+        'assistir': 'MoonTube — Assistindo',
+        'shorts': 'MoonTube — Shorts',
+        'historico': 'MoonTube — Histórico',
+        'canal': 'MoonTube — Canal',
+        'voce': 'MoonTube — Você',
+        'assistir_mais_tarde': 'MoonTube — Assistir mais tarde',
+        'playlists': 'MoonTube — Minhas playlists',
+        'curtidos': 'MoonTube — Vídeos curtidos',
+    };
+    document.title = titulos[nomeDaView] || 'MoonTube — Clone do YouTube com player próprio';
+}
+
+/**
+ * Alterna qual área principal fica visível: grade de resultados (Início
+ * e pesquisa), tela de assistir (player + recomendações), Shorts ou as
+ * demais seções pessoais (histórico, canal, você, playlists etc.).
+ *
+ * @param {string} nomeDaView - View a ser exibida.
  */
 function mostrarView(nomeDaView) {
     // Esconde todas
@@ -227,6 +250,10 @@ function mostrarView(nomeDaView) {
     document.getElementById("areaAssistir").style.display = "none";
     document.getElementById("areaShorts").style.display = "none";
     document.getElementById("areaResultados").parentElement.style.display = "none";
+
+    // Atualiza a aba do navegador conforme a seção (SEO/UX) e sobe ao topo.
+    atualizarTituloDaAba(nomeDaView);
+    window.scrollTo({ top: 0, behavior: 'auto' });
 
     // Mostra a correta
     if (nomeDaView === 'inicio' || nomeDaView === 'busca' || nomeDaView === 'inscricoes') {
