@@ -3266,6 +3266,84 @@ window.iniciarDownloadModal = function(formato) {
 // Iniciar o tema ao carregar
 document.addEventListener('DOMContentLoaded', carregarTema);
 
+// ============================================================================
+//   Atalhos de teclado do player principal
+//   (espaço/k = play/pausa, m = som, f = tela cheia, setas/j/l = ±5s)
+// ============================================================================
+// Avança ou retrocede a reprodução principal em uma quantidade de segundos.
+function avancarPrincipal(segundos) {
+    if (
+        !playerPrincipal ||
+        typeof playerPrincipal.getCurrentTime !== 'function' ||
+        typeof playerPrincipal.getDuration !== 'function' ||
+        typeof playerPrincipal.seekTo !== 'function'
+    ) {
+        return;
+    }
+    const duracao = playerPrincipal.getDuration();
+    if (!isFinite(duracao) || duracao <= 0) return; // Ao vivo ou sem duração
+    const tempoAtual = playerPrincipal.getCurrentTime() || 0;
+    const novo = Math.min(Math.max(tempoAtual + segundos, 0), duracao - 0.1);
+    playerPrincipal.seekTo(novo, true);
+}
+
+// Ignora atalhos quando o foco está em um campo editável (busca, comentários…).
+function alvoEhEditavel(alvo) {
+    if (!alvo || !alvo.tagName) return false;
+    if (alvo.isContentEditable) return true;
+    const tag = alvo.tagName.toUpperCase();
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+function configurarAtalhosDeTeclado() {
+    document.addEventListener('keydown', (evento) => {
+        // Não captura quando o usuário digita em um campo de texto.
+        if (alvoEhEditavel(evento.target)) return;
+
+        // Só faz sentido quando existe um player principal montado.
+        if (!playerPrincipal) return;
+
+        const tecla = evento.key;
+        const somenteEspaco = tecla === ' ' || tecla === 'Spacebar';
+        const comSistema = evento.ctrlKey || evento.metaKey || evento.altKey;
+
+        // Teclas "tipo latina" ignoram teclas modificadas do sistema.
+        if (comSistema && !somenteEspaco) return;
+
+        switch (true) {
+            case tecla === 'k' || tecla === 'K' || somenteEspaco || tecla === 'MediaPlayPause':
+                // Espaço também pausa a página, então bloqueamos o padrão.
+                if (somenteEspaco) evento.preventDefault();
+                alternarPlayPrincipal();
+                break;
+
+            case tecla === 'm' || tecla === 'M':
+                alternarMudoPrincipal();
+                break;
+
+            case tecla === 'f' || tecla === 'F':
+                toggleTelaCheiaPrincipal();
+                break;
+
+            case tecla === 'ArrowRight' || tecla === 'l' || tecla === 'L':
+                evento.preventDefault();
+                avancarPrincipal(5);
+                break;
+
+            case tecla === 'ArrowLeft' || tecla === 'j' || tecla === 'J':
+                evento.preventDefault();
+                avancarPrincipal(-5);
+                break;
+
+            default:
+                return; // Nenhum atalho corresponde: cai fora sem interromper.
+        }
+    });
+}
+
+// Registra os atalhos assim que o DOM estiver pronto (player é montado depois).
+document.addEventListener('DOMContentLoaded', configurarAtalhosDeTeclado);
+
 
 
 
