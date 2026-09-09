@@ -62,6 +62,8 @@ body {
 .logotipo-svg {
     display: block;
     color: var(--text-primary);
+    height: 34px;
+    width: auto;
 }
 
 .cabecalho-inicio {
