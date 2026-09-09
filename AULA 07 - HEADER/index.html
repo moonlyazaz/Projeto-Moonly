@@ -1,32 +1,67 @@
-<html lang="pr-bt">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vitor Fatobene</title>
+<link rel="stylesheet" href="style.css">
+</head>
 <body>
-    <header class="cabecalho"></header>
+
+  <header class="topbar">
+    <div class="profile">
+      <img src="foto.svg" alt="Foto de Vitor Fatobene" class="avatar">
+      <div class="titulo">
+        <span class="cargo">CEO, dev</span>
+        <h1>Vitor Fatobene</h1>
+        <p class="subtitulo">Estudante de Engenharia de Software</p>
+        <p class="descricao">Desenvolvedor backend e inteligência artificial</p>
+      </div>
+    </div>
     <nav>
-       <a href="">Home</a>
-       <a href="">Projetos</a>
-       <a href="">Contatos</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#projetos">Projetos</a>
+      <a href="#contato">Contato</a>
     </nav>
-    </header>
+  </header>
 
-    <main>
-     <section class="banner">
-         <img src="" alt="Foto de perfil">
-         <div class="banner-texto">
-          <p>Olá. eu sou</p>
-          <h2>Moonly</h2>
-</div>
+  <main id="projetos" class="projetos">
+    <h2>Meus Projetos</h2>
+    <div class="cards">
+      <article class="card">
+        <h3>RAG</h3>
+        <p>Implementação do algoritmo RAG.</p>
+      </article>
+      <article class="card">
+        <h3>Gestão Pecuária</h3>
+        <p>Sistema para gestão de fazendas.</p>
+      </article>
+      <article class="card">
+        <h3>Último Guardião</h3>
+        <p>Jogo RPG feito para módulo da faculdade.</p>
+      </article>
+    </div>
+  </main>
 
-     </section>
+  <footer id="contato" class="rodape">
+    <div class="rodape-perfil">
+      <strong>Vitor Fatobene</strong>
+      <span>Estudante de Engenharia de Software</span>
+    </div>
+    <div class="rodape-contato">
+      <strong>Contato</strong>
+      <p>E-mail: vitor.fatobene@gmail.com</p>
+      <p>Telefone: (43) 00000-0000</p>
+    </div>
+    <div class="rodape-redes">
+      <span>Me encontre em</span>
+      <div class="icones">
+        <a href="#" aria-label="Instagram">📷</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="GitHub">gh</a>
+      </div>
+    </div>
+  </footer>
 
-     <section class="catalogo"></section>
-     <h2>Meus Projetos</h2>
-     <div class="Produtos"></div>
-     <article class="produto">
-      <img src="" alt="">
-      <h3>MoonTube</h3>
-      <p>Aplicativo inspirado no YouTube</p>
-     </article>
-
-    </main>
 </body>
 </html>

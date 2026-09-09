@@ -1,0 +1,168 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #0d2438;
+  background: #ffffff;
+}
+
+/* ===== Cabeçalho ===== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 48px;
+  background: linear-gradient(90deg, #0b3d91, #2196f3 60%, #62b6f5);
+  color: #ffffff;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffffff;
+  background: #cfe4fb;
+}
+
+.cargo {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #d7e9ff;
+}
+
+.titulo h1 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitulo {
+  font-size: 14px;
+  color: #eaf3ff;
+}
+
+.descricao {
+  font-size: 13px;
+  color: #cfe4fb;
+}
+
+nav a {
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 24px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+nav a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ===== Projetos ===== */
+.projetos {
+  background: linear-gradient(180deg, #eaf3ff, #ffffff);
+  padding: 48px;
+  text-align: center;
+}
+
+.projetos h2 {
+  font-size: 22px;
+  color: #0b3d91;
+  margin-bottom: 32px;
+}
+
+.cards {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #cfe0f5;
+  border-radius: 8px;
+  padding: 24px;
+  width: 220px;
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(11, 61, 145, 0.08);
+}
+
+.card h3 {
+  color: #0b3d91;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #4a5d73;
+}
+
+/* ===== Rodapé ===== */
+.rodape {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 32px 48px;
+  background: linear-gradient(90deg, #62b6f5, #2196f3 40%, #0b3d91);
+  color: #ffffff;
+}
+
+.rodape-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rodape-contato p {
+  font-size: 13px;
+  color: #eaf3ff;
+}
+
+.rodape-redes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.icones {
+  display: flex;
+  gap: 12px;
+}
+
+.icones a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 640px) {
+  .topbar, .rodape {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  nav a {
+    margin-left: 0;
+    margin-right: 16px;
+  }
+}
