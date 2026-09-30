@@ -24,45 +24,45 @@ let dia = "sun"
 let diaTraduzido = '';
 
 switch (dia) {
-    case "mon": 
-    diaTraduzido = "Segunda-Feira"
-    break;
-    case "tue": 
-    diaTraduzido = "Terça-Feira"
-    break;
-    case "wed": 
-    diaTraduzido = "Quarta-Feira"
-    break;
-    case "thu": 
-    diaTraduzido = "Quinta-Feira"
-    break;
-    case "fri": 
-    diaTraduzido = "Sexta-Feira"
-    break;
-    case "sat": 
-    diaTraduzido = "Sábado"
-    break;
-    case "sun": 
-    diaTraduzido = "Domingo"
-    break
-    default: 
-    diaTraduzido = "Dia inexistente"
+    case "mon":
+        diaTraduzido = "Segunda-Feira"
+        break;
+    case "tue":
+        diaTraduzido = "Terça-Feira"
+        break;
+    case "wed":
+        diaTraduzido = "Quarta-Feira"
+        break;
+    case "thu":
+        diaTraduzido = "Quinta-Feira"
+        break;
+    case "fri":
+        diaTraduzido = "Sexta-Feira"
+        break;
+    case "sat":
+        diaTraduzido = "Sábado"
+        break;
+    case "sun":
+        diaTraduzido = "Domingo"
+        break
+    default:
+        diaTraduzido = "Dia inexistente"
 }
 
 console.log(diaTraduzido)
 
 // Outro codigo
 
- let nota = 90
+let nota = 90
 
- if (nota >= 60) {
+if (nota >= 60) {
     console.log("Aprovado!")
- } else if (nota >= 59){
+} else if (nota >= 59) {
     console.log("Recuperação!")
- } else if (nota <= 58){
+} else if (nota <= 58) {
     console.log("Reprovado Burro, Estude Mais!")
- }
+}
 
  // Proximo Codigo LEGALEs
 
- 
+
