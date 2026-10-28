@@ -1,0 +1,21 @@
+# Logs
+*.log
+debug.log
+
+# Dependências
+node_modules/
+
+# Vercel
+.vercel/
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Configuração e arquivos do editor (locais por máquina)
+.vscode
